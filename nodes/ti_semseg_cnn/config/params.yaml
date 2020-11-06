@@ -1,0 +1,61 @@
+# LDC LUT definition
+lut_file_path:          $(find ti_semseg_cnn)/../ldc_lut/SN29788442_HD_LUT_right.bin
+
+# location of conifg
+tidl_config_file_path:  $(env TI_DATA_PATH)/tidl_semseg_model/city_deeplabv3lite_mobilenetv2_tv_1.bin
+
+# location of network
+tidl_network_file_path: $(env TI_DATA_PATH)/tidl_semseg_model/city_deeplabv3lite_mobilenetv2_tv.bin
+
+# input data width in pixels
+width:                  1280
+
+# input data height in lines
+height:                 720
+
+# input data width in pixels given to dl network
+dl_width:               768
+
+# input data height in lines given to dl network
+dl_height:              432
+
+# output width
+out_width:              768
+
+# output height
+out_height:             432
+
+# Maximum number of Semantic Segmentation classes
+num_classes:            20
+
+# interactive mode
+is_interactive:         0
+
+# Flag to indicate if the post processing of th TIDL output should be enabled.
+#  0 - disable. The output will be a tensor after from TIDL processing.
+#  1 - enable. The ouput will be an image after post-processing.
+enable_post_proc:       0
+
+# To enable showing output on display when display_option = 1
+display_option:         1
+
+# pipeline depth
+pipeline_depth:         4
+
+# Enable or disable output image writing. 0: disable, 1: enable
+en_out_tensor_write:    1
+
+# inter-frame delay in milli-sec
+#    Type   : usigned integer
+#    Allowed: {0, 1, .... UINT32_MAX}
+inter_frame_delay:      33.333
+
+# Flag to indicate if the graph should be exported
+#  0 - disable
+#  1 - enable
+exportGraph:            1
+
+# Real-time logging enable.
+#  0 - disable
+#  1 - enable
+rtLogEnable:            0

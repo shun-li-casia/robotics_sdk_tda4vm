@@ -1,0 +1,17 @@
+<launch>
+
+    <node pkg="ti_sde" type="sde" name="sde" output="screen" args="" required="true">
+        <!-- Configuration file for the openVX CNN graph -->
+        <rosparam file="$(find ti_sde)/config/params.yaml" subst_value="true" />
+
+        <!-- Left input topic name to subscribe to -->
+        <param name = "left_input_topic"  value = "camera/left/image_raw"/>
+
+        <!-- Right input topic name to subscribe to -->
+        <param name = "right_input_topic" value = "camera/right/image_raw"/>
+
+        <!-- Ouput raw dispairty topic to publish to -->
+        <param name= "disparity_topic"    value = "camera/disparity/raw"/>
+    </node>
+
+</launch>
