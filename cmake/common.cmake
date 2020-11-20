@@ -11,16 +11,18 @@ catkin_package(CATKIN_DEPENDS nodelet roscpp cv_bridge image_transport sensor_ms
 
 find_package(OpenCV REQUIRED)
 
-include_directories(include)
-include_directories(${catkin_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(
+    include
+    ${catkin_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+)
 
 # PSDKRA base folder location
 set(PSDK_DIR $ENV{PSDK_BASE_PATH})
 
 set(CGT7X_ROOT          ti-cgt-c7000_1.4.0.LTS)
 set(PDK_PACKAGE_ROOT    pdk/packages/ti)
-set(TIDL_PACKAGE_ROOT   tidl_j7_01_03_00_07/ti_dl)
+set(TIDL_PACKAGE_ROOT   tidl_j7_01_03_00_11/ti_dl)
 set(MMALIB_PACKAGE_ROOT mmalib_01_03_00_06)
 set(TIADALG_PATH        tiadalg)
 
@@ -63,32 +65,30 @@ unset(CMAKE_BUILD_TYPE CACHE)
 
 # pass the macros
 if(${TARGET_PLATFORM} STREQUAL "PC")
-    add_definitions(-DTARGET_CPU=${TARGET_CPU}
-                    -DTARGET_OS=${TARGET_OS}
-                    -DPROFILE=${PROFILE}
-                    -DBUILD_EMULATION_MODE=${BUILD_EMULATION_MODE}
-                    -DPC
-                    # -DTARGET_CPU_PC=true
+    add_definitions(
+        -DTARGET_CPU=${TARGET_CPU}
+        -DTARGET_OS=${TARGET_OS}
+        -DPROFILE=${PROFILE}
+        -DBUILD_EMULATION_MODE=${BUILD_EMULATION_MODE}
+        -DPC
     )
 else()  # J7
-    add_definitions(-DTARGET_CPU=${TARGET_CPU}
-                    -DTARGET_OS=${TARGET_OS}
-                    -DPROFILE=${PROFILE}
-                    -DBUILD_EMULATION_MODE=${BUILD_EMULATION_MODE}
+    add_definitions(
+        -DTARGET_CPU=${TARGET_CPU}
+        -DTARGET_OS=${TARGET_OS}
+        -DPROFILE=${PROFILE}
+        -DBUILD_EMULATION_MODE=${BUILD_EMULATION_MODE}
     )
 endif()
 
 # TIOVX, VISION_APPS, PTK_DEMOS: include folders
 set(TIOVX_INCLUDE_DIRS
     ${PSDK_DIR}/tiovx/include
+    ${PSDK_DIR}/tiovx/kernels_j7/include
     ${PSDK_DIR}/tiovx/tiovx_dev/kernels_j7/include
     ${PSDK_DIR}/tiovx/utils/include/
     ${PSDK_DIR}/tiovx/kernels/include/
 )
-
-# set(PDK_INCLUDE_DIRS
-#     ${PSDK_DIR}/${PDK_PACKAGE_ROOT}/drv/udma
-# )
 
 set(PTK_INCLUDE_DIRS
     ${PSDK_DIR}/perception/include
@@ -133,14 +133,15 @@ set(OTHER_INCLUDE_DIRS
     ${PSDK_DIR}/ivision
 )
 
-include_directories(${TIOVX_INCLUDE_DIRS}
-                    ${PTK_INCLUDE_DIRS}
-                    ${VISION_APP_INCLUDE_DIRS}
-                    ${VISION_APP_KERNEL_INCLUDE_DIRS}
-                    ${MMALIB_INCLUDE_DIRS}
-                    ${TIDL_INCLUDE_DIRS}
-                    ${TIADALG_INCLUDE_DIRS}
-                    ${OTHER_INCLUDE_DIRS}
+include_directories(
+    ${TIOVX_INCLUDE_DIRS}
+    ${PTK_INCLUDE_DIRS}
+    ${VISION_APP_INCLUDE_DIRS}
+    ${VISION_APP_KERNEL_INCLUDE_DIRS}
+    ${MMALIB_INCLUDE_DIRS}
+    ${TIDL_INCLUDE_DIRS}
+    ${TIADALG_INCLUDE_DIRS}
+    ${OTHER_INCLUDE_DIRS}
 )
 
 # TIOVX, VISION_APPS, PTK_DEMOS: define lib variables
@@ -191,20 +192,22 @@ else() # static
         ${PTHREAD_LIB}
         ${ION_LIB}         # only for J7
         ${CMAKE_DL_LIBS}
-        -Wl,--end-group)
+        -Wl,--end-group
+    )
 
-    link_directories(${TIOVX_LIBS_DIR}
-                     ${VISION_APPS_LIBS_DIR}
-                     ${PDK_LIBS_DIR}
-                     ${PTK_LIBS_DIR}
-                     ${IMAGING_LIBS_DIR}
-                     ${CGT7X_LIBS_DIR}
-                     ${TIDL_LIBS_DIR}
-                     ${MMA_LIBS_DIR}
-                     ${TIADALG_LIBS_DIR}
-                     ${J7_CMODEL_LIBS_DIR}
-                     ${PTHREAD_LIB_DIR}
-                     ${ION_LIB_DIR}  # only for J7
-                    )
+    link_directories(
+        ${TIOVX_LIBS_DIR}
+        ${VISION_APPS_LIBS_DIR}
+        ${PDK_LIBS_DIR}
+        ${PTK_LIBS_DIR}
+        ${IMAGING_LIBS_DIR}
+        ${CGT7X_LIBS_DIR}
+        ${TIDL_LIBS_DIR}
+        ${MMA_LIBS_DIR}
+        ${TIADALG_LIBS_DIR}
+        ${J7_CMODEL_LIBS_DIR}
+        ${PTHREAD_LIB_DIR}
+        ${ION_LIB_DIR}  # only for J7
+    )
 endif()
 

@@ -194,7 +194,7 @@ typedef struct
     uint8_t                                inputFormat;
 
     /** Application interactive status, 0=non-interactive, 1=interactive. */
-    uint32_t                               is_interactive;
+    uint8_t                                is_interactive;
 
     SDELDCAPPLIB_createParams              sdeLdcCreateParams;
     SDELDCAPPLIB_Handle                    sdeLdcHdl;

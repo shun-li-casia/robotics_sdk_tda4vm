@@ -1,30 +1,43 @@
 How to Set Up TI OpenVX + ROS Environment
 =========================================
 
-## Prerequisites
+## Prerequisites & Dependency
 
 ### Hardward: J7/TDA4x Family Processors
 https://www.ti.com/processors/automotive-processors/featured-platform.html
 
-### J7 Host Linux: Jacinto Processor SDK Linux Version 7.1.0 or Later
-https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-jacinto7/latest/exports/docs/linux/index.html
+### J7 Processor SDK RTOS Version 7.1.0
+Currently testing with Prebuilt Package of J7 Processor SDK RTOS 7.1.0 RC9 [LINK](http://gtweb.dal.design.ti.com/nightly_builds/PSDKRA_INSTALLER/57-2020-11-19_11-41-23/artifacts/output/webgen/publish/PROCESSOR-SDK-RTOS-J721E/07_01_00_09/)
 
-Currently testing with pre-lease version of PSDKLA 7.1.0
+Download [Pre-built Package](http://gtweb.dal.design.ti.com/nightly_builds/PSDKRA_INSTALLER/57-2020-11-19_11-41-23/artifacts/output/webgen/publish/PROCESSOR-SDK-RTOS-J721E/07_01_00_09/exports/ti-processor-sdk-rtos-j721e-evm-07_01_00_09-prebuilt.tar.gz) and instrall to a SD card by referring to the instruction on this page [LINK](http://gtweb.dal.design.ti.com/nightly_builds/PSDKRA_INSTALLER/57-2020-11-19_11-41-23/artifacts/output/webgen/publish/PROCESSOR-SDK-RTOS-J721E/07_01_00_09/exports/docs/psdk_rtos/docs/user_guide/out_of_box_j721e.html)
+
+### Terminal Session to J7
+
+Once finding the IP address assigned to J7 EVM (e.g., using a serial port communications program, for example, `minicom`), connect to J7 Linux with SSH:
+
+```
+ssh root@<J7_IP_address>
+```
+
+**Note**: It is highly recommended to use a "static IP" for the J7 EVM to make ROS network setting easy.
+
 
 <!-- ================================================================================= -->
 ## Clone Git Repository
+
 ```sh
-# Working directory
+# project home directory
 WORK_DIR=$HOME/j7ros_home
 # catkin workspace
 CATKIN_WS=$WORK_DIR/catkin_ws
-
 mkdir -p $CATKIN_WS/src
 cd $CATKIN_WS/src
 
-# git clone
-# Not yet active >>> TODO
-git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git jacinto_ros_perception
+# clone the project GIT repository
+# Below is accessible only in TI network:
+git clone ssh://git@bitbucket.itg.ti.com/processor-sdk-vision/jacinto_ros_perception.git
+# To be be available on the following GIT repository:
+# git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
 ```
 
 ## Configure J7 Host Linux & Install TI Vision Apps Library
@@ -32,32 +45,17 @@ git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
 For convenience, set up following soft-links:
 ```sh
 cd $WORK_DIR
-ln -s $CATKIN_WS/src/jacinto_ros_perception/docker
+ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
 ln -s docker/Makefile
-```
-
-### Configure Host Linux
-For configuring the host Linux, run the following in `$WORK_DIR`:
-```sh
-make opkg_config
-```
-
-### Install TI Vision Apps Library
-
-To install the TI Vision Apps Library, run the following in `$WORK_DIR`:
-```sh
-make opkg_repo_download
-make ipk_install
 ```
 
 <!-- ================================================================================= -->
 ## Build Docker Image
 
-The IP address that is assigned to the J7 host Linux will be required in setting network for the ROS applications.  The IP address is automatically parsed in `Makefile`, to check:
+The IP address that is assigned to the J7 host Linux will be required in setting network for the ROS applications. The IP address is automatically parsed in `Makefile`. To check the IP address:
 ```
 make ip_show
 ```
-**Note**: It is highly recommended to use a "static IP" for the J7 EVM to make ROS network setting easy.
 
 ### Generate Scripts
 To generate bash scripts for building and running a Docker image for the project:
@@ -97,6 +95,8 @@ j7ros               latest                     34ef46e34368        2 minutes ago
 arm64v8/ubuntu      18.04                      0ccb47f043f5        3 months ago        57.8MB
 ```
 
+**Note**: The Docker image that is built using `Makefile` provided in the GIT repository will include minimal number of ROS packages on which the ROS package(s) under `$CATKIN_WS/src` have dependency. In case when more ROS package(s) are added under the folder, it is required to re-build a Docker image using the `Makefile`.
+
 <!-- ================================================================================= -->
 ## Run Docker Image
 To run the docker image:
@@ -104,40 +104,62 @@ To run the docker image:
 ./docker_run.sh
 ```
 
-For reference, below shows `docker_run.sh`:
-```sh
-root@j7-evm:~/j7ros_home# cat docker_run.sh
-#!/bin/bash
-DOCKER_TAG=j7ros
-DOCKER_DIR=/home/root/j7ros_home/catkin_ws/src/jacinto_ros_perception/docker
-IP_ADDR=$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)
-if [ "$#" -lt 1 ]; then
-    COMMAND=/bin/bash
-else
-    COMMAND="$@"
-fi
-docker run -it --rm \
-    -v /home/root/j7ros_home:/root/j7ros_home \
-    -v /usr:/host/usr:ro \
-    -v /dev:/dev \
-    --privileged \
-    --network host \
-    --device-cgroup-rule='c 238:* rmw' \
-    --env J7_IP_ADDR=$IP_ADDR \
-    --env-file $DOCKER_DIR/env_list.txt \
-      $DOCKER_TAG $COMMAND
-```
-
-Some explanation:
-
-* `-v /home/root/j7ros_home:/root/j7ros_home`: `$WORK_DIR` is volume-mapped to `/root/j7ros_home` in the Docker container, under the folder all the source codes for the project will be available. Therefore, any changes made to `$WORK_DIR` will be accessible both inside the container or on the host Linux
-
-* `--env J7_IP_ADDR=$IP_ADDR`: IP address is passed as an environment variable `J7_IP_ADDR` to the container.
-
-* `--env-file $DOCKER_DIR/env_list.txt`: pass other environment variables that are specified in `$DOCKER_DIR/env_list.txt` for the ROS applications are passed to the container.
-
 To exit from inside the Docker container, type `exit` at the command line.
 
+<!-- ================================================================================= -->
+## Setting Up Remote PC for Visualization
+
+Open another terminal on Ubuntu PC to set up environments for visualization.
+
+### Clone GIT repository
+```sh
+# catkin workspace
+CATKIN_WS=$HOME/j7ros_home/catkin_ws
+
+mkdir -p $CATKIN_WS/src
+cd $CATKIN_WS/src
+
+# git clone
+# Below is accessible only in TI network:
+git clone ssh://git@bitbucket.itg.ti.com/processor-sdk-vision/jacinto_ros_perception.git
+# To be be available on the following GIT repository:
+# git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
+```
+
+### Build ROS nodes
+```
+cd $CATKIN_WS
+catkin_make
+```
+
+### PC Environment Setting
+For convenience, set up following soft-links:
+```sh
+cd $CATKIN_WS
+ln -s src/jacinto_ros_perception/setup_env_pc.sh
+```
+
+Update the following lines in `setup_env_pc.sh` for setting the ROS network:
+```
+PC_IP_ADDR=<PC_IP_address>
+J7_IP_ADRR=<J7_IP_address>
+```
+
+`<J7_IP_address>` can be found by running the following on the J7 terminal:
+```
+make ip_show
+```
+
+To set up the PC environment, run the following:
+```
+source setup_env_pc.sh
+```
+
+### Checking ROS topics
+After launching ROS nodes on the J7, when the network is set correctly, we can check the all the topics published with:
+```
+rostopic list
+```
 
 <!-- ================================================================================= -->
 ## ROS Applications
@@ -151,9 +173,6 @@ Several tarballs are downloaded and uncompressed under `$WORK_DIR/data`, with fo
 
 ```
 $WORK_DIR/data
-├── opkg-repo_7.1.0-r0.0.tar.gz
-├── ros-bag_2020_0914.tar.gz
-├── tidl-semseg-model_1.3.0.0.tar.gz
 ├── ros_bag
 │   └── 2020-09-14-12-31-43.bag
 └── tidl_semseg_model
@@ -181,6 +200,11 @@ Alternatively, you can run the following `roslaunch` command **inside** the Dock
 roslaunch ti_sde bag_sde.launch
 ```
 
+For visualization, on the PC (see the above for setting PC environment):
+```
+roslaunch ti_sde rviz.launch
+```
+
 ### Run Semantic Segmentation CNN App
 To launch `ti_semseg_cnn` along with `rosbag play <ROSBAG>`, run the following in `$WORK_DIR` on the J7 host Linux:
 ```sh
@@ -191,3 +215,9 @@ Alternatively, you can run the following `roslaunch` command **inside** the Dock
 ```sh
 roslaunch ti_semseg_cnn bag_semseg_cnn.launch
 ```
+
+For visualization, on the PC (see the above for setting PC environment):
+```
+roslaunch ti_semseg_cnn rviz.launch
+```
+

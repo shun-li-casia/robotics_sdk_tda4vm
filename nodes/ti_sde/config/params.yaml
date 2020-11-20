@@ -14,7 +14,6 @@ width:                              1280
 # input data height in lines
 height:                             720
 
-
 # SDE type
 # 0: Single-layer SDE, 1: Multi-layer SDE
 sde_algo_type:                      0
@@ -24,7 +23,7 @@ sde_algo_type:                      0
 num_layers:                         2
 
 # For single-layer SDE only
-# disparity thrshold 
+# disparity threshold
 sde_confidence_threshold:           1
 
 ####### SDE params BEGIN #######
@@ -46,7 +45,7 @@ texture_filter_enable:              0
 # <0 - 255>, scaled threshold for texture based filtering
 threshold_texture:                  0
 
-# <0 - 127>, Optimization penalty constant for smalle disparity change
+# <0 - 127>, Optimization penalty constant for small disparity change
 aggregation_penalty_p1:             32
 
 # <0 - 255>, Optimization penalty constant for large disparity change

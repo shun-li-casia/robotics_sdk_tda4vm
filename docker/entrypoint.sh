@@ -4,18 +4,14 @@ set -e
 # set up ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 
-# set up TI Processor SDK environment
-ln -s /host/usr/lib/libtivision_apps.so.7.1.0 /usr/lib/libtivision_apps.so.7.1.0
-ln -s /usr/lib/libtivision_apps.so.7.1.0 /usr/lib/libtivision_apps.so
-ln -s /host/usr/include/processor_sdk /usr/include/processor_sdk
-ln -s /host/usr/lib/libion.so.1.0.0 /usr/lib/libion.so.1.0.0
-ln -s /usr/lib/libion.so.1.0.0 /usr/lib/libion.so
-ln -s /host/usr/lib/libgbm.so.1.0.0 /usr/lib/libgbm.so.1.0.0
-ln -s /usr/lib/libgbm.so.1.0.0 /usr/lib/libgbm.so.1
-ln -s /usr/lib/libgbm.so.1.0.0 /usr/lib/libgbm.so
-ln -s /host/usr/lib/libti_rpmsg_char.so.0.1.0 /usr/lib/libti_rpmsg_char.so.0.1.0
-ln -s /usr/lib/libti_rpmsg_char.so.0.1.0 /usr/lib/libti_rpmsg_char.so.0
-ln -s /usr/lib/libti_rpmsg_char.so.0.1.0 /usr/lib/libti_rpmsg_char.so
+# setup TI Processor SDK environment
+SRC_PATH=$WORK_DIR/catkin_ws/src/jacinto_ros_perception/docker
+FILE="$SRC_PATH/setup_ti_processor_sdk.sh"
+if [ -f $FILE ]; then
+    source $FILE
+else
+    echo "$FILE does not exist"
+fi
 
 # ROS network settings
 export ROS_MASTER_URI=http://$J7_IP_ADDR:11311

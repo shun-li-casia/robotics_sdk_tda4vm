@@ -11,12 +11,13 @@
 using namespace sensor_msgs;
 using namespace message_filters;
 
-
+// OpenCV uses BGR format
 static const uint8_t color_map[20][3] =
 {{128,  64, 128},{244,  35, 232},{ 70,  70,  70},{102, 102, 156},{190, 153, 153},
  {153, 153, 153},{250, 170,  30},{220, 220,   0},{107, 142,  35},{152, 251, 152},
  { 70, 130, 180},{220,  20,  60},{255,   0,   0},{  0,   0, 142},{  0,   0,  70},
  {  0,  60, 100},{  0,  80, 100},{  0,   0, 230},{119,  11,  32},{128, 128, 128}};
+
 
 namespace ros_app_viz
 {
@@ -81,13 +82,16 @@ namespace ros_app_viz
             // Semantic class
             uint8_t classId;
 
+            // blending factor
+            float bf = 0.5;
+
             int32_t stride = m_width * 3;
 
             float   horScale = m_tensorWidth *1.0/m_width;
             float   verScale = m_tensorHeight*1.0/m_height;
 
             cv_bridge::CvImagePtr cv_ssPtr;
-            cv_ssPtr = cv_bridge::toCvCopy(imagePtr, sensor_msgs::image_encodings::BGR8);
+            cv_ssPtr = cv_bridge::toCvCopy(imagePtr, sensor_msgs::image_encodings::RGB8);
 
             for (j = 0; j < m_height; j++)
             {
@@ -100,11 +104,11 @@ namespace ros_app_viz
                     classId =  tensorPtr->data[y*m_tensorWidth + x];
 
                     cv_ssPtr->image.data[j*stride + i*3]     =
-                        0.5*cv_ssPtr->image.data[j*stride + i*3]     + 0.5*color_map[classId][0];
+                        (1-bf)*cv_ssPtr->image.data[j*stride + i*3]     + bf*color_map[classId][0];
                     cv_ssPtr->image.data[j*stride + i*3 + 1] =
-                        0.5*cv_ssPtr->image.data[j*stride + i*3 + 1] + 0.5*color_map[classId][1];
+                        (1-bf)*cv_ssPtr->image.data[j*stride + i*3 + 1] + bf*color_map[classId][1];
                     cv_ssPtr->image.data[j*stride + i*3 + 2] =
-                        0.5*cv_ssPtr->image.data[j*stride + i*3 + 2] + 0.5*color_map[classId][2];
+                        (1-bf)*cv_ssPtr->image.data[j*stride + i*3 + 2] + bf*color_map[classId][2];
                 }
             }
 

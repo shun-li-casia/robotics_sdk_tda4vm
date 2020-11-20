@@ -1,14 +1,14 @@
 Semantic Segmentation Application on ROS
 ========================================
 
-It demonstrates the semantic segmenation application using a TIDL (TI Deep Learning) CNN network running on J7 C7x/MMA. However, as shown in Figure 1, this application consists of multiple processing blocks that consumes other J7 HWAs and processors besides C7x/MMA.
+It demonstrates the semantic segmentation application using a TIDL (TI Deep Learning) CNN network running on J7 C7x/MMA. However, as shown in Figure 1, this application consists of multiple processing blocks that consumes other J7 HWAs and processors besides C7x/MMA.
 
 <figure class="image">
   <center><img src="./docs/ti_semseg_cnn_data_flow.png"></center>
   <figcaption> <center>Figure 1. Overall semantic segmentation application flow </center></figcaption>
 </figure>
 
-# Introduction
+## Introduction
 
 `ti_semseg_cnn` directory structure is shown below:
 ```
@@ -36,21 +36,41 @@ This application can be run by launching semseg_cnn.launch file, i.e.,
 ```
 roslaunch ti_semseg_cnn semseg_cnn.launch
 ```
-It is recommended to launch bag_semseg_cnn.launch file if a rosbag file needs to be played as well.
+It is recommended to launch bag_semseg_cnn.launch file if a ROSBAG file needs to be played as well.
 
 semseg_cnn.launch file specifies the followings:
-* YAML file that includes algorithm configuration parameters. For the descriptions of them, please take a look at this file.
+* YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the description of all parameters, please see a yaml file.
 * Input topic name to read input images.
 * Output undistorted or rectified image topic name.
 * Output semantic segmentation image topic name when an color-coded semantic segmentation map is published.
 * Flag that indicates the color-coded semantic segmentation map is published in RGB format. If this flag is false, it is published in YUV420 format.
 * Output semantic segmentation tensor topic name when the output tensor is published.
 
-When the semantic segmentation output tensor is published by the application, the color-coded semantic segmentation can be created alternatively by launching the ti_viz_semseg application, i.e.,
+When the semantic segmentation output tensor is published by the application, the color-coded semantic segmentation can be created alternatively by launching the ti_viz_nodes application, i.e.,
 ```
-roslaunch ti_viz_semseg viz_semseg.launch
+roslaunch ti_viz_nodes viz_semseg.launch
 ```
-# Processing Blocks
+
+## Parameters
+ 
+ Parameter                | Description                                                                  | Value
+--------------------------|------------------------------------------------------------------------------|----------
+ lut_file_path            | LDC rectification table path                                                 | String
+ tidl_config_file_path    | TIDL config file path                                                        | String
+ tidl_network_file_path   | TIDL network file path                                                       | String
+ tidl_network_file_path   | TIDL network file path                                                       | String
+ width                    | Input image width                                                            | Integer
+ height                   | Input image height                                                           | Integer
+ dl_width                 | Image width to TIDL network                                                  | Integer
+ dl_height                | Image height to TIDL network                                                 | Integer
+ out_width                | Output semantic segmentation output (tensor) width                           | Integer
+ out_height               | Output semantic segmentation output (tensor) height                          | Integer
+ num_classes              | Number of semantic segmentation classes                                      | 0 ~ 20
+ enable_post_proc         | Flag to indicate if the post processing of th TIDL output should be enabled  | 0, 1
+ pipeline_depth           | OpenVX graph pipeline depth                                                  | 1 ~ 4
+
+
+## Processing Blocks
 
 Please refer to Figure 1 for the following descriptions of the processing blocks implemented for this application. 
 

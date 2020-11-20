@@ -1,7 +1,7 @@
 <launch>
 
     <!-- ti_semseg_cnn -->
-    <include file="$(find ti_semseg_cnn)/launch/semseg_cnn.launch"/>    
+    <include file="$(find ti_semseg_cnn)/launch/semseg_cnn.launch"/>
 
     <!-- rosbag play -->
     <arg name="bagfile" default="$(env WORK_DIR)/data/ros_bag/2020-09-14-12-31-43.bag"/>
