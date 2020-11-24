@@ -8,7 +8,15 @@ It demonstrates the semantic segmentation application using a TIDL (TI Deep Lear
   <figcaption> <center>Figure 1. Overall semantic segmentation application flow </center></figcaption>
 </figure>
 
-## Introduction
+## Semantic Segmentation CNN with TI Deep-Learning (TIDL) Development Tool
+A CNN model for semantic segmentation has been developed using [Jacinto AI DevKit (PyTorch)](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/). 
+
+
+* Model: deeplabv3lite_mobilenetv2_tv (for details, see [LINK](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/docs/Semantic_Segmentation.md))
+* Input image: 768 x 432 pixels in RGB
+* Training data: [Cityscapes Dataset](https://www.cityscapes-dataset.com)
+
+## Node Description
 
 `ti_semseg_cnn` directory structure is shown below:
 ```
@@ -38,7 +46,7 @@ roslaunch ti_semseg_cnn semseg_cnn.launch
 ```
 It is recommended to launch bag_semseg_cnn.launch file if a ROSBAG file needs to be played as well.
 
-semseg_cnn.launch file specifies the followings:
+`semseg_cnn.launch` file specifies the followings:
 * YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the description of all parameters, please see a yaml file.
 * Input topic name to read input images.
 * Output undistorted or rectified image topic name.
@@ -46,13 +54,13 @@ semseg_cnn.launch file specifies the followings:
 * Flag that indicates the color-coded semantic segmentation map is published in RGB format. If this flag is false, it is published in YUV420 format.
 * Output semantic segmentation tensor topic name when the output tensor is published.
 
-When the semantic segmentation output tensor is published by the application, the color-coded semantic segmentation can be created alternatively by launching the ti_viz_nodes application, i.e.,
+When the semantic segmentation output tensor is published by the application, the color-coded semantic segmentation can be created alternatively by launching the `ti_viz_nodes` application, i.e.,
 ```
 roslaunch ti_viz_nodes viz_semseg.launch
 ```
 
 ## Parameters
- 
+
  Parameter                | Description                                                                  | Value
 --------------------------|------------------------------------------------------------------------------|----------
  lut_file_path            | LDC rectification table path                                                 | String
@@ -69,7 +77,6 @@ roslaunch ti_viz_nodes viz_semseg.launch
  enable_post_proc         | Flag to indicate if the post processing of th TIDL output should be enabled  | 0, 1
  pipeline_depth           | OpenVX graph pipeline depth                                                  | 1 ~ 4
 
-
 ## Processing Blocks
 
 Please refer to Figure 1 for the following descriptions of the processing blocks implemented for this application. 
@@ -83,3 +90,7 @@ Please refer to Figure 1 for the following descriptions of the processing blocks
 4. The TIDL semantic segmentation network is accelerated by C7x/MMA and outputs a tensor that has class information for every pixel.
 
 5. The post-processing block, which runs on C6x, creates a color-coded semantic segmentation map image from the output tensor. It can be enabled or disabled by configuring `enable_post_proc` parameter in `params.yaml`. Only if the post-processing block is enabled, the color-coded semantic segmentation map is created and published. Its format is YUV420. When `output_rgb` is true in the launch file, it is published in RGB format after conversion. If the post-processing, the semantic segmentation output tensor from the TIDL network is published instead.
+
+## Known Issue
+
+1. The inference-time accuracy of `ti_semseg_cnn` semantic segmentation CNN is currently not great. This is expected since the CNN network was trained with Cityscapes dataset, and was not re-trained to further optimize the CNN model on the camera data played back from the ROSBAG file.

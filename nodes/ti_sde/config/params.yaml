@@ -1,8 +1,8 @@
 # left image LDC LUT definition
-left_lut_file_path:                 $(find ti_sde)/../ldc_lut/SN29788442_HD_LUT_left.bin
+left_lut_file_path:                 $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_left.bin
 
 # right image LDC LUT definition
-right_lut_file_path:                $(find ti_sde)/../ldc_lut/SN29788442_HD_LUT_right.bin
+right_lut_file_path:                $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_right.bin
 
 # input_format
 # 0: U8 (bmp), 1: YUV422
@@ -50,6 +50,9 @@ aggregation_penalty_p1:             32
 
 # <0 - 255>, Optimization penalty constant for large disparity change
 aggregation_penalty_p2:             192
+
+# <0, 1>, median filter in SDE
+median_filter_enable:               1
 
 ####### SDE params END #######
 

@@ -1,5 +1,5 @@
 # LDC LUT definition
-lut_file_path:          $(find ti_semseg_cnn)/../ldc_lut/SN29788442_HD_LUT_right.bin
+lut_file_path:          $(find ti_semseg_cnn)/../ldc_lut/SN5867575_HD_LUT_right.bin
 
 # location of conifg
 tidl_config_file_path:  $(env TI_DATA_PATH)/tidl_semseg_model/city_deeplabv3lite_mobilenetv2_tv_1.bin

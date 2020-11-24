@@ -4,7 +4,7 @@ TI OpenVX + ROS Framework & Applications
 ### Introduction to TI OpenVX + ROS Development Framework
 
 <figure class="image">
-    <center><img src="docker/docs/tiovx_ros_sw_stack.png"/></center>
+    <center><img src="docker/docs/tiovx_ros_sw_stack.png" style="width:726px;"/></center>
     <figcaption> <center>Figure 1. TI OpenVX + ROS Framework: Software Stack </center></figcaption>
 </figure>
 
@@ -16,7 +16,7 @@ The TI OpenVX + ROS development framework is enabled in a Docker container envir
 Figure below is a representative vision application that can be developed in TI OpenVX + ROS framework.
 
 <figure class="image">
-    <center><img src="docker/docs/tiovx_ros_demo_diagram.png" style="width: 800px;"/></center>
+    <center><img src="docker/docs/tiovx_ros_demo_diagram.png" style="width:896px;"/></center>
     <figcaption> <center>Figure 2. Example Application in TI OpenVX + ROS Framework </center></figcaption>
 </figure>
 
@@ -33,12 +33,21 @@ See [LINK](docker/README.md)
 
 ## TI OpenVX + ROS Demo Applications
 
+<figure class="image">
+    <center><img src="docker/docs/sde_semseg_rviz.png" style="width:700px;"/></center>
+    <figcaption> <center>Figure 3. Demo Applications </center></figcaption>
+</figure>
+
 ### [Stereo Vision Processing Node Accelerated on LDC and SDE](nodes/ti_sde/README.md)
 
 ### [CNN Semantic Segmentation Node with TIDL Running on C7x/MMA](nodes/ti_semseg_cnn/README.md)
 
 ## Known Issues
 
-1. Display is not enabled from a Docker container on J7.
-2. The inference-time accuracy of `ti_semseg_cnn` semantic segmentation CNN is not great. This is expected since the CNN network was trained with Cityscapes dataset, and was not re-trained to further optimize the CNN model on the camera data that played back from the ROSBAG file.
-3. Ctrl+C terminal of a ROS node or a ROS launch session may be slow and sometimes does not  fully clean up OpenVX part of implementation, causing VX_ERROR in the next launching. When this happens, it is recommended to reboot the J7 EVM.
+1. Display from insider a Docker container on J7 is not enabled.
+2. Ctrl+C termination of a ROS node or a ROS launch session can be sometimes slow and does not fully clean up OpenVX part of implementation. When VX_ERROR happens, it is recommended to reboot the J7 EVM.
+2. Stereo Vision Demo
+    * Output disparity map may have artifacts that are common to block-based stereo algorithms, e.g., noise in the sky, textureless area, repeated patterns, etc.
+    * While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
+3. Semantic Segmentation Demo
+    * The inference-time accuracy of `ti_semseg_cnn` semantic segmentation CNN is currently not great. This is expected since the CNN network was trained with Cityscapes dataset, and was not re-trained to further optimize the CNN model on the camera data played back from the ROSBAG file.

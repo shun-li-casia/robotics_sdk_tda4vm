@@ -11,7 +11,7 @@ TIVA_LIB_VER     = 7.1.0
 # TIDL version
 TIDL_VER         = 1.3.0.11
 # ROS bag date
-ROSBAG_DATE      = 2020_0914
+ROSBAG_DATE      = 2020_1109
 
 ## Dependent variables
 WORK_DIR         = j7ros_home
@@ -31,7 +31,7 @@ ENV_FILE_PATH    = $(DOCKER_DIR)/$(ENV_FILE)
 
 # Tarball URLs
 TIDL_MODEL_URL  = https://tidrive.ext.ti.com/fss/public/link/public/stream/read/tidl-semseg-model_1.3.0.11.tar.gz?linkToken=xeW1RA_ltU_X5bVF&itemName=aabc76cb-ae69-451c-97b9-11bf0b959563
-ROSBAG_URL   	= https://tidrive.ext.ti.com/fss/public/link/public/stream/read/ros-bag_2020_0914.tar.gz?linkToken=rRCsIGcQrCe_EKwh&itemName=3b002324-6c8b-43b4-b4b3-c797d3852ff3
+ROSBAG_URL   	= https://tidrive.ext.ti.com/fss/public/link/public/stream/read/ros-bag_2020_1109.tar.gz?linkToken=ymxhrABsYabYbGGt&itemName=afd1c071-bf25-4d42-9369-ceb1d335cb0f
 
 # Tarball filenames
 TIDL_MODEL_FILE  = tidl-semseg-model_$(TIDL_VER).tar.gz
@@ -60,7 +60,6 @@ docker_run_sh:
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                         >> $(DOCKER_RUN_SH)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                         >> $(DOCKER_RUN_SH)
 	@echo "IP_ADDR=\$$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)" >> $(DOCKER_RUN_SH)
-	@echo "TIVA_LIB_VER=$(TIVA_LIB_VER)"                     >> $(DOCKER_RUN_SH)
 	@echo "if [ \"\$$#\" -lt 1 ]; then"                      >> $(DOCKER_RUN_SH)
 	@echo "    COMMAND=/bin/bash"                            >> $(DOCKER_RUN_SH)
 	@echo "else"                                             >> $(DOCKER_RUN_SH)
@@ -74,7 +73,7 @@ docker_run_sh:
 	@echo "    --network host \\"                            >> $(DOCKER_RUN_SH)
 	@echo "    --device-cgroup-rule='c 238:* rmw' \\"        >> $(DOCKER_RUN_SH)
 	@echo "    --env J7_IP_ADDR=\$$IP_ADDR \\"               >> $(DOCKER_RUN_SH)
-	@echo "    --env TIVA_LIB_VER=\$$TIVA_LIB_VER \\"        >> $(DOCKER_RUN_SH)
+	@echo "    --env TIVA_LIB_VER=$(TIVA_LIB_VER) \\"        >> $(DOCKER_RUN_SH)
 	@echo "    --env-file \$$DOCKER_DIR/$(ENV_FILE) \\"      >> $(DOCKER_RUN_SH)
 	@echo "      \$$DOCKER_TAG \$$COMMAND"                   >> $(DOCKER_RUN_SH)
 	@chmod +x $(DOCKER_RUN_SH)

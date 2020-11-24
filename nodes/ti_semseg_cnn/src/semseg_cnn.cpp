@@ -466,7 +466,22 @@ void SEMSEG_CNN_intSigHandler(SEMSEG_CNN_Context *appCntxt)
     if (appCntxt->state != SEMSEG_CNN_STATE_INVALID)
     {
         /* Wait for the threads to exit. */
-        SEMSEG_CNN_exitProcThreads(appCntxt);
+        vx_status   vxStatus = VX_SUCCESS;
+
+        appCntxt->state = SEMSEG_CNN_STATE_SHUTDOWN;
+        PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
+                    __FUNCTION__, __LINE__);
+
+        vxStatus = SEMSEG_CNN_APPLIB_waitGraph(appCntxt->sscnnHdl);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_waitGraph() failed\n",
+                        __FUNCTION__, __LINE__);
+        }
+
+        SEMSEG_CNN_cleanupHdlr(appCntxt);
+        PTK_printf("\nDEMO FINISHED!\n");
     }
 
     exit(0);

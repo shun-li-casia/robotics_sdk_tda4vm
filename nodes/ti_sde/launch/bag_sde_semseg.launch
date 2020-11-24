@@ -1,5 +1,8 @@
 <launch>
 
+    <!-- ti_sde -->
+    <include file="$(find ti_sde)/launch/sde.launch"/>
+
     <!-- ti_semseg_cnn -->
     <include file="$(find ti_semseg_cnn)/launch/semseg_cnn.launch"/>
 

@@ -45,7 +45,7 @@ roslaunch ti_sde sde.launch
 ```
 It is recommended to launch bag_sde.launch file if a ROSBAG file needs to be played as well.
 
-sde.launch file specifies the followings:
+`sde.launch` file specifies the followings:
 * YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the descriptions of all parameters, please see a yaml file.
 * Left input topic name to read left images from a stereo camera.
 * Right input topic name to read right images from a stereo camera.
@@ -143,3 +143,8 @@ When `sde_algo_type = 1` in params.yaml, the multi-layer SDE refinement is appli
 </figure>
 
 Figure 2 shows the overal block diagram of the multi-layer SDE refinement approach. The rectified stereo pair at full resolution are down-sampled by half to smaller resolutions by the MSC (Multi-Scaler) HWA. The stereo pair at each layers are provided to SDEs to produce the disparity maps at different resolutions. Then the low-resolution disparity map is up-sampled and merged with the high-resolution disparity map successively. The merged disparity map is further processed by hole filling algorithm.
+
+## Known Issues
+
+1. Output disparity map may have artifacts that are common to block-based stereo algorithms, e.g., noise in the sky, textureless area, repeated patterns, etc.
+2. While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
