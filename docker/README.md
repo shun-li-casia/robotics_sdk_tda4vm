@@ -38,10 +38,17 @@ ssh root@<J7_IP_address>
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
     ```
-2. Clone the project GIT repository:
+<!-- 2. Clone the project GIT repository:
     ```
     git clone ssh://git@bitbucket.itg.ti.com/processor-sdk-vision/jacinto_ros_perception.git
-    ```
+    ``` -->
+
+2. Download the project GIT repository [Temporary until the external GIT repository is set up]
+   ```
+   wget -O jacinto-ros-perception_0.1.0.tar.gz "https://tidrive.ext.ti.com/fss/public/link/public/stream/read/jacinto-ros-perception_0.1.0.tar.gz?linkToken=tc9lbH_PZWGnz2Vt&itemName=7d3c43bc-66e8-4f38-90f6-40a9ae257d01"
+   tar xzf jacinto-ros-perception_0.1.0.tar.gz
+   rm jacinto-ros-perception_0.1.0.tar.gz
+   ```
 
 **Note**: Soon the GIT repository will be available on the following public repository:
 https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git

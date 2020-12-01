@@ -28,6 +28,8 @@ The TI Vision Apps Library is a set of APIs for the target deployment that are d
 - Advanced driver-assistance systems (ADAS) applications
 - Perception applications
 
+The TI Vision Apps Library is included in the pre-built package of [J721E Processor SDK RTOS 7.1.0](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/index_FDS.html).
+
 ## How to Set Up TI OpenVX + ROS Docker Container Environment on J7 Target
 See [LINK](docker/README.md)
 
