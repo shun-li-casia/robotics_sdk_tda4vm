@@ -154,7 +154,7 @@ void ROSAppSDE::rosAppSDEIntcHdlrThread(SDEAPP_Context *appCntxt)
 
     uint32_t done  = 0;
 
-    appPerfStatsResetAll();
+    //appPerfStatsResetAll();
 
     while (!done)
     {
@@ -187,7 +187,7 @@ void ROSAppSDE::rosAppSDEIntcHdlrThread(SDEAPP_Context *appCntxt)
     /* Wait for the graph to consume all input. */
     SDEAPP_waitGraph(appCntxt);
 
-    SDEAPP_cleanupHdlr(appCntxt);
+    SDEAPP_cleanupHdlr(appCntxt, false);
 
     PTK_printf("\nDEMO FINISHED!\n");
 }
@@ -433,8 +433,6 @@ void ROSAppSDE::rosAppSDEProcessData(unsigned char* leftImg, unsigned char* righ
 
 void ROSAppSDE::rosAppSDEDeInit()
 {
-    SDEAPP_cleanupHdlr(appCntxt);
-
     delete appCntxt;
 }
 

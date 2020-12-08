@@ -27,6 +27,14 @@ ssh root@<J7_IP_address>
 
 **Note**: It is highly recommended to use a *static* IP for the J7 EVM to make ROS network setting easy.
 
+### Setup
+
+Figure shows hardware setup and high-level installation steps on the J7 target and the remote Ubuntu PC.
+
+<figure class="image">
+    <center><img src="docs/tiovx_ros_setup.svg" style="width:1047px;"/></center>
+    <figcaption> <center>Figure 1. TI OpenVX + ROS Framework: Setup and Installation </center></figcaption>
+</figure>
 
 <!-- ================================================================================= -->
 ## Clone Git Repository

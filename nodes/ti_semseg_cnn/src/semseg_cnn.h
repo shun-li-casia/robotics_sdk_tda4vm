@@ -221,6 +221,8 @@ struct SEMSEG_CNN_Context
 
 vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt);
 
+void      SEMSEG_CNN_reset(SEMSEG_CNN_Context * appCntxt);
+
 vx_status SEMSEG_CNN_processImage(SEMSEG_CNN_Context   *appCntxt,
                                   const unsigned char  *inputImage);
 

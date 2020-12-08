@@ -247,11 +247,13 @@ void      SDEAPP_setAllParams(SDEAPP_Context *appCntxt);
 
 int32_t   SDEAPP_init(SDEAPP_Context *appCntxt);
 
+void      SDEAPP_reset(SDEAPP_Context * appCntxt);
+
 void      SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt);
 
 void      SDEAPP_intSigHandler(SDEAPP_Context *appCntxt, int sig);
 
-void      SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt);
+void      SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt, bool detach);
 
 void      SDEAPP_run(SDEAPP_Context *appCntxt, vx_uint8 * inputLeftImage, vx_uint8 * inputRightImage);
 

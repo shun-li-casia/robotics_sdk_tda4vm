@@ -77,6 +77,8 @@ static char menu[] = {
     "\n"
     "\n p: Print performance statistics"
     "\n"
+    "\n e: Export performance statistics"
+    "\n"
     "\n x: Exit"
     "\n"
     "\n Enter Choice: "
@@ -180,6 +182,9 @@ vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt)
 
             appCntxt->exitInputDataProcess = 0;
             appCntxt->state = SEMSEG_CNN_STATE_INIT;
+
+            SEMSEG_CNN_reset(appCntxt);
+            appPerfStatsResetAll();
         }
     }
 
@@ -287,6 +292,11 @@ void SEMSEG_CNN_cleanupHdlr(SEMSEG_CNN_Context *appCntxt)
     fflush(stdout);
     getchar();
 
+    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    appPerfStatsPrintAll();
+    SEMSEG_CNN_APPLIB_printStats(appCntxt->sscnnHdl);
+    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
+
     if (appCntxt->rtLogEnable == 1)
     {
         char name[256];
@@ -372,7 +382,7 @@ static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
     vx_status   vxStatus = VX_SUCCESS;
     uint32_t    done = 0;
 
-    appPerfStatsResetAll();
+    //appPerfStatsResetAll();
 
     while (!done)
     {

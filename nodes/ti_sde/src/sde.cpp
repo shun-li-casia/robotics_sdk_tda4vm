@@ -263,6 +263,9 @@ int32_t SDEAPP_init(SDEAPP_Context *appCntxt)
         {
             tivxLogRtTraceEnable(appCntxt->vxGraph);
         }
+
+        SDEAPP_reset(appCntxt);
+        appPerfStatsResetAll();
     }
 
     return status;
@@ -368,14 +371,19 @@ static void SDEAPP_exitProcThreads(SDEAPP_Context *appCntxt,
     }
 }
 
-void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
+void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt, bool detach)
 {
     /* Wait for the threads to exit. */
-    SDEAPP_exitProcThreads(appCntxt, false);
+    SDEAPP_exitProcThreads(appCntxt, detach);
 
     PTK_printf("\nPress ENTER key to exit.\n");
     fflush(stdout);
     getchar();
+
+    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    appPerfStatsPrintAll();
+    SDEAPP_printStats(appCntxt);
+    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
@@ -411,26 +419,7 @@ void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt, int sig)
 {
     SDEAPP_waitGraph(appCntxt);
 
-    /* Wait for the threads to exit. */
-    SDEAPP_exitProcThreads(appCntxt, true);
-
-    /* Release the Application context. */
-    SDELDCAPPLIB_delete(&appCntxt->sdeLdcHdl);
-
-    if (appCntxt->sdeAlgoType == 0)
-    {
-        SL_SDEAPPLIB_delete(&appCntxt->slSdeHdl);
-    }
-    else if (appCntxt->sdeAlgoType == 1)
-    {
-        ML_SDEAPPLIB_delete(&appCntxt->mlSdeHdl);
-    }
-
-    /* De-initialize the Application context. */
-    SDEAPP_deInit(appCntxt);
-
-    PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
-
+    SDEAPP_cleanupHdlr(appCntxt, true);
     exit(0);
 }
 
