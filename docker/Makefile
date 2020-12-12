@@ -29,13 +29,13 @@ SCRIPTS_DIR      = $(REPO_PATH)/docker/scripts
 ENV_FILE         = env_list.txt
 ENV_FILE_PATH    = $(DOCKER_DIR)/$(ENV_FILE)
 
-# Tarball URLs
-TIDL_MODEL_URL  = https://tidrive.ext.ti.com/fss/public/link/public/stream/read/tidl-semseg-model_1.3.0.11.tar.gz?linkToken=xeW1RA_ltU_X5bVF&itemName=aabc76cb-ae69-451c-97b9-11bf0b959563
-ROSBAG_URL   	= https://tidrive.ext.ti.com/fss/public/link/public/stream/read/ros-bag_2020_1109.tar.gz?linkToken=ymxhrABsYabYbGGt&itemName=afd1c071-bf25-4d42-9369-ceb1d335cb0f
-
 # Tarball filenames
 TIDL_MODEL_FILE  = tidl-semseg-model_$(TIDL_VER).tar.gz
 ROSBAG_FILE      = ros-bag_$(ROSBAG_DATE).tar.gz
+
+# Tarball URLs
+TIDL_MODEL_URL  = https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/$(TIDL_MODEL_FILE)
+ROSBAG_URL   	= https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/$(ROSBAG_FILE)
 
 # IP address
 J7_IP_ADDR       := $(shell ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)

@@ -46,10 +46,12 @@ See [LINK](docker/README.md)
 
 ## Known Issues
 
-1. Display from insider a Docker container on J7 is not enabled.
-2. Ctrl+C termination of a ROS node or a ROS launch session can be sometimes slow and does not fully clean up OpenVX part of implementation. When VX_ERROR happens, it is recommended to reboot the J7 EVM.
-2. Stereo Vision Demo
-    * Output disparity map may have artifacts that are common to block-based stereo algorithms, e.g., noise in the sky, textureless area, repeated patterns, etc.
+1. Display from insider a Docker container on J7 is not enabled. RViz visualization is displayed on a remote Ubuntu PC.
+2. Ctrl+C termination of a ROS node or a ROS launch session can be sometimes slow. When VX_ERROR happens, it is recommended to reboot the J7 EVM.
+3. Stereo Vision Demo
+    * Output disparity map may have artifacts that are common to block-based stereo algorithms. e.g., noise in the sky, textureless area, repeated patterns, etc.
     * While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
-3. Semantic Segmentation Demo
-    * The inference-time accuracy of `ti_semseg_cnn` semantic segmentation CNN is currently not great. This is expected since the CNN network was trained with Cityscapes dataset, and was not re-trained to further optimize the CNN model on the camera data played back from the ROSBAG file.
+
+## Questions & Feedback
+
+If you have questions or feedback, please use [TI E2E](https://e2e.ti.com/support/processors).

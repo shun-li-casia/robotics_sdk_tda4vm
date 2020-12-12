@@ -32,7 +32,7 @@ ssh root@<J7_IP_address>
 Figure shows hardware setup and high-level installation steps on the J7 target and the remote Ubuntu PC.
 
 <figure class="image">
-    <center><img src="docs/tiovx_ros_setup.svg" style="width:1047px;"/></center>
+    <center><img src="docs/tiovx_ros_setup.svg"/></center>
     <figcaption> <center>Figure 1. TI OpenVX + ROS Framework: Setup and Installation </center></figcaption>
 </figure>
 
@@ -46,22 +46,10 @@ Figure shows hardware setup and high-level installation steps on the J7 target a
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
     ```
-<!-- 2. Clone the project GIT repository:
+2. Clone the project GIT repository:
     ```
-    git clone ssh://git@bitbucket.itg.ti.com/processor-sdk-vision/jacinto_ros_perception.git
-    ``` -->
-
-2. Download the project GIT repository [Temporary until the external GIT repository is set up]
-   ```
-   wget -O jacinto-ros-perception_0.1.0.tar.gz "https://tidrive.ext.ti.com/fss/public/link/public/stream/read/jacinto-ros-perception_0.1.0.tar.gz?linkToken=tc9lbH_PZWGnz2Vt&itemName=7d3c43bc-66e8-4f38-90f6-40a9ae257d01"
-   tar xzf jacinto-ros-perception_0.1.0.tar.gz
-   rm jacinto-ros-perception_0.1.0.tar.gz
-   ```
-
-**Note**: Soon the GIT repository will be available on the following public repository:
-https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
-
-
+    git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
+    ```
 ## Download TIDL Model & ROSBAG File
 
 1. For convenience, set up following soft-links:
@@ -73,18 +61,7 @@ https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
     ```sh
     make data_download
     ```
-    Two tarballs are downloaded and uncompressed under `$WORK_DIR/data`.
-
-<!--
-with folder structure, for example, as shown below:
-```
-$WORK_DIR/data
-├── ros_bag
-│   └── zed1_2020-11-09-18-01-08.bag
-└── tidl_semseg_model
-    ├── city_deeplabv3lite_mobilenetv2_tv_1.bin
-    └── city_deeplabv3lite_mobilenetv2_tv.bin
-``` -->
+    Two tarballs (TIDL network model files, and a ROSBAG file) are downloaded and uncompressed under `$WORK_DIR/data`. Each tarball can be downloaded individually with `make tidl_net_download` and `make rosbag_download`, respectively.
 
 <!-- ================================================================================= -->
 ## Set Up Docker Environment
@@ -115,7 +92,7 @@ Open another terminal on Ubuntu PC to set up environment for RViz visualization.
     CATKIN_WS=$HOME/j7ros_home/catkin_ws
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
-    git clone ssh://git@bitbucket.itg.ti.com/processor-sdk-vision/jacinto_ros_perception.git
+    git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
     ```
 2. Build ROS nodes:
     ```

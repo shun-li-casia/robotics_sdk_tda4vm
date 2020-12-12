@@ -93,4 +93,5 @@ Please refer to Figure 1 for the following descriptions of the processing blocks
 
 ## Known Issue
 
-1. The inference-time accuracy of `ti_semseg_cnn` semantic segmentation CNN is currently not great. This is expected since the CNN network was trained with Cityscapes dataset, and was not re-trained to further optimize the CNN model on the camera data played back from the ROSBAG file.
+1. The `ti_semseg_cnn` semantic segmentation CNN was trained with Cityscapes dataset first, and then re-trained with a small dataset collected from a stereo camera (ZED-1 camera, HD mode) with coarse annotation. Therefore, accuracy performance of the CNN model can be improved with a larger dataset and fine annotation.
+
