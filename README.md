@@ -4,14 +4,14 @@ TI OpenVX + ROS Framework & Applications
 ### Introduction to TI OpenVX + ROS Development Framework
 
 <figure class="image">
-    <center><img src="docker/docs/tiovx_ros_sw_stack.png" style="width:726px;"/></center>
+    <center><img src="docker/docs/tiovx_ros_sw_stack.png" style="width:726px; height:398px;"/></center>
     <figcaption> <center>Figure 1. TI OpenVX + ROS Framework: Software Stack </center></figcaption>
 </figure>
 
 The TI OpenVX + ROS development framework is enabled in a Docker container environment on J7 Processor SDK Linux. We provide detailed steps for setting a Docker container environment for ROS Melodic together with the TI Vision Apps Library (see next section). The TI OpenVX + ROS development framework allows:
 
-- Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, and ADAS) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the Jacinto 7 processor
-- Application softwares can be complied directly on the Jacinto 7 processor in a Docker container using APIs optimized on Jacinto 7 processor along with many open-source libraries and packages including, for example. OpenCV and Point-Cloud Library (PCL).
+* Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, and ADAS) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the Jacinto 7 processor
+* Application softwares can be complied directly on the Jacinto 7 processor in a Docker container using APIs optimized on Jacinto 7 processor along with many open-source libraries and packages including, for example. OpenCV and Point-Cloud Library (PCL).
 
 Figure below is a representative vision application that can be developed in TI OpenVX + ROS framework.
 
@@ -23,17 +23,16 @@ Figure below is a representative vision application that can be developed in TI 
 ### TI Vision Apps Library
 The TI Vision Apps Library is a set of APIs for the target deployment that are derived from the Jacinto 7 Processor SDK RTOS, which includes:
 
-- TI OpenVX kernels and infrastructure
-- TI deep learning (TIDL) applications
-- Imaging and vision applications
-- Advanced driver-assistance systems (ADAS) applications
-- Perception applications
+* TI OpenVX kernels and infrastructure
+* TI deep learning (TIDL) applications
+* Imaging and vision applications
+* Advanced driver-assistance systems (ADAS) applications
+* Perception applications
 
 The TI Vision Apps Library is included in the pre-built package of [J721E Processor SDK RTOS 7.1.0](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/index_FDS.html).
 
 ## How to Set Up TI OpenVX + ROS Docker Container Environment on J7 Target
 See [docker/README.md](docker/README.md).
-<!-- or [docker/README.pdf](docker/README.pdf) (in case there is some formatting issue in reading `docker/README.md` on your web browser). -->
 
 ## TI OpenVX + ROS Demo Applications
 

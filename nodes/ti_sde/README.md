@@ -46,6 +46,7 @@ roslaunch ti_sde sde.launch
 It is recommended to launch bag_sde.launch file if a ROSBAG file needs to be played as well.
 
 `sde.launch` file specifies the followings:
+
 * YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the descriptions of all parameters, please see a yaml file.
 * Left input topic name to read left images from a stereo camera.
 * Right input topic name to read right images from a stereo camera.
@@ -74,15 +75,12 @@ roslaunch ti_viz_nodes viz_disparity.launch
 
 ## LDC (Lense Distortion Correction)
 
-As shown in Figure 1, We use the LDC HWA to rectify left and right images. In order to use LDC, the rectification tables should be provided in the format that LDC support. It is a two-step process to create the rectification table in the LDC format.
+As shown in Figure 1, We use the LDC HWA to rectify left and right images. In order to use LDC, the rectification tables should be provided in the format that LDC support. It is a two-step process to create the rectification table in the LDC format.br
 
-1. Generation of raw rectification table
-
+1. Generation of raw rectification table<br>
     A raw look-up table has `width x height x 2` entries in it, where width and height are the horizontal and vertical sizes of an image, to specify the horizontal and vertical pixel position in a source image that every pixel in a target image maps to. It may consist of two look-up tables of `width x height` for horizontal position and vertical position, respectively. A target image (i.e. rectified image) is created by fetching the pixel in a source image (i.e. unrectified image), which is specified by a raw look up table, for every pixel. For example, OpenCV stereo rectification function generates such a raw rectification table for given camera parameters.
-
-2. Convention of raw rectification table to LDC format
-
-    A raw rectification table is converted to the LDC format by the following pseudo code.
+2. Convention of raw rectification table to LDC format<br>
+    A raw rectification table is converted to the LDC format by the following pseudo code.<br>
 
     ```
     // mapX is a raw LUT for horizontal pixel position in Q3 format. Its size is width x height
@@ -127,7 +125,6 @@ As shown in Figure 1, We use the LDC HWA to rectify left and right images. In or
         }
     }
     ```
-
 
 ## SDE (Stereo Depth Engine)
 

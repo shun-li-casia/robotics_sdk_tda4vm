@@ -19,8 +19,7 @@ This TI OpenVX + ROS development framework works with
 ### Ubuntu PC
 A Ubuntu (18.04 recommended) PC is required. For RViz visualization of input/output topics published from the J7, it is assumed that ROS (Melodic recommended) is installed on the Ubuntu PC.
 
-Once finding the IP address assigned to J7 EVM (using a serial port communications program, for example, `minicom`), connect to J7 Linux with SSH:
-
+Once finding the IP address assigned to J7 EVM (using a serial port communications program, for example, `minicom`), connect to J7 Linux with SSH:<br>
 ```
 ssh root@<J7_IP_address>
 ```
@@ -38,7 +37,8 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 
 <!-- ================================================================================= -->
 ## Clone Git Repository
-1. Set up the project directory and the catkin workspace:
+
+1. Set up the project directory and the catkin workspace:<br>
     ```
     WORK_DIR=$HOME/j7ros_home
     CATKIN_WS=$WORK_DIR/catkin_ws
@@ -46,19 +46,19 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
     ```
-
-2. Clone the project GIT repository:
+2. Clone the project GIT repository:<br>
     ```
     git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
     ```
+
 ## Download TIDL Model & ROSBAG File
 
-1. For convenience, set up following soft-links:
+1. For convenience, set up following soft-links:<br>
     ```
     cd $WORK_DIR
     ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
     ```
-2. To download data files, run the following in `$WORK_DIR`:
+2. To download data files, run the following in `$WORK_DIR`:<br>
     ```
     make data_download
     ```
@@ -69,13 +69,12 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 
 1. Following [this link](https://docs.docker.com/get-started/#test-docker-installation),
 check that Docker and network work correctly on the J7 host Linux.
-
-2. To generate bash scripts for building and running a Docker image for the project:
+2. To generate bash scripts for building and running a Docker image for the project:<br>
     ```
     make scripts
     ```
     Make sure that two bash scripts named `docker_build.sh` and `docker_run.sh` are generated.
-3. To build the Docker image, at `$WORK_DIR` run:
+3. To build the Docker image, at `$WORK_DIR` run:<br>
     ```
     ./docker_build.sh
     ```
@@ -85,90 +84,93 @@ check that Docker and network work correctly on the J7 host Linux.
 
 <!-- ================================================================================= -->
 ## Set Up Remote PC for Visualization
-
 Open another terminal on Ubuntu PC to set up environment for RViz visualization.
 
-1. Clone GIT repository:
-    ```sh
+1. Clone GIT repository:<br>
+    ```
     CATKIN_WS=$HOME/j7ros_home/catkin_ws
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
     git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
     ```
-2. Build ROS nodes:
+2. Build ROS nodes:<br>
     ```
     cd $CATKIN_WS
     catkin_make
     ```
-
-3. ROS network setting: For convenience, set up a soft-link:
-    ```sh
+3. ROS network setting: For convenience, set up a soft-link:<br>
+    ```
     ln -s src/jacinto_ros_perception/setup_env_pc.sh
     ```
 
-    Update the following lines in `setup_env_pc.sh`:
+    Update the following lines in `setup_env_pc.sh`:<br>
     ```
     PC_IP_ADDR=<PC_IP_address>
     J7_IP_ADDR=<J7_IP_address>
     ```
-    `<J7_IP_address>` can be found by running "`make ip_show`" on **J7 terminal**.
+    `<J7_IP_address>` can be found by running `make ip_show` on **J7 terminal**.
 
-    To set up the PC environment, run the following:
+    To set up the PC environment, run the following:<br>
     ```
     source setup_env_pc.sh
     ```
-After launching ROS nodes on the J7, we can check the all the ROS topics by running "`rostopic list`".
+
+After launching ROS nodes on the J7, we can check the all the ROS topics by running `rostopic list`.
 
 <!-- ================================================================================= -->
 ## Build Demo ROS Applications
-1. To run the docker image:
+
+1. To run the docker image:<br>
     ```
     ./docker_run.sh
     ```
-2. To build ROS applications, inside the Docker container:
-    ```sh
+2. To build ROS applications, inside the Docker container:<br>
+    ```
     cd $CATKIN_WS
     catkin_make
     source devel/setup.bash
     ```
 
 ## Run Stereo Vision Application
-1. **[J7]** To launch `ti_sde` node with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:
-    ```sh
+
+1. **[J7]** To launch `ti_sde` node with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:<br>
+    ```
     ./docker_run.sh roslaunch ti_sde bag_sde.launch
     ```
-    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:
-    ```sh
+    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:<br>
+    ```
     roslaunch ti_sde bag_sde.launch
     ```
-2. **[Remote PC]** For visualization, on the PC:
+2. **[Remote PC]** For visualization, on the PC:<br>
     ```
     roslaunch ti_sde rviz.launch
     ```
 
 ## Run CNN Semantic Segmentation Application
-1. **[J7]** To launch `ti_semseg_cnn` node with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:
-    ```sh
+
+1. **[J7]** To launch `ti_semseg_cnn` node with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:<br>
+    ```
     ./docker_run.sh roslaunch ti_semseg_cnn bag_semseg_cnn.launch
     ```
-    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:
-    ```sh
+    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:<br>
+    ```
     roslaunch ti_semseg_cnn bag_semseg_cnn.launch
     ```
-2. **[Remote PC]** For visualization, on the PC:
+2. **[Remote PC]** For visualization, on the PC:<br>
     ```
     roslaunch ti_semseg_cnn rviz.launch
     ```
 ## Run Stereo Vision and CNN Semantic Segmentation Together
-1. **[J7]** To launch `ti_sde` and `ti_semseg_cnn` tigether with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:
-    ```sh
+
+1. **[J7]** To launch `ti_sde` and `ti_semseg_cnn` tigether with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:<br>
+    ```
     ./docker_run.sh roslaunch ti_sde bag_sde_semseg.launch
     ```
-    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:
-    ```sh
+    Alternatively, you can run the following `roslaunch` command **inside** the Docker container:<br>
+    ```
     roslaunch ti_sde bag_sde_semseg.launch
     ```
-2. **[Remote PC]** For visualization, on the PC:
+2. **[Remote PC]** For visualization, on the PC:<br>
     ```
     roslaunch ti_sde rviz_sde_semseg.launch
     ```
