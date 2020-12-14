@@ -22,6 +22,7 @@ Figure below is a representative vision application that can be developed in TI 
 
 ### TI Vision Apps Library
 The TI Vision Apps Library is a set of APIs for the target deployment that are derived from the Jacinto 7 Processor SDK RTOS, which includes:
+
 - TI OpenVX kernels and infrastructure
 - TI deep learning (TIDL) applications
 - Imaging and vision applications

@@ -29,7 +29,7 @@ ssh root@<J7_IP_address>
 
 ### Setup
 
-Figure shows hardware setup and high-level installation steps on the J7 target and the remote Ubuntu PC.
+Figure 1 shows the hardware setup and high-level installation steps on the J7 target and the remote Ubuntu PC.
 
 <figure class="image">
     <center><img src="docs/tiovx_ros_setup.svg"/></center>
@@ -39,13 +39,14 @@ Figure shows hardware setup and high-level installation steps on the J7 target a
 <!-- ================================================================================= -->
 ## Clone Git Repository
 1. Set up the project directory and the catkin workspace:
-    ```sh
+    ```
     WORK_DIR=$HOME/j7ros_home
     CATKIN_WS=$WORK_DIR/catkin_ws
 
     mkdir -p $CATKIN_WS/src
     cd $CATKIN_WS/src
     ```
+
 2. Clone the project GIT repository:
     ```
     git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
@@ -53,12 +54,12 @@ Figure shows hardware setup and high-level installation steps on the J7 target a
 ## Download TIDL Model & ROSBAG File
 
 1. For convenience, set up following soft-links:
-    ```sh
+    ```
     cd $WORK_DIR
     ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
     ```
 2. To download data files, run the following in `$WORK_DIR`:
-    ```sh
+    ```
     make data_download
     ```
     Two tarballs (TIDL network model files, and a ROSBAG file) are downloaded and uncompressed under `$WORK_DIR/data`. Each tarball can be downloaded individually with `make tidl_net_download` and `make rosbag_download`, respectively.
