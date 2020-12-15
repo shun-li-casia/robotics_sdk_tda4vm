@@ -10,11 +10,8 @@ How to Set Up TI OpenVX + ROS Environment
  J721E       | [TDA4VM](https://www.ti.com/product/TDA4VM) | [TDA4VMXEVM](https://www.ti.com/tool/TDA4VMXEVM)
 
 ### J7 Processor SDK RTOS
-This TI OpenVX + ROS development framework works with
+This TI OpenVX + ROS development framework works with [pre-built package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/ti-processor-sdk-rtos-j721e-evm-07_01_00_11-prebuilt.tar.gz) of 
 [J721E Processor SDK RTOS 7.1.0](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/index_FDS.html).
-
-1. Download [Pre-built Package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/ti-processor-sdk-rtos-j721e-evm-07_01_00_11-prebuilt.tar.gz)
-2. Install to a SD card by referring to the instruction on [this page](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/psdk_rtos/docs/user_guide/out_of_box_j721e.html)
 
 ### Ubuntu PC
 A Ubuntu (18.04 recommended) PC is required. For RViz visualization of input/output topics published from the J7, it is assumed that ROS (Melodic recommended) is installed on the Ubuntu PC.
@@ -36,6 +33,12 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 </figure>
 
 <!-- ================================================================================= -->
+## Build SD Card
+
+1. Download [Pre-built Package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/ti-processor-sdk-rtos-j721e-evm-07_01_00_11-prebuilt.tar.gz)
+2. Install to a SD card by referring to the instruction on [this page](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/psdk_rtos/docs/user_guide/out_of_box_j721e.html)
+
+
 ## Clone Git Repository
 
 1. Set up the project directory and the catkin workspace:<br>
