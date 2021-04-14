@@ -5,14 +5,8 @@ left_lut_file_path:                 $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_l
 right_lut_file_path:                $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_right.bin
 
 # input_format
-# 0: U8 (bmp), 1: YUV422
+# should be 1: YUV422
 input_format:                       1
-
-# input data width in pixels
-width:                              1280
-
-# input data height in lines
-height:                             720
 
 # SDE type
 # 0: Single-layer SDE, 1: Multi-layer SDE
@@ -22,9 +16,6 @@ sde_algo_type:                      0
 # number of layers (2, 3)
 num_layers:                         2
 
-# For single-layer SDE only
-# disparity threshold
-sde_confidence_threshold:           1
 
 ####### SDE params BEGIN #######
 
@@ -33,7 +24,7 @@ sde_confidence_threshold:           1
 disparity_min:                      0
 
 # <disparity in pixels>, maximum disparity in pixels
-# maximum disparity (0 -> 63 pixels, 1 -> 127 pixels, 2 -> 191 pixels)
+# maximum disparity (0 -> 63 pixels, 1 -> 127 pixels)
 disparity_max:                      1
 
 # <0 - 255>, left-right consistency check threshold in pixels
@@ -56,13 +47,58 @@ median_filter_enable:               1
 
 ####### SDE params END #######
 
-# <1 - 4>, pipeline depth
-# single-layer SDE - 2
-# multi-layer SDE  - 3
-pipeline_depth:                     2
+# baseline in meter
+stereo_baseline:                    0.12 
+
+# Enable PC generation
+enable_pc:                          0
+
+# PC subsampling ratio (1, 2, 4)
+pc_subsample_ratio:                 1
+
+# Enabling flag for the following point cloud configurations:
+# sde_confidence_threshold, 
+# point_low_x, point_high_x, point_low_y, point_high_y, point_low_z, point_high_z
+use_pc_config:                      1
+
+# disparity threshold to be mapped to point cloud (0 ~ 7)
+sde_confidence_threshold:           1
+
+# 3D point range to be rendered -
+#   Only 3D points in [low_x:high_x, low_y:high_y, low_z:high_z] 
+#   are redered
+#
+#       (Z)   (Y)
+#        |   / 
+#        |  /
+#        | /
+#        |/________ (X)
+#
+
+# Low X limit in meter
+point_low_x:                       -10.0 
+
+# Hig X limit in meter  
+point_high_x:                       10.0 
+
+# Low Y limits in meter (depth)
+point_low_y:                        0.0
+
+# High Y limits in meter (depth)
+point_high_y:                       10.0
+
+# Low Z limit in meter (depth)
+point_low_z:                       -2.0
+
+# High Z limit in meter (depth)
+point_high_z:                       5.0
+
 
 # interactive mode
+#  0 - disable
+#  1 - enable
 is_interactive:                     0
+
 
 # Flag to indicate if the graph should be exported
 #  0 - disable
@@ -74,14 +110,36 @@ exportGraph:                        0
 #  1 - enable
 rtLogEnable:                        0
 
-# Core deployment for disparity merge node, when sde_algo_type = 1
+# <1 - 8>, pipeline depth
+pipeline_depth:                     4
+
+
+# Core deployment
+# merge node in multi-layer SDE
+# TIVX_TARGET_DSP1
+# TIVX_TARGET_DSP2
+# TIVX_TARGET_A72_0
+# TIVX_TARGET_A72_1
 disp_merge_deploy_core:             TIVX_TARGET_A72_0
 
-# Core deployment for hole filling node, when sde_algo_type = 1
+# holing filling node in multi-layer SDE
+# TIVX_TARGET_DSP1
+# TIVX_TARGET_DSP2
+# TIVX_TARGET_A72_0
+# TIVX_TARGET_A72_1
 hole_filling_deploy_core:           TIVX_TARGET_A72_0
 
+# point cloud creation node in detection
+# TIVX_TARGET_DSP1
+# TIVX_TARGET_DSP2
+color_conv_deploy_core:             TIVX_TARGET_DSP1
 
-
+# OG map creation node in detection
+# TIVX_TARGET_DSP1
+# TIVX_TARGET_DSP2
+# TIVX_TARGET_A72_0
+# TIVX_TARGET_A72_1
+triang_deploy_core:                 TIVX_TARGET_A72_0
 
 
 

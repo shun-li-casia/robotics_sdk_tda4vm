@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2020 Texas Instruments Incorporated
+ * Copyright (c) 2021 Texas Instruments Incorporated
  *
  * All rights reserved not granted herein.
  *
@@ -59,82 +59,110 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _SDE_NODE_H_
-#define _SDE_NODE_H_
+#ifndef _APP_SDE_NODE_H_
+#define _APP_SDE_NODE_H_
 
 #include <stdio.h>
-#include <ros/ros.h>
+#include <thread>
 
+#include <ros/ros.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
-#include <cv_bridge/cv_bridge.h>
+#include <common_msgs/Disparity.h>
+#include <sensor_msgs/PointCloud2.h>
 
 #include <sde.h>
-#include <signal.h>
 
-#include <common_msgs/Disparity.h>
+using namespace sensor_msgs;
+using namespace message_filters;
+using namespace common_msgs;
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-class ROSAppSDE
+class SDEAppNode
 {
-public:
-    ROSAppSDE(ros::NodeHandle &privNodeHdl,  std::string disparity_topic_name);
+    using ImgSub     = message_filters::Subscriber<Image>;
+    using CamInfoSub = message_filters::Subscriber<CameraInfo>;
+    using TimeSync   = TimeSynchronizer<Image, Image>;
+    using ImgPub     = image_transport::Publisher;
+    using ImgTrans   = image_transport::ImageTransport;
+    using SubCon     = message_filters::Connection;
 
-    ~ROSAppSDE();
+    public:
+        SDEAppNode(ros::NodeHandle &nodeHdl,
+                   ros::NodeHandle &privNodeHdl);
+        ~SDEAppNode();
 
-    /** Event handler thread */
-    void rosAppSDEEvtHdlrThread(SDEAPP_Context *appCntxt);
+        /** Intercept signal handler */
+        void sigHandler(int32_t  sig);
 
-    /** Intc signal handler thread */
-    void rosAppSDEIntcHdlrThread(SDEAPP_Context *appCntxt);
+    private:
+        /** Initialize App cntxt */ 
+        vx_status init();
 
-    /** Processing thread */
-    void rosAppSdelaunchProcThreads(SDEAPP_Context *appCntxt);
+        /** process input frames */
+        void process();
 
-    /* Initialize application */
-    int  rosAppSDEInit();
+        /** Callback to process camera info data */
+        void camInfoCb(const CameraInfoConstPtr& cam_info);
 
-    /* Process input stereo data */
-    void rosAppSDEProcessData(unsigned char* leftImg, unsigned char* rightImg);
+        /** Callback to process input data */
+        void imgCb(const ImageConstPtr& left_image_ptr,
+                   const ImageConstPtr& right_image_ptr);
 
-    /** Deinitialize application */
-    void rosAppSDEDeInit();
+        /** Run camera info subscriber thread */
+        void subscriberCamInfoThread();
 
-    /** Publish raw disparity map output */
-    void rosAppSDEPublishOutput(int32_t width, int32_t height, int16_t minSdeDisp, int16_t maxSdeDisp, vx_image disparityImage);
+        /** Run publisher thread */
+        void publisherThread();
 
-    /** Get application context */
-    SDEAPP_Context * getSDEAPPContext() { return appCntxt; }
+        /** OpenVX graph completion event handler */
+        void graphCompleteEvtHdlr();
 
-private:
-    /** Read yaml algorithm paramters file */
-    void readParams();
+        /** Read yaml algorithm paramters file */
+        void readParams();
 
-    /** Node handler to read alogrithm parameters */
-    ros::NodeHandle                 &m_privNodeHdl;
+    private:
+        SDEAPP_Context         *m_cntxt{};
+        TimeSync               *m_sync{};
+        CamInfoSub             *m_sub{};
+        ImgTrans               *m_imgTrans{};
+        ImgSub                 *m_leftImageSub{};
+        ImgSub                 *m_rightImageSub{};
+        SubCon                  m_conObj;
 
-    /** Event handler thread. */
-    std::thread                     intcHdlrThread;
+        ros::NodeHandle        &m_nodeHdl;
+        ros::NodeHandle        &m_privNodeHdl;
 
-    /** Application context */
-    SDEAPP_Context                * appCntxt;
+        /** Subscriber thread */
+        std::thread             m_subThread;
+
+        /** Publisher thread */
+        std::thread             m_pubThread;
+
+        /** Input image width */
+        uint32_t                m_imgWidth;
+
+        /** Input image height */
+        uint32_t                m_imgHeight;
+
+        /** Disparity map publisher */
+        uint16_t               *m_disparityData{};
+        std::vector<uint16_t>   m_disparityPubData;
+        uint32_t                m_disparitySize;
+        ros::Publisher          m_disparityPub;
+
+        /** Point Cloud publisher */
+        uint8_t                *m_pcData{};
+        std::vector<uint8_t>    m_pcPubData;
+        uint32_t                m_numPcPoints;
+        uint32_t                m_pcSize;
+        ros::Publisher          m_pcPub;
+
+        /** Initialize control semaphore */
+        UTILS::Semaphore       *initCtrlSem;
 };
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _SDE_NODE_H_ */
-
-
-
-
-
-
+#endif /* _APP_SDE_NODE_H_ */
 

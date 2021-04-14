@@ -44,6 +44,10 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     build_node(viz_semseg VIZ_SEMSEG_SRCS)
     add_dependencies(viz_semseg ${catkin_EXPORTED_TARGETS})
 
+    # viz_estop
+    set(VIZ_ESTOP_SRCS src/viz_estop_node.cpp)
+    build_node(viz_estop VIZ_ESTOP_SRCS)
+    add_dependencies(viz_estop ${catkin_EXPORTED_TARGETS})
 endif()
 
 

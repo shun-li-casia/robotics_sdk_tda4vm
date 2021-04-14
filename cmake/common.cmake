@@ -20,10 +20,10 @@ include_directories(
 # PSDKRA base folder location
 set(PSDK_DIR $ENV{PSDK_BASE_PATH})
 
-set(CGT7X_ROOT          ti-cgt-c7000_1.4.0.LTS)
+set(CGT7X_ROOT          ti-cgt-c7000_1.4.2.LTS)
 set(PDK_PACKAGE_ROOT    pdk/packages/ti)
-set(TIDL_PACKAGE_ROOT   tidl_j7_01_03_00_11/ti_dl)
-set(MMALIB_PACKAGE_ROOT mmalib_01_03_00_06)
+set(TIDL_PACKAGE_ROOT   tidl_j7_02_00_00_07/ti_dl)
+set(MMALIB_PACKAGE_ROOT mmalib_02_00_00_02)
 set(TIADALG_PATH        tiadalg)
 
 SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
@@ -112,11 +112,11 @@ set(VISION_APP_INCLUDE_DIRS
     ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_ldc_applib
     ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_multilayer_applib
     ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_singlelayer_applib
+    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_triangulate_applib
     ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_obstacle_detection_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/semseg_cnn_applib
     ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/ss_sde_detection_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/applib_common
     ${PSDK_DIR}/vision_apps/kernels/img_proc/include
+    ${PSDK_DIR}/vision_apps/kernels/img_proc/host
     ${PSDK_DIR}/vision_apps/kernels/stereo/include
     src
 )
@@ -174,7 +174,8 @@ endfunction()
 if ((${TIVISION_APPS_TYPE} STREQUAL shared) AND (${TARGET_PLATFORM} STREQUAL J7))
     set(TARGET_LINK_LIBS
         ${catkin_LIBRARIES}
-        tivision_apps gbm)
+        tivision_apps dlr)
+
 else() # static
     set(TARGET_LINK_LIBS
         ${catkin_LIBRARIES}

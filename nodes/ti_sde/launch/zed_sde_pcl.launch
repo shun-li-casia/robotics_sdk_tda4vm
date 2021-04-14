@@ -1,0 +1,13 @@
+<launch>
+
+    <!-- ti_sde with enable_pc: 1 -->
+    <include file="$(find ti_sde)/launch/sde.launch">
+        <arg name="enable_pc" value="1" />
+    </include>
+
+    <!-- zed_capture -->
+    <include file="$(find zed_capture)/launch/zed_capture.launch">
+        <arg name="frame_rate" value="15"/>
+    </include>
+
+</launch>

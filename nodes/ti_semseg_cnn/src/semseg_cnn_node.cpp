@@ -63,6 +63,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 
 #include <cv_bridge/cv_bridge.h>
 
@@ -106,10 +107,10 @@ CnnSemSegNode::CnnSemSegNode(ros::NodeHandle &nodeHdl,
     }
 
     // Cache the input and output image sizes
-    m_inputImgWidth  = m_cntxt->createParams.inputImageWidth;
-    m_inputImgHeight = m_cntxt->createParams.inputImageHeight;
-    m_outImgWidth    = m_cntxt->createParams.outImageWidth;
-    m_outImgHeight   = m_cntxt->createParams.outImageHeight;
+    m_inputImgWidth  = m_cntxt->inputImageWidth;
+    m_inputImgHeight = m_cntxt->inputImageHeight;
+    m_outImgWidth    = m_cntxt->outImageWidth;
+    m_outImgHeight   = m_cntxt->outImageHeight;
 
     // launch the subscriber thread
     m_subThread = std::thread([=]{subscriberThread();});
@@ -155,7 +156,7 @@ void CnnSemSegNode::publisherThread()
     bool        status;
     bool        latch = true;
 
-    if (m_cntxt->createParams.enableLdcNode)
+    if (m_cntxt->enableLdcNode)
     {
         status = m_privNodeHdl.getParam("rectified_image_topic", rectImgTopic);
         if (status == false)
@@ -173,7 +174,7 @@ void CnnSemSegNode::publisherThread()
         ROS_INFO_STREAM("Created Publisher for topic: " << rectImgTopic);
     }
 
-    if (m_cntxt->createParams.enablePostProcNode)
+    if (m_cntxt->enablePostProcNode)
     {
         m_privNodeHdl.param("output_rgb", m_outputRgb, true);
 
@@ -217,15 +218,15 @@ void CnnSemSegNode::publisherThread()
         ROS_INFO_STREAM("Created Publisher for topic: " << ssTensorTopic);
     }
 
-    graphCompleteEvtHdlr();
+    processCompleteEvtHdlr();
 
     // Shutdown the publishers
-    if (m_cntxt->createParams.enableLdcNode)
+    if (m_cntxt->enableLdcNode)
     {
         m_rectImgPub.shutdown();
     }
 
-    if (m_cntxt->createParams.enablePostProcNode)
+    if (m_cntxt->enablePostProcNode)
     {
         m_outImgPub.shutdown();
     } 
@@ -239,10 +240,7 @@ void CnnSemSegNode::imgCb(const ImageConstPtr& imgPtr)
 {
     if (m_cntxt->state == SEMSEG_CNN_STATE_INIT)
     {
-        sensor_msgs::Image      image = *imgPtr;
-        cv_bridge::CvImagePtr   imgPtr = cv_bridge::toCvCopy(image,  sensor_msgs::image_encodings::YUV422);
-
-        SEMSEG_CNN_processImage(m_cntxt, imgPtr->image.data);
+        SEMSEG_CNN_run(m_cntxt, imgPtr->data.data(), imgPtr->header.stamp.toNSec());
     }
     else
     {
@@ -250,7 +248,7 @@ void CnnSemSegNode::imgCb(const ImageConstPtr& imgPtr)
     }
 }
 
-void CnnSemSegNode::graphCompleteEvtHdlr()
+void CnnSemSegNode::processCompleteEvtHdlr()
 {
     Image       rectImg;
     Image       outImg;
@@ -259,7 +257,7 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
 
     ROS_INFO("%s Launched.", __FUNCTION__);
 
-    if (m_cntxt->createParams.enableLdcNode)
+    if (m_cntxt->enableLdcNode)
     {
         rectImg.width    = m_inputImgWidth;
         rectImg.height   = m_inputImgHeight;
@@ -267,7 +265,7 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
         rectImg.encoding = "mono8";
     }
 
-    if (m_cntxt->createParams.enablePostProcNode)
+    if (m_cntxt->enablePostProcNode)
     {
         outImg.width  = m_outImgWidth;
         outImg.height = m_outImgHeight;
@@ -309,11 +307,12 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
             break;
         }
 
-        SEMSEG_CNN_APPLIB_getOutBuff(m_cntxt->sscnnHdl,
-                                     &m_cntxt->vxInputDisplayImage,
-                                     &outRef);
+        SEMSEG_CNN_getOutBuff(m_cntxt,
+                             &m_cntxt->vxInputDisplayImage,
+                             &outRef,
+                             &m_cntxt->outTimestamp);
 
-        if (m_cntxt->createParams.enableLdcNode)
+        if (m_cntxt->enableLdcNode)
         {
             // Extract rectified right image data (Luma only)
             vxStatus = CM_extractImageData(m_rectImageData,
@@ -329,7 +328,7 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
             }
         }
 
-        if (m_cntxt->createParams.enablePostProcNode)
+        if (m_cntxt->enablePostProcNode)
         {
             m_cntxt->vxOutputImage = (vx_image)outRef;
 
@@ -354,7 +353,7 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
             vxStatus = CM_extractTensorData(m_ssTensorData,
                                             m_cntxt->vxOutputTensor,
                                             m_outImgWidth,
-                                            m_outImgWidth);
+                                            m_outImgHeight);
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
@@ -387,13 +386,14 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
 #endif
 
         // Release the output buffers
-        SEMSEG_CNN_APPLIB_releaseOutBuff(m_cntxt->sscnnHdl);
+        SEMSEG_CNN_releaseOutBuff(m_cntxt);
 
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
-            ros::Time time = ros::Time::now();
+            ros::Time time;
+            time.fromNSec(m_cntxt->outTimestamp);
 
-            if (m_cntxt->createParams.enableLdcNode)
+            if (m_cntxt->enableLdcNode)
             {
                 // Publish Rectified (Right) image
                 m_rectImagePubData.assign(m_rectImageData,
@@ -405,7 +405,7 @@ void CnnSemSegNode::graphCompleteEvtHdlr()
                 m_rectImgPub.publish(rectImg);
             }
 
-            if (m_cntxt->createParams.enablePostProcNode)
+            if (m_cntxt->enablePostProcNode)
             {
                 // Publish output image
                 m_outPubData.assign(m_outImageData,
@@ -468,25 +468,18 @@ CnnSemSegNode::~CnnSemSegNode()
 
 void CnnSemSegNode::readParams()
 {
-    SEMSEG_CNN_APPLIB_createParams *createParams;
     std::string                     str;
     bool                            status;
     int32_t                         tmp;
 
-    createParams = &m_cntxt->createParams;
-
     // set default parameters
-    createParams->ldcSsFactor        = SEMSEG_LDC_DS_FACTOR;
-    createParams->ldcBlockWidth      = SEMSEG_LDC_BLOCK_WIDTH;
-    createParams->ldcBlockHeight     = SEMSEG_LDC_BLOCK_HEIGHT;
-    createParams->ldcPixelPad        = SEMSEG_LDC_PIXEL_PAD;
-    createParams->enableLdcNode      = 1;
-    createParams->padInTidl          = 0;
-    createParams->vxEvtAppValBase    = 0;
-    m_cntxt->interFrameDelay         = 0;
-    createParams->ldcLutFilePath     = m_cntxt->ldcLutFilePath;
-    createParams->tidlCfgFilePath    = m_cntxt->tidlCfgFilePath;
-    createParams->tidlNwFilePath     = m_cntxt->tidlNwFilePath;
+    m_cntxt->ldcSsFactor        = SEMSEG_LDC_DS_FACTOR;
+    m_cntxt->ldcBlockWidth      = SEMSEG_LDC_BLOCK_WIDTH;
+    m_cntxt->ldcBlockHeight     = SEMSEG_LDC_BLOCK_HEIGHT;
+    m_cntxt->ldcPixelPad        = SEMSEG_LDC_PIXEL_PAD;
+    m_cntxt->enableLdcNode      = 1;
+    m_cntxt->padInTidl          = 0;
+    m_cntxt->vxEvtAppValBase    = 0;
 
     /* Get LUT file path information. */
     status = m_privNodeHdl.getParam("lut_file_path", str);
@@ -499,47 +492,36 @@ void CnnSemSegNode::readParams()
 
     snprintf(m_cntxt->ldcLutFilePath, SEMSEG_CNN_MAX_LINE_LEN-1, "%s", str.c_str());
 
-    /* Get TIDL config path information. */
-    status = m_privNodeHdl.getParam("tidl_config_file_path", str);
-
-    if (status == false)
-    {
-        ROS_INFO("Config parameter 'tidl_config_file_path' not found.");
-        exit(-1);
-    }
-
-    snprintf(m_cntxt->tidlCfgFilePath, SEMSEG_CNN_MAX_LINE_LEN-1, "%s", str.c_str());
-
     /* Get TIDL network path information. */
-    status = m_privNodeHdl.getParam("tidl_network_file_path", str);
+    status = m_privNodeHdl.getParam("dlr_model_file_path", str);
 
     if (status == false)
     {
-        ROS_INFO("Config parameter 'tidl_network_file_path' not found.");
+        ROS_INFO("Config parameter 'dlr_model_file_path' not found.");
         exit(-1);
     }
 
-    snprintf(m_cntxt->tidlNwFilePath, SEMSEG_CNN_MAX_LINE_LEN-1, "%s", str.c_str());
+    snprintf(m_cntxt->dlrModelPath, SEMSEG_CNN_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get input image width information. */
-    m_privNodeHdl.param("width", createParams->inputImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
+    m_privNodeHdl.param("width", m_cntxt->inputImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
 
     /* Get input image height information. */
-    m_privNodeHdl.param("height", createParams->inputImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
+    m_privNodeHdl.param("height", m_cntxt->inputImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
 
     /* Get input TIDL input image width information. */
-    m_privNodeHdl.param("dl_width", createParams->tidlImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
+    m_privNodeHdl.param("dl_width", m_cntxt->tidlImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
 
     /* Get input TIDL input image height information. */
-    m_privNodeHdl.param("dl_height", createParams->tidlImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
+    m_privNodeHdl.param("dl_height", m_cntxt->tidlImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
 
     /* Get input TIDL output image width information. */
-    m_privNodeHdl.param("out_width", createParams->outImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
+    m_privNodeHdl.param("out_width", m_cntxt->outImageWidth, SEMSEG_CNN_DEFAULT_IMAGE_WIDTH);
 
     /* Get input TIDL output image height information. */
-    m_privNodeHdl.param("out_height", createParams->outImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
+    m_privNodeHdl.param("out_height", m_cntxt->outImageHeight, SEMSEG_CNN_DEFAULT_IMAGE_HEIGHT);
 
-    /* Get class count information information. */
+    /* Get class count information. */
     status = m_privNodeHdl.getParam("num_classes", tmp);
 
     if (status == false)
@@ -548,11 +530,27 @@ void CnnSemSegNode::readParams()
         exit(-1);
     }
 
-    createParams->numClasses = (int16_t)tmp;
+    m_cntxt->numClasses = (int16_t)tmp;
+
+    /* Get pre-process mean information. */
+    std::vector<int32_t>   mean = {128, 128, 128};
+    mean = m_privNodeHdl.param("pre_proc_mean", mean);
+
+    m_cntxt->preProcMean[0] = mean[0];
+    m_cntxt->preProcMean[1] = mean[1];
+    m_cntxt->preProcMean[2] = mean[2];
+
+    /* Get pre-process mean information. */
+    std::vector<float>   scale = {0.015625, 0.015625, 0.015625};
+    scale = m_privNodeHdl.param("pre_proc_scale", scale);
+
+    m_cntxt->preProcScale[0] = scale[0];
+    m_cntxt->preProcScale[1] = scale[1];
+    m_cntxt->preProcScale[2] = scale[2];
 
     /* Get post processing node enable information. */
     m_privNodeHdl.param("enable_post_proc", tmp, 1);
-    createParams->enablePostProcNode = (uint8_t)tmp;
+    m_cntxt->enablePostProcNode = (uint8_t)tmp;
 
     /* Get interactive mode flag information. */
     m_privNodeHdl.param("is_interactive", tmp, 0);
@@ -560,18 +558,15 @@ void CnnSemSegNode::readParams()
 
     /* Get pipeline depth information. */
     m_privNodeHdl.param("pipeline_depth", tmp, 1);
-    createParams->pipelineDepth = (uint8_t)tmp;
+    m_cntxt->pipelineDepth = (uint8_t)tmp;
 
     /* Get graph export flag information. */
     m_privNodeHdl.param("exportGraph", tmp, 0);
-    createParams->exportGraph = (uint8_t)tmp;
+    m_cntxt->exportGraph = (uint8_t)tmp;
 
     /* Get real-time logging enable information. */
     m_privNodeHdl.param("rtLogEnable", tmp, 0);
-    createParams->rtLogEnable = (uint8_t)tmp;
-
-    m_cntxt->exportGraph = createParams->exportGraph;
-    m_cntxt->rtLogEnable = createParams->rtLogEnable;
+    m_cntxt->rtLogEnable = (uint8_t)tmp;
 
     return;
 }
@@ -625,6 +620,8 @@ vx_status CnnSemSegNode::init()
 
 void CnnSemSegNode::sigHandler(int32_t  sig)
 {
+    (void)sig;
+
     if (m_cntxt)
     {
         SEMSEG_CNN_intSigHandler(m_cntxt);

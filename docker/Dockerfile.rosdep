@@ -1,6 +1,6 @@
 # "jacinto_ros_perception" should be populated under $WORK_DIR/catkin_ws/src
 # cd $WORK_DIR
-# docker build -t "<label>" -f ./catkin_ws/src/jacinto_ros_perception/docker/Dockerfile .
+# docker build -t "<label>" -f ./catkin_ws/src/jacinto_ros_perception/docker/Dockerfile.rosdep .
 
 FROM arm64v8/ubuntu:18.04 as melodic_ros
 ARG DEBIAN_FRONTEND=noninteractive
@@ -15,6 +15,19 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y \
     wget curl git vim tmux net-tools iputils-ping && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    apt-get install -y \
+    software-properties-common && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    apt-get install -y \
+    gcc-9 g++-9 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 50 && \
     rm -rf /var/lib/apt/lists/*
 
 ## install ROS
@@ -81,7 +94,8 @@ RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
     echo "    fi"                                >> .profile && \
     echo "fi"                                    >> .profile && \
     echo "#!/bin/bash"                           >  .bashrc  && \
-    echo "export PS1=\"${debian_chroot:+($debian_chroot)}\u@j7-docker:\w\$ \"" >> .bashrc
+    echo "export PS1=\"${debian_chroot:+($debian_chroot)}\u@j7-docker:\w\$ \"" >> .bashrc && \
+    echo "alias catkin_make='catkin_make -j1'"   >> .bashrc
 
 #============================================================
 FROM scratch
@@ -101,4 +115,5 @@ WORKDIR $CATKIN_WS
 # setup entrypoint
 ARG GIT_REPO=jacinto_ros_perception
 ADD ./catkin_ws/src/$GIT_REPO/docker/entrypoint.sh /root/
+ADD ./catkin_ws/src/$GIT_REPO/docker/ros_setup.sh /root/
 ENTRYPOINT ["/root/entrypoint.sh"]

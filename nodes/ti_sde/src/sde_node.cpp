@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2020 Texas Instruments Incorporated
+ * Copyright (c) 2021 Texas Instruments Incorporated
  *
  * All rights reserved not granted herein.
  *
@@ -59,166 +59,432 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <cv_bridge/cv_bridge.h>
+
 #include <sde_node.h>
 #include <sde.h>
 
+#include <cm_common.h>
+#include <app_ptk_demo_common.h>
+
 using namespace common_msgs;
 
-ros::Publisher  disp_pub;
-Disparity       disp_msg;
-
-static char menu[] = {
-    "\n"
-    "\n =========================================="
-    "\n Demo : ROS Stereo                         "
-    "\n =========================================="
-    "\n"
-    "\n p: Print performance statistics"
-    "\n"
-    "\n e: Export performance statistics"
-    "\n"
-    "\n x: Exit"
-    "\n"
-    "\n Enter Choice: "
-};
-
-ROSAppSDE::ROSAppSDE(ros::NodeHandle &privNodeHdl, std::string disparity_topic_name):
-    m_privNodeHdl(privNodeHdl)
+#define PC_POINT_SIZE                (16)
+ 
+SDEAppNode::SDEAppNode(ros::NodeHandle &nodeHdl,
+                       ros::NodeHandle &privNodeHdl):
+    m_nodeHdl(nodeHdl),
+    m_privNodeHdl(privNodeHdl),
+    m_imgTrans(new ImgTrans(nodeHdl))
 {
-    ros::NodeHandle nh;
+    std::string cfgFile;
+    std::string leftLUTFile;
+    std::string rightLUTFile;
+    bool        status;
+    vx_status   vxStatus = VX_SUCCESS;
 
-    disp_pub = nh.advertise<Disparity>(disparity_topic_name, 1);
+    // Create initialization control semaphore
+    initCtrlSem = new Semaphore(0);
 
-    // OpenVX Graph init
-    rosAppSDEInit();
-}
-
-ROSAppSDE::~ROSAppSDE()
-{
-    // OpenVX Graph deinit
-    rosAppSDEDeInit();
-}
-
-
-void ROSAppSDE::rosAppSDEEvtHdlrThread(SDEAPP_Context *appCntxt)
-{
-    vx_event_t evt;
-    vx_status vxStatus;
-
-    vxStatus = VX_SUCCESS;
-
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
-
-    /* Clear any pending events. The third argument is do_not_block = true. */
-    while (vxStatus == VX_SUCCESS)
+    // Create App context
+    m_cntxt = new SDEAPP_Context();
+    if (m_cntxt == nullptr)
     {
-        vxStatus = vxWaitEvent(appCntxt->vxContext, &evt, vx_true_e);
+        ROS_ERROR("new SDEAPP_Context() failed.");
+        vxStatus = VX_FAILURE;
     }
 
-    while (true)
+    if (vxStatus == VX_SUCCESS)
     {
-        vxStatus = vxWaitEvent(appCntxt->vxContext, &evt, vx_false_e);
+        // camera parameter should be initialized
+        m_cntxt->state = SDEAPP_STATE_CAM_INIT;
 
-        if (vxStatus == VX_SUCCESS)
+        // launch the subscriber thread
+        m_subThread = std::thread([=]{subscriberCamInfoThread();});
+        m_subThread.detach();
+
+        // wait until camera params are set
+        if (initCtrlSem)
         {
-            if (evt.type == VX_EVENT_USER)
-            {
-                if (evt.app_value == SDEAPP_USER_EVT_EXIT)
-                {
-                    break;
-                }
-            }
-
-            SDEAPP_processEvent(appCntxt, &evt);
-            
-            if (evt.type == VX_EVENT_GRAPH_COMPLETED)
-            {
-                SDEAPP_getOutBuff(appCntxt, &appCntxt->vxInputImage, &appCntxt->vxDisparity16);
-
-                /****************************/
-                /* publish output to topics */
-                /****************************/
-                rosAppSDEPublishOutput(appCntxt->width[0], appCntxt->height[0],
-                                       appCntxt->sde_params.disparity_min, appCntxt->sde_params.disparity_max,
-                                       appCntxt->vxDisparity16);
-
-                SDEAPP_releaseOutBuff(appCntxt);
-            }
+            initCtrlSem->wait();
         }
-    } // while (true)
-}
 
+        // Initialize the App context
+        vxStatus = this->init();
 
-void ROSAppSDE::rosAppSDEIntcHdlrThread(SDEAPP_Context *appCntxt)
-{
-
-    uint32_t done  = 0;
-
-    //appPerfStatsResetAll();
-
-    while (!done)
-    {
-        char ch;
-
-        PTK_printf(menu);
-        ch = getchar();
-        PTK_printf("\n");
-
-        switch (ch)
+        if (vxStatus != (vx_status)VX_SUCCESS)
         {
-        case 'p':
-            appPerfStatsPrintAll();
-            SDEAPP_printStats(appCntxt);
-            break;
-
-        case 'e':
-            SDEAPP_exportStats(appCntxt);
-            break;
-
-        case 'x':
-            done = 1;
-            appCntxt->processFinished = true;
-            /* Consume the newline character. */
-            getchar();
-            break;
+            ROS_INFO("Application Initialization failed.");
+            exit(-1);
         }
-    } // if (appCntxt->is_interactive)
 
-    /* Wait for the graph to consume all input. */
-    SDEAPP_waitGraph(appCntxt);
+        m_imgWidth       = m_cntxt->width;
+        m_imgHeight      = m_cntxt->height;
 
-    SDEAPP_cleanupHdlr(appCntxt, false);
+        // launch the publisher threads
+        m_pubThread = std::thread([=]{publisherThread();});
+        m_pubThread.detach();
 
-    PTK_printf("\nDEMO FINISHED!\n");
-}
-
-
-void ROSAppSDE::rosAppSdelaunchProcThreads(SDEAPP_Context *appCntxt)
-{
-    /* Launch the event handler thread. */
-    appCntxt->evtHdlrThread   = std::thread(&ROSAppSDE::rosAppSDEEvtHdlrThread, this, appCntxt);
-    if (appCntxt->is_interactive)
-    {
-        intcHdlrThread = std::thread(&ROSAppSDE::rosAppSDEIntcHdlrThread, this, appCntxt);
+        // process input frames
+        process();
     }
 }
 
+void SDEAppNode::process()
+{
+    std::string leftTopicName;
+    std::string rightTopicName;
+    bool        status;
 
-void ROSAppSDE::readParams()
+    // Query the topicname to subscribe to
+    status = m_privNodeHdl.getParam("left_input_topic", leftTopicName);
+    if (status == true)
+    {
+        status = m_privNodeHdl.getParam("right_input_topic", rightTopicName);
+    }
+
+    if (status == false)
+    {
+        ROS_INFO("Config parameter 'input_topic_name' not found.");
+        exit(-1);
+    }
+
+    m_leftImageSub = new ImgSub(m_nodeHdl, leftTopicName, 1);
+    m_rightImageSub = new ImgSub(m_nodeHdl, rightTopicName, 1);
+
+    m_sync = new TimeSync(*m_leftImageSub, *m_rightImageSub, 10);
+
+    if (m_sync == nullptr)
+    {
+        ROS_ERROR("new TimeSync() failed.");
+        exit(-1);
+    }
+
+    m_conObj = m_sync->registerCallback(&SDEAppNode::imgCb, this);
+
+    ROS_INFO_STREAM("Subscribed to the topic: " << leftTopicName);
+    ROS_INFO_STREAM("Subscribed to the topic: " << rightTopicName);
+}
+
+
+void SDEAppNode::subscriberCamInfoThread()
+{
+    std::string camInfoTopicName;
+    bool        status;
+
+    status = m_privNodeHdl.getParam("camera_info_topic", camInfoTopicName);
+    if (status == false)
+    {
+        ROS_INFO("Config parameter 'camera_info_topic' not found.");
+        exit(-1);
+    }
+
+    m_sub = new CamInfoSub(m_nodeHdl, camInfoTopicName, 1);
+    if (m_sub == nullptr)
+    {
+        ROS_ERROR("new CamInfoSub() failed.");
+        exit(-1);
+    }
+
+    m_sub->registerCallback(&SDEAppNode::camInfoCb, this);
+
+    ROS_INFO_STREAM("Subscribed to the topic: " << camInfoTopicName);
+
+    ros::Rate r(15);
+    while (m_cntxt->state == SDEAPP_STATE_CAM_INIT)
+    {
+        ros::spinOnce();
+        r.sleep();
+    }
+}
+
+void SDEAppNode::publisherThread()
+{
+    std::string rawDispTopic;
+    std::string pcTopic;
+ 
+    vx_status   vxStatus;
+
+    bool        status;
+    bool        latch = true;
+
+    // Query the topic name to publish the output image.
+    status = m_privNodeHdl.getParam("disparity_topic", rawDispTopic);
+    if (status == false)
+    {
+        ROS_ERROR("Config parameter 'disparity_topic' not found.");
+        exit(-1);
+    }
+
+    status = m_privNodeHdl.getParam("point_cloud_topic", pcTopic);
+    if (status == false)
+    {
+        ROS_ERROR("Config parameter 'point_cloud_topic' not found.");
+        exit(-1);
+    }
+
+    /* Raw disparity */
+    // Pre-allocate vectors used for publishing out raw disparity
+    m_disparitySize = m_imgWidth * m_imgHeight;
+
+    m_disparityPubData.reserve(m_disparitySize);
+    m_disparityData = new uint16_t[m_disparitySize];
+
+    // Create the publisher for the disparity output
+    m_disparityPub = m_nodeHdl.advertise<Disparity>(rawDispTopic, 1);
+    ROS_INFO_STREAM("Created Publisher for topic: " << rawDispTopic);
+
+    /* Point cloud data */
+    // Pre-allocate vectors used for publishing out point cloud data
+    // XYZRGB is total 4*3 + 1*4 = 16 bytes
+    if (m_cntxt->enablePC)
+    {
+        m_pcSize = m_imgWidth * m_imgHeight * PC_POINT_SIZE;
+
+        m_pcPubData.reserve(m_pcSize);
+        m_pcData = new uint8_t[m_pcSize];
+
+        // init Point Cloud data
+        memset(m_pcData, 0, m_pcSize);
+        // Create the publisher for the OG data
+        m_pcPub = m_nodeHdl.advertise<sensor_msgs::PointCloud2>(pcTopic, 1);
+
+        ROS_INFO_STREAM("Created Publisher for topic: " << pcTopic);
+    }
+
+    // Event handler
+    graphCompleteEvtHdlr();
+
+    m_disparityPub.shutdown();
+    if (m_cntxt->enablePC)
+    {
+        m_pcPub.shutdown();
+    }
+}
+
+void SDEAppNode::camInfoCb(const CameraInfoConstPtr& cam_info)
+{
+    if (m_cntxt->state == SDEAPP_STATE_CAM_INIT)
+    {
+        SDEAPP_init_camInfo(m_cntxt, 
+                            cam_info->width, cam_info->height, 
+                            cam_info->P[0], cam_info->P[2], cam_info->P[6]);
+
+        if (initCtrlSem)
+        {
+            initCtrlSem->notify();
+        }
+    } 
+}
+
+
+void SDEAppNode::imgCb(const ImageConstPtr& left_image_ptr, 
+                       const ImageConstPtr& right_image_ptr)
+{
+    if (m_cntxt->state == SDEAPP_STATE_INIT)
+    {
+        SDEAPP_run(m_cntxt, 
+                   left_image_ptr->data.data(),
+                   right_image_ptr->data.data(),
+                   right_image_ptr->header.stamp.toNSec());
+    } else
+    if (m_cntxt->state == SDEAPP_STATE_INVALID)
+    {
+        m_conObj.disconnect();
+    }
+}
+
+void SDEAppNode::graphCompleteEvtHdlr()
+{
+    Disparity                    dispMsg;
+    PointCloud2                  pcMsg;
+
+    vx_status                    vxStatus = VX_SUCCESS;
+    int8_t                       i;
+    uint32_t                     offset;
+
+    ROS_INFO("%s Launched.", __FUNCTION__);
+
+    // Raw Disparity message
+    dispMsg.width    = m_imgWidth;
+    dispMsg.height   = m_imgHeight;
+    dispMsg.minDisp  = 0;
+    dispMsg.maxDisp  = 127;
+    dispMsg.step     = m_imgWidth * 2;
+
+
+    // PointCloud2 message
+    if (m_cntxt->enablePC)
+    {
+        pcMsg.header.frame_id = "PointCloud";
+        pcMsg.height          = 1;
+        pcMsg.width           = 0;  // should be updated for every PC frame
+        pcMsg.fields.resize(4);
+
+        pcMsg.fields[0].name = "x";
+        pcMsg.fields[1].name = "y";
+        pcMsg.fields[2].name = "z";
+        pcMsg.fields[3].name = "rgb";
+
+        offset = 0;
+        for(i = 0; i < 3; i++)
+        {
+            pcMsg.fields[i].offset   = offset;
+            pcMsg.fields[i].datatype = 7; // float32
+            pcMsg.fields[i].count    = 1;
+            offset                  += 4;
+        }
+
+        for(i = 3; i < 4; i++)
+        {
+            pcMsg.fields[i].offset   = offset;
+            pcMsg.fields[i].datatype = 6; // unit32
+            pcMsg.fields[i].count    = 1;
+
+            offset                  += 4;
+        }
+
+        pcMsg.is_bigendian    = false;
+        pcMsg.point_step      = offset;  // should be PC_POINT_SIZE
+        pcMsg.row_step        = 0;       // should be updated for every PC frame
+        pcMsg.is_dense        = 1;
+    }
+
+    while (m_cntxt->exitOutputThread == false)
+    {
+        vx_reference    outRef{};
+
+        /* Wait for the data ready semaphore. */
+        if (m_cntxt->outputCtrlSem)
+        {
+            m_cntxt->outputCtrlSem->wait();
+        }
+
+        if (m_cntxt->exitOutputThread == true)
+        {
+            break;
+        }
+
+        SDEAPP_getOutBuff(m_cntxt,
+                              &m_cntxt->vxDispRightImage,
+                              &m_cntxt->vxDisparity16,
+                              &m_cntxt->vxDispTriangPC,
+                              &m_cntxt->outTimestamp);
+
+        /* Raw Disparity */
+        // Extract raw disparity data
+        vxStatus = CM_extractImageData((uint8_t *)m_disparityData,
+                                       m_cntxt->vxDisparity16,
+                                       m_imgWidth,
+                                       m_imgHeight,
+                                       1,
+                                       0);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            ROS_ERROR("CM_extractImageData() failed.");
+        }
+
+        /* Point cloude data */
+        if (m_cntxt->enablePC)
+        {
+            // Extract point cloud data
+            vxStatus = CM_extractPointCloudData((uint8_t *)m_pcData,
+                                                m_cntxt->vxDispTriangPC,
+                                                pcMsg.point_step,
+                                                &m_numPcPoints);
+        }
+
+        // Release the output buffers
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            SDEAPP_releaseOutBuff(m_cntxt);
+        }
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            ros::Time time;
+            time.fromNSec(m_cntxt->outTimestamp);
+
+            // Publish raw Disparity map
+            m_disparityPubData.assign(m_disparityData,
+                                 &m_disparityData[m_disparitySize]);
+
+            dispMsg.data         = m_disparityPubData;
+            dispMsg.header.stamp = time;
+            m_disparityPub.publish(dispMsg);
+
+            if (m_cntxt->enablePC)
+            {
+                // Publish point cloud data
+                m_pcPubData.assign(m_pcData, &m_pcData[m_numPcPoints*pcMsg.point_step]);
+
+                pcMsg.width           = m_numPcPoints;
+                pcMsg.row_step        = m_numPcPoints * pcMsg.point_step;
+                pcMsg.data            = m_pcPubData;
+                pcMsg.header.stamp    = time;
+                m_pcPub.publish(pcMsg);
+            }
+        }
+    }
+
+    ROS_INFO("%s Exiting.", __FUNCTION__);
+}
+
+SDEAppNode::~SDEAppNode()
+{
+    if (m_disparityData)
+    {
+        delete [] m_disparityData;
+    }
+
+    if (m_pcData)
+    {
+        delete [] m_pcData;
+    }
+
+    if (m_imgTrans)
+    {
+        delete m_imgTrans;
+    }
+
+    if (m_sync)
+    {
+        delete m_sync;
+    }
+
+    if (m_cntxt)
+    {
+        delete m_cntxt;
+    }
+
+    if (initCtrlSem)
+    {
+        delete initCtrlSem;
+    }
+}
+
+void SDEAppNode::readParams()
 {
     std::string                     str;
     bool                            status;
     int32_t                         tmp;
+    float                           ftmp;
 
-    // Set default SDE parameters
-    appCntxt->sde_params.confidence_score_map[0] = 0;
-    appCntxt->sde_params.confidence_score_map[1] = 4;
-    appCntxt->sde_params.confidence_score_map[2] = 9;
-    appCntxt->sde_params.confidence_score_map[3] = 18;
-    appCntxt->sde_params.confidence_score_map[4] = 28;
-    appCntxt->sde_params.confidence_score_map[5] = 43;
-    appCntxt->sde_params.confidence_score_map[6] = 109;
-    appCntxt->sde_params.confidence_score_map[7] = 127;
+    m_cntxt->sde_params.confidence_score_map[0]     = 0;
+    m_cntxt->sde_params.confidence_score_map[1]     = 4;
+    m_cntxt->sde_params.confidence_score_map[2]     = 9;
+    m_cntxt->sde_params.confidence_score_map[3]     = 18;
+    m_cntxt->sde_params.confidence_score_map[4]     = 28;
+    m_cntxt->sde_params.confidence_score_map[5]     = 43;
+    m_cntxt->sde_params.confidence_score_map[6]     = 109;
+    m_cntxt->sde_params.confidence_score_map[7]     = 127;
+
 
     /* Get left LUT file path information. */
     status = m_privNodeHdl.getParam("left_lut_file_path", str);
@@ -228,146 +494,197 @@ void ROSAppSDE::readParams()
         exit(-1);
     }
 
-    snprintf(appCntxt->left_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
+    snprintf(m_cntxt->left_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get right LUT file path information. */
     status = m_privNodeHdl.getParam("right_lut_file_path", str);
     if (status == false)
     {
-        ROS_INFO("Config parameter 'left_lut_file_path' not found.");
+        ROS_INFO("Config parameter 'right_lut_file_path' not found.");
         exit(-1);
     }
 
-    snprintf(appCntxt->right_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
+    snprintf(m_cntxt->right_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get input image format information */
-    m_privNodeHdl.param("input_format", tmp, 1);
-    appCntxt->inputFormat = (uint8_t)tmp;
-
-    /* Get input image width information. */
-    m_privNodeHdl.param("width", tmp, SDEAPP_DEFAULT_IMAGE_WIDTH);
-    appCntxt->width[0] = (uint16_t)tmp;
-
-    /* Get input image height information. */
-    m_privNodeHdl.param("height", tmp, SDEAPP_DEFAULT_IMAGE_HEIGHT);
-    appCntxt->height[0] = (uint16_t)tmp;
+    m_privNodeHdl.param("input_format", tmp, (int32_t)PTK_IMG_FORMAT_UYVY);
+    m_cntxt->inputFormat = (uint8_t)tmp;
 
     /* Get stereo algorithm type information */
     m_privNodeHdl.param("sde_algo_type", tmp, 0);
-    appCntxt->sdeAlgoType = (uint8_t)tmp;
+    m_cntxt->sdeAlgoType = (uint8_t)tmp;
 
     /* Get the number of layers information when sde_algo_typ = 1*/
     m_privNodeHdl.param("num_layers", tmp, 2);
-    appCntxt->numLayers = (uint8_t)tmp;
+    m_cntxt->numLayers = (uint8_t)tmp;
 
     /* Get the median filtering flag information when sde_algo_typ = 1*/
     m_privNodeHdl.param("pp_median_filter_enable", tmp, 0);
-    appCntxt->ppMedianFilterEnable = (uint8_t)tmp;
-
-    /* Get the disparity confidence threshold information */
-    m_privNodeHdl.param("sde_confidence_threshold", tmp, 0);
-    appCntxt->confidence_threshold = (uint8_t)tmp;
+    m_cntxt->ppMedianFilterEnable = (uint8_t)tmp;
 
     /* SDE Parameters */ 
-    /* Get the SDE median filter enable flag information */
-    m_privNodeHdl.param("median_filter_enable", tmp, 1);
-    appCntxt->sde_params.median_filter_enable = (uint16_t)tmp;
-
-    /* Get the SDE reduced range search enable flag information */
-    m_privNodeHdl.param("reduced_range_search_enable", tmp, 0);
-    appCntxt->sde_params.reduced_range_search_enable = (uint16_t)tmp;
-
     /* Get the SDE minimum disparity information */
     m_privNodeHdl.param("disparity_min", tmp, 0);
-    appCntxt->sde_params.disparity_min = (uint16_t)tmp;
+    m_cntxt->sde_params.disparity_min = (uint16_t)tmp;
 
     /* Get the SDE maximum disparity information */
     m_privNodeHdl.param("disparity_max", tmp, 1);
-    appCntxt->sde_params.disparity_max = (uint16_t)tmp;
+    m_cntxt->sde_params.disparity_max = (uint16_t)tmp;
 
     /* Get the SDE left-right consistency check threshold information */
     m_privNodeHdl.param("threshold_left_right", tmp, 3);
-    appCntxt->sde_params.threshold_left_right = (uint16_t)tmp;
+    m_cntxt->sde_params.threshold_left_right = (uint16_t)tmp;
 
     /* Get the SDE texture based filtering enable flag information */
     m_privNodeHdl.param("texture_filter_enable", tmp, 0);
-    appCntxt->sde_params.texture_filter_enable = (uint16_t)tmp;
+    m_cntxt->sde_params.texture_filter_enable = (uint16_t)tmp;
 
     /* Get the SDE texture filtering threshold information */
     m_privNodeHdl.param("threshold_texture", tmp, 0);
-    appCntxt->sde_params.threshold_texture = (uint16_t)tmp;
+    m_cntxt->sde_params.threshold_texture = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p1 information */
     m_privNodeHdl.param("aggregation_penalty_p1", tmp, 32);
-    appCntxt->sde_params.aggregation_penalty_p1 = (uint16_t)tmp;
+    m_cntxt->sde_params.aggregation_penalty_p1 = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p2 information */
     m_privNodeHdl.param("aggregation_penalty_p2", tmp, 197);
-    appCntxt->sde_params.aggregation_penalty_p2 = (uint16_t)tmp;
+    m_cntxt->sde_params.aggregation_penalty_p2 = (uint16_t)tmp;
 
-    /* Get pipeline depth information. */
-    m_privNodeHdl.param("pipeline_depth", tmp, SDEAPP_MAX_PIPELINE_DEPTH);
-    appCntxt->pipelineDepth = (uint8_t)tmp;
+    /* Get the SDE median filter enable flag information */
+    m_privNodeHdl.param("median_filter_enable", tmp, 1);
+    m_cntxt->sde_params.median_filter_enable = (uint16_t)tmp;
 
+    /* Get the SDE reduced range search enable flag information */
+    m_privNodeHdl.param("reduced_range_search_enable", tmp, 0);
+    m_cntxt->sde_params.reduced_range_search_enable = (uint16_t)tmp;
+
+
+    /* Get the stereo camera baseline information */
+    m_privNodeHdl.param("stereo_baseline", ftmp, 0.12f);
+    m_cntxt->baseline = (float)ftmp;
+
+    /* Get PC creation flag information */
+    m_privNodeHdl.param("enable_pc", tmp, 1);
+    m_cntxt->enablePC = (uint8_t)tmp;
+
+    /*Sub-sampling ratio of point cloud */
+    m_privNodeHdl.param("pc_subsample_ratio", tmp, 1);
+    m_cntxt->pcSubsampleRatio = (uint8_t)tmp;
+
+    /* Get use of PC configuration flag information*/
+    m_privNodeHdl.param("use_pc_config", tmp, 1);
+    m_cntxt->usePCConfig = (uint8_t)tmp;
+
+    /* Get the disparity confidence threshold information */
+    m_privNodeHdl.param("sde_confidence_threshold", tmp, 0);
+    m_cntxt->dispConfidence = (uint8_t)tmp;
+
+    /* Low X pos limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_low_x", ftmp, -20.0f);
+    m_cntxt->lowPtX = (float)ftmp;
+
+    /* High X pos limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_high_x", ftmp, 20.0f);
+    m_cntxt->highPtX = (float)ftmp;
+
+    /* Low Y pos (depth) limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_low_y", ftmp, 0.0f);
+    m_cntxt->lowPtY = (float)ftmp;
+
+    /* High Y pos (depth) limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_high_y", ftmp, 20.0f);
+    m_cntxt->highPtY = (float)ftmp;
+
+    /* Low Z pos limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_low_Z", ftmp, -2.0f);
+    m_cntxt->lowPtZ = (float)ftmp;
+
+    /* High Z pos limit for which 3D point is rendered  */
+    m_privNodeHdl.param("point_high_Z", ftmp, 5.0f);
+    m_cntxt->highPtZ = (float)ftmp;
+
+    /* OpenVX Graph Operation Parameters */
     /* Get interactive mode flag information. */
     m_privNodeHdl.param("is_interactive", tmp, 0);
-    appCntxt->is_interactive = (uint8_t)tmp;
+    m_cntxt->is_interactive = (uint8_t)tmp;
 
     /* Get graph export flag information. */
     m_privNodeHdl.param("exportGraph", tmp, 0);
-    appCntxt->exportGraph = (uint8_t)tmp;
+    m_cntxt->exportGraph = (uint8_t)tmp;
 
     /* Get real-time logging enable information. */
     m_privNodeHdl.param("rtLogEnable", tmp, 0);
-    appCntxt->rtLogEnable = (uint8_t)tmp;
+    m_cntxt->rtLogEnable = (uint8_t)tmp;
 
-    if (appCntxt->sdeAlgoType == 1)
+    /* Get pipeline depth information. */
+    m_privNodeHdl.param("pipeline_depth", tmp, SDEAPP_MAX_PIPELINE_DEPTH);
+    m_cntxt->pipelineDepth = (uint8_t)tmp;
+
+    /* Get the disparity merge core information. */
+    m_privNodeHdl.getParam("disp_merge_deploy_core", str);
+    m_cntxt->mlSdeCreateParams.dispMergeNodeCore = app_common_get_coreName((const char *)str.c_str());
+    
+    /* Get the hole filling core information. */
+    m_privNodeHdl.getParam("hole_filling_deploy_core", str);
+    m_cntxt->mlSdeCreateParams.holeFillingNodeCore = app_common_get_coreName((const char *)str.c_str());
+
+    /* Get the point cloud generation core information. */
+    m_privNodeHdl.getParam("color_conv_deploy_core", str);
+    m_cntxt->sdeTriangCreateParams.ccNodeCore = app_common_get_coreName((const char *)str.c_str());
+
+    /* Get the occupancy grid generation core information. */
+    m_privNodeHdl.getParam("triang_deploy_core", str);
+    m_cntxt->sdeTriangCreateParams.triangNodeCore = app_common_get_coreName((const char *)str.c_str());
+
+
+    if (m_cntxt->width < 128)
     {
-        /* Get disparity merge node core information. */
-        status = m_privNodeHdl.getParam("disp_merge_deploy_core", str);
-        if (status == false)
+        m_cntxt->width = 128;
+    }
+    if (m_cntxt->height < 128)
+    {
+        m_cntxt->height = 128;
+    }
+
+    if (m_cntxt->pipelineDepth > SDEAPP_MAX_PIPELINE_DEPTH)
+    {
+        ROS_INFO("Pipeline depth is larger than maximum pipeline depth allowed. Clipped..");
+        m_cntxt->pipelineDepth = SDEAPP_MAX_PIPELINE_DEPTH;
+    }
+
+    if (m_cntxt->inputFormat != PTK_IMG_FORMAT_UYVY)
+    {
+        ROS_INFO("Input format should be YUV_UYVY...");
+        exit(-1);
+    }
+
+    if (m_cntxt->enablePC)
+    {
+        if (m_cntxt->pcSubsampleRatio != 1 || m_cntxt->pcSubsampleRatio != 2 || m_cntxt->pcSubsampleRatio != 4)
         {
-            ROS_INFO("Config parameter 'disp_merge_deploy_core' not found.");
-            exit(-1);
+            ROS_INFO("Improper point cloud sub-sample ratio. Set to 1");
+            m_cntxt->pcSubsampleRatio = 1;
         }
-
-        appCntxt->mlSdeCreateParams.dispMergeNodeCore =  app_common_get_coreName(str.c_str());
-
-        /* Get hole fillinge node core information. */
-        status = m_privNodeHdl.getParam("hole_filling_deploy_core", str);
-        if (status == false)
-        {
-            ROS_INFO("Config parameter 'hole_filling_deploy_core' not found.");
-            exit(-1);
-        }
-
-        appCntxt->mlSdeCreateParams.holeFillingNodeCore = app_common_get_coreName(str.c_str());
     }
 
     // when multi-layer SDE is used
-    if (appCntxt->sdeAlgoType == 1)
+    if (m_cntxt->sdeAlgoType == 1)
     {
-        if (appCntxt->numLayers < 2 || appCntxt->numLayers > 3)
-        {
-            ROS_INFO("The number of layer should be 2 or 3. Set the number of layers to 2...\n");
-            appCntxt->numLayers = 2;
-        }
+        int8_t  factor = (m_cntxt->numLayers - 1) * 2;
+        int32_t w, i;
 
-        int8_t  i;
-        int8_t  factor = (appCntxt->numLayers - 1) * 2;
-
-        if (appCntxt->height[0] % factor != 0 || appCntxt->width[0] % factor != 0)
+        if (m_cntxt->height % factor != 0 || m_cntxt->width % factor != 0)
         {
-            ROS_INFO("Improper stereo image resolution...\n");
+            ROS_INFO("Improper stereo image resolution...");
             exit(-1);
         }
 
-        for (i = 1; i < appCntxt->numLayers; i++)
+        for (i = 1; i < m_cntxt->numLayers; i++)
         {
-            appCntxt->width[i]  = appCntxt->width[i-1]/2;
-            appCntxt->height[i] = appCntxt->height[i-1]/2;
+            w = m_cntxt->width  / (2*i);
 
-            if (appCntxt->width[i] % 16 != 0)
+            if (w % 16 != 0)
             {
                 ROS_INFO("Improper image width is not multiple of 16...\n");
                 exit(-1);
@@ -375,119 +692,60 @@ void ROSAppSDE::readParams()
         }
     }
 
-    appCntxt->renderPeriod = 0;
+    m_cntxt->renderPeriod = 0;
 
     return;
+
 }
 
-
-int ROSAppSDE::rosAppSDEInit()
+vx_status SDEAppNode::init()
 {
-    PTK_CRT    ptkConfig;
-    vx_status  vxStatus = VX_SUCCESS;
+    PTK_CRT             ptkConfig;
+    vx_status           vxStatus;
+
+    vxStatus = VX_SUCCESS;
 
     /* Initialize PTK library. */
     ptkConfig.exit   = exit;
     ptkConfig.printf = printf;
     ptkConfig.time   = NULL;
 
+    //tivx_set_debug_zone(VX_ZONE_INFO);
+
     PTK_init(&ptkConfig);
 
-    /* create appCntxt */
-    appCntxt = new SDEAPP_Context();
 
-    if (appCntxt == nullptr)
+    if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        ROS_ERROR("new SDEAPP_Context() failed.");
-        vxStatus = VX_FAILURE;
+        /* parse command line */
+        readParams();
+
+        SDEAPP_setAllParams(m_cntxt);
+
+        /* Initialize the Application context */
+        vxStatus = SDEAPP_init(m_cntxt);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            ROS_ERROR("SDEAPP_init() failed.");
+        }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        /* Read parameters */
-        readParams();
-
-        /* init processFinished */
-        appCntxt->processFinished = false;
-
-        /* set defalut params */
-        SDEAPP_setAllParams(appCntxt);
-
-        /* Initialize the Application context */
-        SDEAPP_init(appCntxt);
-
         /* Launch processing threads. */
-        rosAppSdelaunchProcThreads(appCntxt);
+        SDEAPP_launchProcThreads(m_cntxt);
     }
 
-    return 0;
+    return vxStatus;
 }
 
-void ROSAppSDE::rosAppSDEProcessData(unsigned char* leftImg, unsigned char* rightImg)
+void SDEAppNode::sigHandler(int32_t  sig)
 {
-    if(!appCntxt->processFinished)
+    if (m_cntxt)
     {
-        SDEAPP_run(appCntxt, leftImg, rightImg);
+        SDEAPP_intSigHandler(m_cntxt);
     }
 }
 
-void ROSAppSDE::rosAppSDEDeInit()
-{
-    delete appCntxt;
-}
 
-
-void ROSAppSDE::rosAppSDEPublishOutput(int32_t width, int32_t height, int16_t minSdeDisp, int16_t maxSdeDisp, vx_image disparity)
-{
-    vx_status                  vxStatus;
-    vx_map_id                  map_id;
-    vx_rectangle_t             rect;
-    vx_imagepatch_addressing_t image_addr;
-    uint16_t                 * data_ptr;
-    int32_t                    i, j;
-
-    rect.start_x = 0;
-    rect.start_y = 0;
-    rect.end_x   = width;
-    rect.end_y   = height;
-
-    // raw disparity data
-    vxStatus = vxMapImagePatch(disparity,
-                               &rect,
-                               0,
-                               &map_id,
-                               &image_addr,
-                               (void **)&data_ptr,
-                               VX_READ_ONLY,
-                               VX_MEMORY_TYPE_HOST,
-                               VX_NOGAP_X);
-    PTK_assert(VX_SUCCESS == vxStatus);
-    vxUnmapImagePatch(disparity, map_id);
-
-
-    // Publish disparity data
-    ros::Time time = ros::Time::now();
-
-    // Does not work if stride_y is not the same as stride_x*width
-    std::vector<uint16_t> vec(data_ptr, data_ptr + width*height);
-    disp_msg.width        = width;
-    disp_msg.height       = height;
-    disp_msg.minDisp      = 0;
-    if (maxSdeDisp == 0)
-    {
-        disp_msg.maxDisp  = 63;
-    }
-    else if (maxSdeDisp == 1)
-    {
-        disp_msg.maxDisp  = 127;
-    }
-    else if (maxSdeDisp == 2)
-    {
-       disp_msg.maxDisp   = 191;
-    }
-    disp_msg.step         = width*2;
-    disp_msg.data         = vec;
-    disp_msg.header.stamp = time;
-
-    disp_pub.publish(disp_msg);
-}

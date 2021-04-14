@@ -1,5 +1,5 @@
-TI OpenVX + ROS Framework & Applications
-========================================
+Robotics Software Development Kit
+=================================
 
 ### Introduction to TI OpenVX + ROS Development Framework
 
@@ -8,54 +8,63 @@ TI OpenVX + ROS Framework & Applications
     <figcaption> <center>Figure 1. TI OpenVX + ROS Framework: Software Stack </center></figcaption>
 </figure>
 
-The TI OpenVX + ROS development framework is enabled in a Docker container environment on J7 Processor SDK Linux. We provide detailed steps for setting a Docker container environment for ROS Melodic together with the TI Vision Apps Library (see next section). The TI OpenVX + ROS development framework allows:
+The TI OpenVX + ROS development framework runs in a Docker container environment on J7 Processor SDK Linux. We provide detailed steps for setting a Docker container environment for ROS Melodic along with the TI Vision Apps Library (see next section). The TI OpenVX + ROS development framework allows:
 
 * Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, and ADAS) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the Jacinto 7 processor
-* Application softwares can be complied directly on the Jacinto 7 processor in a Docker container using APIs optimized on Jacinto 7 processor along with many open-source libraries and packages including, for example. OpenCV and Point-Cloud Library (PCL).
+* Application softwares can be complied directly on the Jacinto 7 target using APIs optimized on the Jacinto 7 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV and Point-Cloud Library (PCL).
 
-Figure below is a representative vision application that can be developed in TI OpenVX + ROS framework.
+Figure below is a representative vision application developed in TI OpenVX + ROS framework.
 
 <figure class="image">
-    <center><img src="docker/docs/tiovx_ros_demo_diagram.png" style="width:896px;"/></center>
+    <center><img src="docker/docs/tiovx_ros_demo_diagram.svg" style="width:896px;"/></center>
     <figcaption> <center>Figure 2. Example Application in TI OpenVX + ROS Framework </center></figcaption>
 </figure>
 
 ### TI Vision Apps Library
-The TI Vision Apps Library is a set of APIs for the target deployment that are derived from the Jacinto 7 Processor SDK RTOS, which includes:
+The TI Vision Apps Library is a set of APIs for the target deployment that are derived from the Jacinto 7 Processor SDK RTOS which includes:
 
 * TI OpenVX kernels and infrastructure
-* TI deep learning (TIDL) applications
+* TI deep-learning (TIDL) applications
 * Imaging and vision applications
 * Advanced driver-assistance systems (ADAS) applications
 * Perception applications
 
-The TI Vision Apps Library is included in the pre-built package of [J721E Processor SDK RTOS 7.1.0](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/index_FDS.html).
+The TI Vision Apps Library is included in the pre-built package of [J721E Processor SDK RTOS 7.3.0](https://www.ti.com/tool/download/PROCESSOR-SDK-RTOS-J721E/07.03.00.07).
 
-## How to Set Up TI OpenVX + ROS Docker Container Environment on J7 Target
-<a href="https://tidrive.ext.ti.com/fss/public/link/public/stream/read/J7ROS_Docker_README.pdf?linkToken=sKgYm3qoGJSiqBia&itemName=d2ec61c9-2cb7-4e73-ad0f-c38aca0fad7c" download>Click to Download J7ROS_Docker_README.pdf</a>
+### Open-Source Deep-Learning Runtime
+The J721E Processor SDK RTOS 7.3.0 also supports the following open-source deep-learning runtime:
+* TVM/Neo-AI-DLR
+* TFLite Runtime
+* ONNX Runtime
 
-<!-- <a href="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/J7ROS_Docker_READMD.pdf" download>Click to Download J7ROS_Docker_README.pdf</a> -->
+We provides two demo applications that include a deep-learning model that is implemented on TVM/Neo-AI-DLR runtime library.
 
-For debugging (Caution: there is formatting issue): [docker/README.md](docker/README.md)
+## Setting Up Robotics SDK Docker Container Environment on J7 Target
+<a href="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/j7ros_docker_readme_00_03_00.pdf" download>Click to Download \"j7ros_docker_readme.pdf\"</a>
 
-## TI OpenVX + ROS Demo Applications
+<!-- For debugging (Caution: there is formatting issue): [docker/README.md](docker/README.md) -->
+
+## Demo Applications
 
 <figure class="image">
-    <center><img src="docker/docs/sde_semseg_rviz.png" style="width:700px;"/></center>
+    <center><img src="nodes/ti_estop/docs/estop_rviz.png" style="width:700px;"/></center>
     <figcaption> <center>Figure 3. Demo Applications </center></figcaption>
 </figure>
 
-### [Stereo Vision Processing Node Accelerated on LDC and SDE](nodes/ti_sde/README.md)
+### [Stereo Vision Processing Accelerated on LDC and SDE](nodes/ti_sde/README.md)
 
-### [CNN Semantic Segmentation Node with TIDL Running on C7x/MMA](nodes/ti_semseg_cnn/README.md)
+### [Semantic Segmentation Accelerated on C7x/MMA](nodes/ti_semseg_cnn/README.md)
 
-## Known Issues
+### [3D Obstacle Detection Accelerated on SDE and C7x/MMA](nodes/ti_estop/README.md)
 
-1. Display from insider a Docker container on J7 is not enabled. RViz visualization is displayed on a remote Ubuntu PC.
+## Limitations and Known Issues
+
+1. RViz visualization is displayed on a remote Ubuntu PC. Display from insider a Docker container on the J7 target is not enabled and tested.
 2. Ctrl+C termination of a ROS node or a ROS launch session can be sometimes slow. When VX_ERROR happens, it is recommended to reboot the J7 EVM.
 3. Stereo Vision Demo
-    * Output disparity map may have artifacts that are common to block-based stereo algorithms. e.g., noise in the sky, textureless area, repeated patterns, etc.
+    * Output disparity map may have artifacts that are common to block-based stereo algorithms. e.g., noise in the sky, texture-less area, repeated patterns, etc.
     * While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
+4. The semantic segmentation model used in `ti_semseg_cnn` and `ti_estop` nodes was trained with Cityscapes dataset first, and  re-trained with a small dataset collected from a particular stereo camera (ZED camera, HD mode) for a limited scenarios with coarse annotation. Therefore, the model can show limited accuracy performance if a different camera model is used and/or when it is applied in different environmental scenes.
 
 ## Questions & Feedback
 

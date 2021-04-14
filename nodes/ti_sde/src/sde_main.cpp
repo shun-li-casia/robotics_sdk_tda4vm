@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2020 Texas Instruments Incorporated
+ * Copyright (c) 2021 Texas Instruments Incorporated
  *
  * All rights reserved not granted herein.
  *
@@ -59,157 +59,49 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
 #include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <ros/ros.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/Image.h>
-#include <cv_bridge/cv_bridge.h>
-
 
 #include <sde_node.h>
 
+static SDEAppNode  *sdeAppNode{};
 
-using namespace sensor_msgs;
-using namespace message_filters;
-
-
-namespace ros_app_sde
+static void sigHandler(int32_t sig)
 {
-    /**
-     * @brief  SDE ROS warpper class
-     */
-
-    class StereoROS
+    if (sdeAppNode)
     {
-    public:
-        /**
-         * @brief { function_description }
-         *
-         * @param[in]  resolution  The resolution
-         * @param[in]  frame_rate  The frame rate
-         */
-
-        StereoROS() : it(nh)
-        {
-            ros::NodeHandle private_nh("~");
-
-            private_nh.param("left_input_topic", left_input_topic_, std::string(""));
-            private_nh.param("right_input_topic", right_input_topic_, std::string(""));
-            private_nh.param("disparity_topic", disparity_topic_, std::string(""));
-
-            /*****************************************/
-            /* OpenVX Graph Init                     */
-            /*****************************************/
-            rosAppSde = new ROSAppSDE(private_nh, disparity_topic_);
-        }
-
-        ~StereoROS()
-        {
-            /*****************************************/
-            /*  OpenVX Graph Deinit                  */
-            /*****************************************/
-            delete rosAppSde;
-        }
-
-        void run()
-        {
-            // Read streo images from rosbag file
-            message_filters::Subscriber<Image> left_imag_sub(nh, left_input_topic_, 1);
-            message_filters::Subscriber<Image> right_imag_sub(nh, right_input_topic_, 1);
-
-            TimeSynchronizer<Image, Image> sync(left_imag_sub, right_imag_sub, 10);
-            sync.registerCallback(boost::bind(&StereoROS::callback_stereo, this, _1, _2));
-            
-            // question: how to do rate control?, is callback blocking function?
-            ros::spin();
-        }
-
-        void callback_stereo(const ImageConstPtr& left_image_ptr, const ImageConstPtr& right_image_ptr)
-        {
-            sensor_msgs::Image left_image  = *left_image_ptr;
-            sensor_msgs::Image right_image = *right_image_ptr;
-
-
-            // Conver to monochrome image to run OpenVX graph
-            // ZED captured images should be monochrome by itself
-            cv_bridge::CvImagePtr cv_ptr_l, cv_ptr_r;
-
-            // left image
-            cv_ptr_l = cv_bridge::toCvCopy(left_image, sensor_msgs::image_encodings::YUV422);
-
-            // right image
-            cv_ptr_r = cv_bridge::toCvCopy(right_image, sensor_msgs::image_encodings::YUV422);
-
-            /*****************************************/
-            /* Process OpenVX Graph                  */
-            /*****************************************/
-            rosAppSde->rosAppSDEProcessData(cv_ptr_l->image.data, cv_ptr_r->image.data);
-        }
-
-        ROSAppSDE * getROSAppSDE()
-        {
-            return rosAppSde;
-        }
-
-
-    private:
-
-        std::string left_input_topic_;
-        std::string right_input_topic_;
-        std::string disparity_topic_;
-
-        ROSAppSDE  *rosAppSde;
-
-        ros::NodeHandle nh;
-        image_transport::ImageTransport it;
-    };
-}
-
-ros_app_sde::StereoROS * sdeRos;
-
-void sde_intSigHandler(int32_t sig)
-{
-    if (sdeRos != nullptr)
-    {
-        ROSAppSDE * rosAppSde = sdeRos->getROSAppSDE();
-        if (rosAppSde != nullptr)
-        {
-            SDEAPP_Context * appCntxt  = rosAppSde->getSDEAPPContext();
-            SDEAPP_intSigHandler(appCntxt, sig);
-        }
+        sdeAppNode->sigHandler(sig);
     }
 
     ros::shutdown();
 }
 
-/**
- * This tutorial demonstrates simple sending of messages over the ROS system.
- */
 int main(int argc, char **argv)
 {
     try
     {
         ros::init(argc, argv, "ros_app_sde", ros::init_options::NoSigintHandler);
-        signal(SIGINT, sde_intSigHandler);
+        ros::NodeHandle nh("");
+        ros::NodeHandle privNh("~");
 
-        // To make intSigHandler work, we create a StereoROS object first,
-        // then call run() to read input data from topics using ros::spin()
-        // If we call ros::spin() in StereoROS constructor,
-        // sdeRos is nullptr always in intSigHandler
-        sdeRos = new ros_app_sde::StereoROS();
-        sdeRos->run();
+        signal(SIGINT, sigHandler);
+
+        sdeAppNode = new SDEAppNode(nh, privNh);
+
+        ros::spin();
 
         return EXIT_SUCCESS;
     }
+
     catch (std::runtime_error& e)
     {
         ros::shutdown();
         return EXIT_FAILURE;
     }
 
+    return 0;
 }
-
 

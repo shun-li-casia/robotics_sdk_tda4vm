@@ -1,0 +1,11 @@
+<launch>
+
+    <!-- ti_sde -->
+    <include file="$(find ti_sde)/launch/sde.launch"/>
+
+    <!-- zed_capture -->
+    <include file="$(find zed_capture)/launch/zed_capture.launch">
+        <arg name="frame_rate" value="15"/>
+    </include>
+
+</launch>

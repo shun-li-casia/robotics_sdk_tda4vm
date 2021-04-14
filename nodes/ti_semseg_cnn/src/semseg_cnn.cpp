@@ -64,9 +64,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <app_ptk_demo_common.h>
-
-#include <cm_common.h>
 #include <semseg_cnn.h>
 
 static char menu[] = {
@@ -84,27 +81,30 @@ static char menu[] = {
     "\n Enter Choice: "
 };
 
-#if !defined(PC)
-void SEMSEG_CNN_drawGraphics(
-        Draw2D_Handle *handle,
-        Draw2D_BufInfo *draw2dBufInfo,
-        uint32_t update_type)
-{
-    appGrpxDrawDefault(handle, draw2dBufInfo, update_type);
-
-    return;
-}
-#endif
 
 vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt)
 {
-    SEMSEG_CNN_APPLIB_createParams *createParams;
-    int32_t                         status;
-    vx_status                       vxStatus;
+    CM_DLRCreateParams params;
+    int32_t            status;
+    vx_status          vxStatus;
 
-    vxStatus     = VX_SUCCESS;
-    createParams = &appCntxt->createParams;
+    vxStatus         = VX_SUCCESS;
 
+    params.modelPath = appCntxt->dlrModelPath;
+    params.devType   = DLR_DEVTYPE_CPU;
+    params.devId     = 0;
+
+    status = CM_dlrNodeCntxtInit(&appCntxt->dlrObj, &params);
+
+    if (status < 0)
+    {
+        PTK_printf("[%s:%d] CM_dlrNodeCntxtInit() failed.\n",
+                    __FUNCTION__, __LINE__);
+
+        vxStatus = VX_FAILURE;
+    }
+
+#if 0
     status = appInit();
 
     if (status < 0)
@@ -114,6 +114,7 @@ vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt)
 
         vxStatus = VX_FAILURE;
     }
+#endif
 
     // OpenVX initialization
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -129,32 +130,27 @@ vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt)
         }
     }
 
+    // create graph
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        // create objects
-        appCntxt->vxInputImage = vxCreateImage(appCntxt->vxContext,
-                                               createParams->inputImageWidth,
-                                               createParams->inputImageHeight,
-                                               VX_DF_IMAGE_UYVY);
-
-        if (appCntxt->vxInputImage == NULL)
+        appCntxt->vxGraph = vxCreateGraph(appCntxt->vxContext);
+        if (appCntxt->vxGraph == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateImage() failed\n",
+            PTK_printf("[%s:%d] vxCreateGraph() failed\n",
                         __FUNCTION__, __LINE__);
-
             vxStatus = VX_FAILURE;
-        }
-        else
+        } else 
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxInputImage,
-                               "InputImage");
+            vxSetReferenceName((vx_reference)appCntxt->vxGraph, 
+                               "CNN Semantic Segmentation Graph");
         }
     }
+
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
         /* load TILDL kernels */
-        tivxTIDLLoadKernels(appCntxt->vxContext);
+        //tivxTIDLLoadKernels(appCntxt->vxContext);
 
         /* load image processing kernel */
         tivxImgProcLoadKernels(appCntxt->vxContext);
@@ -162,61 +158,132 @@ vx_status SEMSEG_CNN_init(SEMSEG_CNN_Context *appCntxt)
         /* load HWA kernels */
         tivxHwaLoadKernels(appCntxt->vxContext);
 
-        /* create SDE CNNPP Applib */
-        createParams->vxContext = appCntxt->vxContext;
-        createParams->vxGraph   = NULL;
+        /* Create CNN semantic semgentation nodes */
+        vxStatus = SEMSEG_CNN_init_SS(appCntxt);
+    }
 
-        appCntxt->sscnnHdl = SEMSEG_CNN_APPLIB_create(createParams);
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        appPerfPointSetName(&appCntxt->semsegPerf,
+                            "Semantic Segmentation GRAPH");
 
-        if (appCntxt->sscnnHdl == NULL)
+        vxStatus = SEMSEG_CNN_setupPipeline(appCntxt);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_create() failed\n",
+            PTK_printf("[%s:%d] SEMSEG_CNN_setupPipeline() failed\n",
                         __FUNCTION__, __LINE__);
+        }            
+    }
 
-            vxStatus = VX_FAILURE;
-        }
-
-        if (vxStatus == (vx_status)VX_SUCCESS)
+    /* Verify graph */
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        vxStatus = vxVerifyGraph(appCntxt->vxGraph);
+        if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            appCntxt->outputCtrlSem = new UTILS::Semaphore(0);
-
-            appCntxt->exitInputDataProcess = 0;
-            appCntxt->state = SEMSEG_CNN_STATE_INIT;
-
-            SEMSEG_CNN_reset(appCntxt);
-            appPerfStatsResetAll();
+            PTK_printf("[%s:%d] vxVerifyGraph() failed\n",
+                        __FUNCTION__, __LINE__);
         }
     }
+
+    /* Set the MSC coefficients. */
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        CM_ScalerNodeCntxt  *scalerObj = &appCntxt->scalerObj;
+
+        vxStatus = CM_scalerNodeCntxtSetCoeff(scalerObj);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            PTK_printf("[%s:%d] CM_scalerNodeCntxtSetCoeff() failed\n",
+                        __FUNCTION__, __LINE__);
+        }
+    }
+
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {    
+
+        if (appCntxt->exportGraph == 1)
+        {
+            tivxExportGraphToDot(appCntxt->vxGraph, ".", "vx_app_semseg_cnn");
+        }
+
+        if (appCntxt->rtLogEnable == 1)
+        {
+            tivxLogRtTraceEnable(appCntxt->vxGraph);
+        }
+
+        appCntxt->exitOutputThread     = false;
+        appCntxt->outputCtrlSem        = new UTILS::Semaphore(0);
+
+        appCntxt->preProcSem           = new UTILS::Semaphore(0);
+        appCntxt->exitPreprocThread    = false;
+
+        appCntxt->dlrDataReadySem      = new UTILS::Semaphore(0);
+        appCntxt->exitDlrThread        = false;
+
+        appCntxt->postProcSem          = new UTILS::Semaphore(0);
+        appCntxt->exitPostprocThread   = false;
+
+        appCntxt->exitInputDataProcess = 0;
+        appCntxt->state                = SEMSEG_CNN_STATE_INIT;
+
+        SEMSEG_CNN_reset(appCntxt);
+        appPerfStatsResetAll();
+    }
+
 
     return vxStatus;
 }
 
-vx_status SEMSEG_CNN_processImage(SEMSEG_CNN_Context   *appCntxt,
-                                  const unsigned char  *inputImage)
+vx_status SEMSEG_CNN_run(SEMSEG_CNN_Context   *appCntxt,
+                         const unsigned char  *inputImage,
+                         uint64_t              timestamp)
 {
-    uint32_t    width;
-    uint32_t    height;
     vx_status   vxStatus;
 
-    width  = appCntxt->createParams.inputImageWidth;
-    height = appCntxt->createParams.inputImageHeight;
+    // For profiling
+    chrono::time_point<chrono::system_clock> start, end;
+    float diff;
 
-    vxStatus = ptkdemo_copy_data_to_image(inputImage, appCntxt->vxInputImage);
+    SEMSEG_CNN_graphParams* gpDesc;
 
+    vxStatus = SEMSEG_CNN_popFreeInputDesc(appCntxt, &gpDesc);
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] ptkdemo_copy_data_to_image() failed\n",
+        PTK_printf("[%s:%d] SEMSEG_CNN_popFreeInputDesc() failed\n",
                     __FUNCTION__, __LINE__);
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        vxStatus = SEMSEG_CNN_APPLIB_process(appCntxt->sscnnHdl,
-                                             appCntxt->vxInputImage);
+        start = GET_TIME();
+        vxStatus = ptkdemo_copy_data_to_image(inputImage, gpDesc->vxInputImage);
+
+        end   = GET_TIME();
+        diff  = GET_DIFF(start, end);
+        CM_reportProctime("input_image_load", diff);
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_process() failed\n",
+            /* Release the descriptor back to the free descriptor queue. */
+            SEMSEG_CNN_enqueInputDesc(appCntxt, gpDesc);
+
+            PTK_printf("[%s:%d] ptkdemo_copy_data_to_image() failed\n",
+                        __FUNCTION__, __LINE__);
+        }
+    }
+
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        vxStatus = SEMSEG_CNN_process(appCntxt,
+                                      gpDesc,
+                                      timestamp);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            PTK_printf("[%s:%d] SEMSEG_CNN_process() failed\n",
                         __FUNCTION__, __LINE__);
         }
     }
@@ -226,24 +293,36 @@ vx_status SEMSEG_CNN_processImage(SEMSEG_CNN_Context   *appCntxt,
 
 void SEMSEG_CNN_deInit(SEMSEG_CNN_Context *appCntxt)
 {
-    if (appCntxt->outputCtrlSem)
-    {
-        delete appCntxt->outputCtrlSem;
-    }
+    int32_t status;
 
-    if (appCntxt->vxInputImage != NULL)
-    {
-        vxReleaseImage(&appCntxt->vxInputImage);
-    }
+    // release graph
+    vxReleaseGraph(&appCntxt->vxGraph);
 
-    tivxTIDLUnLoadKernels(appCntxt->vxContext);
+    //tivxTIDLUnLoadKernels(appCntxt->vxContext);
     tivxImgProcUnLoadKernels(appCntxt->vxContext);
     tivxHwaUnLoadKernels(appCntxt->vxContext);
 
     /* Release the context. */
     vxReleaseContext(&appCntxt->vxContext);
 
-    appDeInit();
+    /* Delete the DLR Model handle. */
+    status = CM_dlrNodeCntxtDeInit(&appCntxt->dlrObj);
+
+    if (status < 0)
+    {
+        PTK_printf("[%s:%d] CM_dlrNodeCntxtDeInit() failed.\n",
+                    __FUNCTION__, __LINE__);
+    }
+
+#if 0
+    status = appDeInit();
+
+    if (status < 0)
+    {
+        PTK_printf("[%s:%d] appDeInit() failed\n", __FUNCTION__, __LINE__);
+    }
+#endif
+
 }
 
 static void SEMSEG_CNN_exitProcThreads(SEMSEG_CNN_Context *appCntxt)
@@ -262,9 +341,32 @@ static void SEMSEG_CNN_exitProcThreads(SEMSEG_CNN_Context *appCntxt)
         PTK_printf("[%s:%d] vxSendUserEvent() failed.\n");
     }
 
-    if (appCntxt->evtHdlrThread.joinable())
+
+    /* Set the exit flag for the pre-process thread. */
+    appCntxt->exitPreprocThread = true;
+
+    /* Wake-up the pre-process thread. */
+    if (appCntxt->preProcSem)
     {
-        appCntxt->evtHdlrThread.join();
+        appCntxt->preProcSem->notify();
+    }
+
+    /* Set the exit flag for the DLR thread. */
+    appCntxt->exitDlrThread = true;
+
+    /* Wake-up the DLR thread. */
+    if (appCntxt->dlrDataReadySem)
+    {
+        appCntxt->dlrDataReadySem->notify();
+    }
+
+    /* Set the exit flag for the post-process thread. */
+    appCntxt->exitPostprocThread = true;
+
+    /* Wake-up the post-process thread. */
+    if (appCntxt->postProcSem)
+    {
+        appCntxt->postProcSem->notify();
     }
 
     /* Let the display thread exit. */
@@ -273,6 +375,48 @@ static void SEMSEG_CNN_exitProcThreads(SEMSEG_CNN_Context *appCntxt)
     if (appCntxt->outputCtrlSem)
     {
         appCntxt->outputCtrlSem->notify();
+    }
+
+    /* Wait for the thread exit */
+    if (appCntxt->evtHdlrThread.joinable())
+    {
+        appCntxt->evtHdlrThread.join();
+    }
+
+    if (appCntxt->preProcThread.joinable())
+    {
+        appCntxt->preProcThread.join();
+    }
+
+    if (appCntxt->dlrThread.joinable())
+    {
+        appCntxt->dlrThread.join();
+    }
+
+    if (appCntxt->postProcThread.joinable())
+    {
+        appCntxt->postProcThread.join();
+    }
+
+    /* Delete the semaphores. */
+    if (appCntxt->outputCtrlSem)
+    {
+        delete appCntxt->outputCtrlSem;
+    }
+
+    if (appCntxt->preProcSem)
+    {
+        delete appCntxt->preProcSem;
+    }
+
+    if (appCntxt->dlrDataReadySem)
+    {
+        delete appCntxt->dlrDataReadySem;
+    }
+
+    if (appCntxt->postProcSem)
+    {
+        delete appCntxt->postProcSem;
     }
 }
 
@@ -294,7 +438,9 @@ void SEMSEG_CNN_cleanupHdlr(SEMSEG_CNN_Context *appCntxt)
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     appPerfStatsPrintAll();
-    SEMSEG_CNN_APPLIB_printStats(appCntxt->sscnnHdl);
+    SEMSEG_CNN_printStats(appCntxt);
+
+    CM_printProctime();
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
@@ -305,27 +451,20 @@ void SEMSEG_CNN_cleanupHdlr(SEMSEG_CNN_Context *appCntxt)
         tivxLogRtTraceExportToFile(name);
     }
 
-    /* Release the Application context. */
-    SEMSEG_CNN_APPLIB_delete(&appCntxt->sscnnHdl);
+    /* Deinit semantic segmentation nodes */
+    SEMSEG_CNN_deinit_SS(appCntxt);
 
     SEMSEG_CNN_deInit(appCntxt);
 
     PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
 }
 
+
 void SEMSEG_CNN_reset(SEMSEG_CNN_Context * appCntxt)
 {
-    int32_t status;
-
-    status = SEMSEG_CNN_APPLIB_reset(appCntxt->sscnnHdl);
-
-    if (status < 0)
-    {
-        PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_reset() failed.\n",
-                   __FUNCTION__,
-                   __LINE__);
-    }
+    appCntxt->startPerfCapt = false;
 }
+
 
 static void SEMSEG_CNN_evtHdlrThread(SEMSEG_CNN_Context *appCntxt)
 {
@@ -354,17 +493,25 @@ static void SEMSEG_CNN_evtHdlrThread(SEMSEG_CNN_Context *appCntxt)
                 {
                     break;
                 }
+                else if (evt.app_value == SEMSEG_CNN_OUT_AVAIL_EVT)
+                {
+                    /* Wakeup the display thread. */
+                    if (appCntxt->outputCtrlSem)
+                    {
+                        appCntxt->outputCtrlSem->notify();
+                    }
+                }
             }
 
-            if (evt.type == VX_EVENT_GRAPH_COMPLETED)
+            if (evt.type == VX_EVENT_NODE_COMPLETED)
             {
                 vxStatus =
-                    SEMSEG_CNN_APPLIB_processEvent(appCntxt->sscnnHdl, &evt);
+                    SEMSEG_CNN_processEvent(appCntxt, &evt);
 
-                /* Wakeup the display thread. */
-                if (appCntxt->outputCtrlSem)
+                if (vxStatus != (vx_status)VX_SUCCESS)
                 {
-                    appCntxt->outputCtrlSem->notify();
+                    PTK_printf("[%s:%d] SEMSEG_CNN_processEvent() failed\n",
+                                __FUNCTION__, __LINE__);
                 }
 
             } // if (evt.type == VX_EVENT_GRAPH_COMPLETED)
@@ -378,11 +525,8 @@ static void SEMSEG_CNN_evtHdlrThread(SEMSEG_CNN_Context *appCntxt)
 
 static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
 {
-    int32_t     status;
     vx_status   vxStatus = VX_SUCCESS;
     uint32_t    done = 0;
-
-    //appPerfStatsResetAll();
 
     while (!done)
     {
@@ -396,7 +540,10 @@ static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
         {
             case 'p':
                 appPerfStatsPrintAll();
-                SEMSEG_CNN_APPLIB_printStats(appCntxt->sscnnHdl);
+                SEMSEG_CNN_printStats(appCntxt);
+
+                CM_printProctime();
+                CM_resetProctime();
                 break;
 
                 case 'e':
@@ -408,7 +555,7 @@ static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
 
                     if (fp != NULL)
                     {
-                        SEMSEG_CNN_APPLIB_exportStats(appCntxt->sscnnHdl,
+                        SEMSEG_CNN_exportStats(appCntxt,
                                                       fp,
                                                       true);
 
@@ -440,11 +587,11 @@ static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
     PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
                 __FUNCTION__, __LINE__);
 
-    vxStatus = SEMSEG_CNN_APPLIB_waitGraph(appCntxt->sscnnHdl);
+    vxStatus = SEMSEG_CNN_waitGraph(appCntxt);
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_waitGraph() failed\n",
+        PTK_printf("[%s:%d] SEMSEG_CNN_waitGraph() failed\n",
                     __FUNCTION__, __LINE__);
     }
 
@@ -454,6 +601,232 @@ static int32_t SEMSEG_CNN_userControlThread(SEMSEG_CNN_Context *appCntxt)
 
     return vxStatus;
 }
+
+static void SEMSEG_CNN_preProcThread(SEMSEG_CNN_Context  *appCntxt)
+{
+    // For profiling
+    chrono::time_point<chrono::system_clock> start, end;
+    float diff;
+
+    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+
+    while (true)
+    {
+        SEMSEG_CNN_graphParams  *desc;
+        vx_status                vxStatus;
+
+        /* Wait for the input buffer availability. */
+        appCntxt->preProcSem->wait();
+
+        /*  Check if we need to exit the thread. */
+        if (appCntxt->exitPreprocThread == true)
+        {
+            break;
+        }
+
+        vxStatus = SEMSEG_CNN_popPreprocInputDesc(appCntxt, &desc);
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            start = GET_TIME();
+            vxStatus =
+                SEMSEG_CNN_preProcess(appCntxt,
+                                      desc->vxScalerOut,
+                                      desc->dlrInputBuff);
+
+            end = GET_TIME();
+            diff  = GET_DIFF(start, end);
+            CM_reportProctime("Preprocessing", diff);
+
+            if (vxStatus != (vx_status)VX_SUCCESS)
+            {
+                PTK_printf("[%s:%d] SEMSEG_CNN_preProcess() "
+                           "failed.\n",
+                            __FUNCTION__, __LINE__);
+            }
+            else
+            {
+                /* Push the descriptor to the DLR queue. */
+                SEMSEG_CNN_enqueDLRInputDesc(appCntxt, desc);
+
+                /* Wakeup the DLR thread. The DLR thread will process the
+                 * descriptor at the head of the queue.
+                 */
+                appCntxt->dlrDataReadySem->notify();
+            }
+
+        } // if (vxStatus == (vx_status)VX_SUCCESS)
+
+    } // while (true)
+
+    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+}
+
+static void SEMSEG_CNN_dlrThread(SEMSEG_CNN_Context  *appCntxt)
+{
+    CM_DLRNodeCntxt        *dlrObj;
+    CM_DLRNodeInputInfo    *dlrInput;
+    CM_DLRNodeOutputInfo   *dlrOutput;
+
+    // For profiling
+    chrono::time_point<chrono::system_clock> start, end;
+    float diff;
+
+    dlrObj       = &appCntxt->dlrObj;
+    dlrInput     = &dlrObj->input;
+    dlrOutput    = &dlrObj->output;
+
+    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+
+    while (true)
+    {
+        SEMSEG_CNN_graphParams  *desc;
+        vx_status                vxStatus;
+
+        /* Wait for the input buffer availability. */
+        appCntxt->dlrDataReadySem->wait();
+
+        /*  Check if we need to exit the thread. */
+        if (appCntxt->exitDlrThread == true)
+        {
+            break;
+        }
+
+        vxStatus = SEMSEG_CNN_popDLRInputDesc(appCntxt, &desc);
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            int32_t status;
+
+            dlrInput->info[0].data  = desc->dlrInputBuff;
+            dlrOutput->info[0].data = desc->dlrOutputBuff;
+
+            start = GET_TIME();
+            status = CM_dlrNodeCntxtProcess(dlrObj, dlrInput, dlrOutput);
+
+            end   = GET_TIME();
+            diff  = GET_DIFF(start, end);
+            CM_reportProctime("DLR-node", diff);
+
+            if (status < 0)
+            {
+                PTK_printf("[%s:%d] CM_dlrNodeCntxtProcess() failed.\n",
+                            __FUNCTION__, __LINE__);
+            }
+            else
+            {
+                /* Push the descriptor to the DLR queue. */
+                SEMSEG_CNN_enquePostprocInputDesc(appCntxt, desc);
+
+                /* Wakeup the post-process thread. The post-process thread will
+                 * process the descriptor at the head of the queue.
+                 */
+                appCntxt->postProcSem->notify();
+            }
+
+        } // if (vxStatus == (vx_status)VX_SUCCESS)
+
+    } // while (true)
+
+    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+}
+
+static void SEMSEG_CNN_postProcThread(SEMSEG_CNN_Context  *appCntxt)
+{
+    // For profiling
+    chrono::time_point<chrono::system_clock> start, end;
+    float diff;
+
+    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+
+    while (true)
+    {
+        SEMSEG_CNN_graphParams  *desc;
+        vx_status                vxStatus;
+
+        /* Wait for the input buffer availability. */
+        appCntxt->postProcSem->wait();
+
+        /*  Check if we need to exit the thread. */
+        if (appCntxt->exitPostprocThread == true)
+        {
+            break;
+        }
+
+        vxStatus = SEMSEG_CNN_popPostprocInputDesc(appCntxt, &desc);
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            if (appCntxt->enablePostProcNode)
+            {
+                /* Create the output object for display. */
+                start = GET_TIME();
+                vxStatus =
+                    SEMSEG_CNN_postProcess(appCntxt,
+                                           desc->vxScalerOut,
+                                           desc->dlrOutputBuff);
+
+                end   = GET_TIME();
+                diff  = GET_DIFF(start, end);
+                CM_reportProctime("Postprocess", diff);
+
+                if (vxStatus != (vx_status)VX_SUCCESS)
+                {
+                    PTK_printf("[%s:%d] SEMSEG_CNN_postProcess() "
+                               "failed.\n",
+                                __FUNCTION__, __LINE__);
+                }
+            }
+            
+            // create vxOutTensor always
+            {
+                /* Create an output tensor. */
+                start = GET_TIME();
+                vxStatus =
+                    SEMSEG_CNN_createOutTensor(appCntxt, 
+                                               desc->vxOutTensor,
+                                               desc->dlrOutputBuff);
+
+                end   = GET_TIME();
+                diff  = GET_DIFF(start, end);
+                CM_reportProctime("Output_tensor_creation", diff);
+
+                if (vxStatus != (vx_status)VX_SUCCESS)
+                {
+                    PTK_printf("[%s:%d] SEMSEG_CNN_createOutTensor() "
+                               "failed.\n",
+                                __FUNCTION__, __LINE__);
+                }
+            }
+
+            if (vxStatus == (vx_status)VX_SUCCESS)
+            {
+                /* Push the descriptor to the output queue. */
+                SEMSEG_CNN_enqueOutputDesc(appCntxt, desc);
+            }
+
+            if (vxStatus == (vx_status)VX_SUCCESS)
+            {
+                /* Let the usr know that output is ready. */
+                vxStatus =
+                    vxSendUserEvent(appCntxt->vxContext,
+                                    SEMSEG_CNN_OUT_AVAIL_EVT,
+                                    NULL);
+
+                if (vxStatus != (vx_status)VX_SUCCESS)
+                {
+                    PTK_printf("[%s:%d] vxSendUserEvent() failed.\n",
+                                __FUNCTION__, __LINE__);
+                }
+            }
+
+        } // if (vxStatus == (vx_status)VX_SUCCESS)
+
+    } // while (true)
+
+    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+}
+
 
 void SEMSEG_CNN_launchProcThreads(SEMSEG_CNN_Context *appCntxt)
 {
@@ -469,6 +842,18 @@ void SEMSEG_CNN_launchProcThreads(SEMSEG_CNN_Context *appCntxt)
     /* Launch the event handler thread. */
     appCntxt->evtHdlrThread =
         std::thread(SEMSEG_CNN_evtHdlrThread, appCntxt);
+
+    /* Launch CNN pre-processing thread */
+    appCntxt->preProcThread =
+        std::thread(SEMSEG_CNN_preProcThread, appCntxt);
+
+    /* Launch DLR processing thread */
+    appCntxt->dlrThread =
+        std::thread(SEMSEG_CNN_dlrThread, appCntxt);
+
+    /* launch post-processing thread. */
+    appCntxt->postProcThread =
+            std::thread(SEMSEG_CNN_postProcThread, appCntxt);
 }
 
 void SEMSEG_CNN_intSigHandler(SEMSEG_CNN_Context *appCntxt)
@@ -482,11 +867,11 @@ void SEMSEG_CNN_intSigHandler(SEMSEG_CNN_Context *appCntxt)
         PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
                     __FUNCTION__, __LINE__);
 
-        vxStatus = SEMSEG_CNN_APPLIB_waitGraph(appCntxt->sscnnHdl);
+        vxStatus = SEMSEG_CNN_waitGraph(appCntxt);
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SEMSEG_CNN_APPLIB_waitGraph() failed\n",
+            PTK_printf("[%s:%d] SEMSEG_CNN_waitGraph() failed\n",
                         __FUNCTION__, __LINE__);
         }
 

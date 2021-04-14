@@ -1,15 +1,11 @@
 #!make
-# Dependency: J7 Processor SDK-RTOS 07_01_00_11
+# Dependency: J7 Processor SDK-RTOS 07_03_00_07 pre-built image
 
 ## Independent variables
-# Dockerfile
-DOCKERFILE_NAME  = Dockerfile
-# Docker image tag
-DOCKER_TAG       = j7ros
 # TI Vision Apps Lib version
-TIVA_LIB_VER     = 7.1.0
+TIVA_LIB_VER     = 7.3.0
 # TIDL version
-TIDL_VER         = 1.3.0.11
+TIDL_VER         = 2.0.0.7
 # ROS bag date
 ROSBAG_DATE      = 2020_1109
 
@@ -37,14 +33,31 @@ ROSBAG_FILE      = ros-bag_$(ROSBAG_DATE).tar.gz
 TIDL_MODEL_URL  = https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/$(TIDL_MODEL_FILE)
 ROSBAG_URL   	= https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/$(ROSBAG_FILE)
 
+# Semantic segmantation TVM-DLR model artifacts location
+SEMSEG_MODEL     = tvmdlr_deeplabv3lite_mobilenetv2_tv_768x432_zed1hd
+SEMSEG_ARTIFACTS_DIR = $(DATA_DIR)/tidl_semseg_model/$(SEMSEG_MODEL)/artifacts
+
 # IP address
 J7_IP_ADDR       := $(shell ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)
+
+## Set up environments on J7 host linux
+opkg_config:
+	$(SCRIPTS_DIR)/config_opkg_repo.sh
+
+ipk_install:
+	$(SCRIPTS_DIR)/install_tivision_apps_ipk.sh
 
 ip_show:
 	@echo "$(J7_IP_ADDR)"
 
 ## Docker
+scripts: DOCKERFILE_NAME = Dockerfile.ros-perception
+scripts: DOCKER_TAG = j7ros:ros-perception
 scripts: docker_build_sh docker_run_sh
+
+scripts_rosdep: DOCKERFILE_NAME = Dockerfile.rosdep
+scripts_rosdep: DOCKER_TAG = j7ros:rosdep
+scripts_rosdep: docker_build_sh docker_run_sh
 
 docker_build_sh:
 	@echo "#!/bin/bash"                                      >  $(DOCKER_BUILD_SH)
@@ -82,11 +95,12 @@ docker_run_sh:
 ## data files
 data_download: tidl_net_download rosbag_download
 
-tidl_net_download: check_data_dir
+model_download: check_data_dir
 	wget -O $(DATA_DIR)/$(TIDL_MODEL_FILE) "$(TIDL_MODEL_URL)"
 	rm -rf  $(DATA_DIR)/tidl_semseg_model
 	tar xzf $(DATA_DIR)/$(TIDL_MODEL_FILE) -C $(DATA_DIR)
 	rm -f $(DATA_DIR)/$(TIDL_MODEL_FILE)
+	cd $(SEMSEG_ARTIFACTS_DIR); ln -s deploy_lib.so.j7 deploy_lib.so; cd -
 
 rosbag_download: check_data_dir
 	wget -O $(DATA_DIR)/$(ROSBAG_FILE) "$(ROSBAG_URL)"

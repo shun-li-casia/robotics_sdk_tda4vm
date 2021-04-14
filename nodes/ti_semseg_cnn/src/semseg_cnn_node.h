@@ -94,7 +94,7 @@ class CnnSemSegNode
         void imgCb(const ImageConstPtr& imgPtr);
         void subscriberThread();
         void publisherThread();
-        void graphCompleteEvtHdlr();
+        void processCompleteEvtHdlr();
         vx_status extractImageData(std::vector<uint8_t>    &v,
                                    const vx_image           vxImage,
                                    uint32_t                 width,

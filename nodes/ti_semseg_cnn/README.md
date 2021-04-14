@@ -1,51 +1,50 @@
 Semantic Segmentation Application on ROS
 ========================================
 
-It demonstrates the semantic segmentation application using a TIDL (TI Deep Learning) CNN network running on J7 C7x/MMA. However, as shown in Figure 1, this application consists of multiple processing blocks that consumes other J7 HWAs and processors besides C7x/MMA.
+<figure class="image">
+  <center><img src="docs/semseg_rviz.png"/></center>
+</figure>
+
+This demonstrates the semantic segmentation application using a deep-learning network running on J7 C7x/MMA. Figure 1 shows the high-level block diagram of the application, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
 
 <figure class="image">
-  <center><img src="./docs/ti_semseg_cnn_data_flow.png"></center>
-  <figcaption> <center>Figure 1. Overall semantic segmentation application flow </center></figcaption>
+  <center><img src="docs/semseg_demo_block_diagram.svg"/></center>
+  <figcaption> <center>Figure 1. Semantic segmentation demo: block diagram</center></figcaption>
 </figure>
 
 ## Semantic Segmentation CNN with TI Deep-Learning (TIDL) Development Tool
-A CNN model for semantic segmentation has been developed using [Jacinto AI DevKit (PyTorch)](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/). 
-
+A CNN model for semantic segmentation has been developed using [Jacinto AI DevKit (PyTorch)](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/).
 
 * Model: deeplabv3lite_mobilenetv2_tv (for details, see [LINK](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/docs/Semantic_Segmentation.md))
 * Input image: 768 x 432 pixels in RGB
-* Training data: [Cityscapes Dataset](https://www.cityscapes-dataset.com)
+* Training data: [Cityscapes Dataset](https://www.cityscapes-dataset.com), and a small dataset collected from ZED camera
+* Model compilation: TVM compilation for generating DLR model artifacts. See "Open Source Runtime" section of [TI Deep Learning Library User Guide](http://gtweb.dal.design.ti.com/nightly_builds/PSDKRA_INSTALLER/114-2021-04-09_22-52-01/artifacts/output/webgen/publish/PROCESSOR-SDK-RTOS-J721E/07_03_00_06/exports/docs/tidl_j7_02_00_00_06/ti_dl/docs/user_guide_html/index.html)
 
-## Node Description
+## How to Run the ROS Application
 
-`ti_semseg_cnn` directory structure is shown below:
+### Run the Semantic Segmentation Demo
+**[J7]** To launch `ti_semseg_cnn` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
-ti_semseg_cnn
-.
-├── CMakeLists.txt
-├── config
-│   └── params.yaml
-├── docs
-│   └── ti_semseg_cnn_data_flow.png
-├── launch
-│   ├── bag_semseg_cnn.launch
-│   └── semseg_cnn.launch
-├── package.xml
-├── README.md
-└── src
-    ├── semseg_cnn.cpp
-    ├── semseg_cnn.h
-    ├── semseg_cnn_main.cpp
-    ├── semseg_cnn_node.cpp
-    └── semseg_cnn_node.h
+roslaunch ti_semseg_cnn bag_semseg_cnn.launch
+```
+To process the image stream from a ZED stereo camera (processing `/camera/right/image_raw`), replace the launch file with `zed_semseg_cnn.launch`:
+```
+roslaunch ti_semseg_cnn zed_semseg_cnn.launch
 ```
 
-This application can be run by launching semseg_cnn.launch file, i.e.,
-```
-roslaunch ti_semseg_cnn semseg_cnn.launch
-```
-It is recommended to launch bag_semseg_cnn.launch file if a ROSBAG file needs to be played as well.
+**[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow "Set Up the Ubuntu PC for Visualization" section of [docker/README.md](../../docker/README.md)
 
+The semantic segmentation output tensor is published by the application. For visualization, a color-coded semantic segmentation image is generated. Following command launches the resulting color-mapped semantic segmentation image along with the raw image on RViz:
+```
+roslaunch ti_semseg_cnn rviz.launch
+```
+### Testing Higher Input Frame Rate with ROSBAG
+We can publish the images at higher frame rate with `rosbag play --rate` option. Below is an example to publish the raw images at 30 fps (double the native frame rate of the ROSBAG file).
+```
+roslaunch ti_semseg_cnn bag_semseg_cnn.launch ratefactor:=2.0
+```
+
+## Launch File Parameters
 `semseg_cnn.launch` file specifies the followings:
 
 * YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the description of all parameters, please see a yaml file.
@@ -55,19 +54,14 @@ It is recommended to launch bag_semseg_cnn.launch file if a ROSBAG file needs to
 * Flag that indicates the color-coded semantic segmentation map is published in RGB format. If this flag is false, it is published in YUV420 format.
 * Output semantic segmentation tensor topic name when the output tensor is published.
 
-When the semantic segmentation output tensor is published by the application, the color-coded semantic segmentation can be created alternatively by launching the `ti_viz_nodes` application, i.e.,
-```
-roslaunch ti_viz_nodes viz_semseg.launch
-```
+## `rosparam` Parameters
+The table below describes the parameters in `config/params.yaml`:
 
-## Parameters
 
  Parameter                | Description                                                                  | Value
 --------------------------|------------------------------------------------------------------------------|----------
  lut_file_path            | LDC rectification table path                                                 | String
- tidl_config_file_path    | TIDL config file path                                                        | String
- tidl_network_file_path   | TIDL network file path                                                       | String
- tidl_network_file_path   | TIDL network file path                                                       | String
+ dlr_model_file_path      | Path the DL model                                                            | String
  width                    | Input image width                                                            | Integer
  height                   | Input image height                                                           | Integer
  dl_width                 | Image width to TIDL network                                                  | Integer
@@ -80,15 +74,14 @@ roslaunch ti_viz_nodes viz_semseg.launch
 
 ## Processing Blocks
 
-Please refer to Figure 1 for the following descriptions of the processing blocks implemented for this application. 
+Referring to Figure 1, below are the descriptions of the processing blocks implemented in this application:
 
-1. When input images are distorted or unrectified, they are undistorted or rectified by the J7 LDC (Lens Distortion Correction) HWA. Pseudo codes to create LDC tables for rectification are described [here](../ti_sde/README.md). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes image format. Input image to the application is of YUV422 (UYVY) format, and YUV422 input is converted to YUV420 (NV12) by LDC.
-2. Input images are resized to a smaller resolution, which is specified by `dl_width` and `dl_height` in `params.yaml`, for the TIDL semantic segmentation network. The MSC (Multi-Scaler) HWA is used to resize input images.
-3. The pre-processing block, which runs on C6x, converts YUV420 to RGB, so that the TIDL semantic segmentation network can read input images.
-4. The TIDL semantic segmentation network is accelerated by C7x/MMA and outputs a tensor that has class information for every pixel.
-5. The post-processing block, which runs on C6x, creates a color-coded semantic segmentation map image from the output tensor. It can be enabled or disabled by configuring `enable_post_proc` parameter in `params.yaml`. Only if the post-processing block is enabled, the color-coded semantic segmentation map is created and published. Its format is YUV420. When `output_rgb` is true in the launch file, it is published in RGB format after conversion. If the post-processing, the semantic segmentation output tensor from the TIDL network is published instead.
+1. The first step to process input images with lens distortion, J7 LDC (Lens Distortion Correction) hardware accelerator (HWA) does un-distortion or rectification. Pseudo codes to create LDC tables for rectification are provided [here](../ti_sde/README.md). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes image format. Input image to the application is of YUV422 (UYVY) format, which is converted to YUV420 (NV12) by the LDC.
+2. Input images are resized to a smaller resolution, which is specified by `dl_width` and `dl_height` in `params.yaml`, for the semantic segmentation network. The MSC (Multi-Scaler) HWA resizes the images to a desired size.
+3. The pre-processing block, which runs on C6x, converts YUV420 (NV12) to RGB, which is expected input format for the semantic segmentation network.
+4. The semantic segmentation network is accelerated by C7x/MMA with DLR runtime, and outputs a tensor that has class information for every pixel.
+5. [Optional] The post-processing block, which runs on C6x, creates a color-coded semantic segmentation map image from the output tensor. It can be enabled or disabled by configuring `enable_post_proc` parameter in `params.yaml`. Only if the post-processing block is enabled, the color-coded semantic segmentation map is created and published. Its format is YUV420. When `output_rgb` is true in the launch file, it is published in RGB format after conversion. If the post-processing, the semantic segmentation output tensor from the TIDL network is published instead.
 
 ## Known Issue
 
-1. The `ti_semseg_cnn` semantic segmentation CNN was trained with Cityscapes dataset first, and then re-trained with a small dataset collected from a stereo camera (ZED-1 camera, HD mode) with coarse annotation. Therefore, accuracy performance of the CNN model can be improved with a larger dataset and fine annotation.
-
+1. The `ti_semseg_cnn` semantic segmentation CNN was trained with Cityscapes dataset first, and then re-trained with a small dataset collected from a stereo camera (ZED camera, HD mode) for a limited scenarios with coarse annotation. Therefore, the model can show limited accuracy performance if a different camera model is used and/or when it is applied in different environmental scenes.

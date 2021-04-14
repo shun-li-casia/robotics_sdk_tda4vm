@@ -1,0 +1,14 @@
+<launch>
+
+    <!-- ti_sde with enable_pc: 1 -->
+    <include file="$(find ti_sde)/launch/sde.launch">
+        <arg name="enable_pc" value="1" />
+    </include>
+
+    <!-- rosbag play -->
+    <arg name="bagfile" default="$(env WORK_DIR)/data/ros_bag/zed1_2020-11-09-18-01-08.bag"/>
+    <arg name="ratefactor" default="1.0"/>
+    <node name="rosbag_play" pkg="rosbag" type="play" output="screen"
+        args="-r $(arg ratefactor) -l $(arg bagfile)" />
+
+</launch>
