@@ -24,14 +24,6 @@ catkin_package(
     CATKIN_DEPENDS
 )
 
-## nodelet
-add_library(zed_capture_nodelet
-    src/zed_capture_node.cpp
-    src/usb_stereo_camera.cpp
-    src/zed_capture_nodelet.cpp
-)
-target_link_libraries(zed_capture_nodelet ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
 # node
 add_executable(zed_capture
     src/zed_capture_node.cpp

@@ -46,79 +46,82 @@ roslaunch ti_estop rviz_ogmap.launch
 ```
 
 ## Launch File Parameters
-`estop.launch` file specifies the followings:
-* YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to "`rosparam` Parameters" section below. For the descriptions of all parameters, please see `config/params.yaml`
-* Left input topic name to read left images from a stereo camera.
-* Right input topic name to read right images from a stereo camera.
-* Right camera parameter topic name to read width, height, distortion centers and focal length
-* Output semantic segmentation map tensor topic to publish the output tensors from a semantic segmentation network.
-* Output rectified right image topic name to publish rectified right images.
-* Output bounding box topic name to publish the 3D bounding boxes coordinates of detected obstacles.
-* Output disparity topic name to publish raw disparity maps.
-* Output occupancy grid topic name to publish ego-centric occupancy grid map.
-* Output emergency stop topic name to publish emergency stop flag when obstacles are too close to a robot. When this flag is true, a robot is forced to stop moving.
 
+Parameter                | Description                                                                | Value
+-------------------------|----------------------------------------------------------------------------|-------------------
+rosparam file            | Algorithm configuration parameters (see "ROSPARAM Parameters" section)     | config/params.yaml
+left_input_topic_name    | Left input topic name to read left images from a stereo camera             | camera/left/image_raw
+right_input_topic_name   | Right input topic name to read right images from a stereo camera           | camera/right/image_raw
+camera_info_topic        | Right camera_info topic name to read relevant camera parameters            | camera/right/camera_info
+semseg_cnn_out_image     | Publish topic name for semantic segmentation output image                  | semseg_cnn/out_image
+semseg_cnn_tensor_topic  | Publish topic name for semantic segmentation tensor                        | semseg_cnn/tensor
+rectified_image_topic    | Publish topic name for rectified right image                               | camera/right/image_rect_mono
+bounding_box_topic       | Publish topic name for 3D bounding boxes coordinates of detected obstacles | detection3D/3dBB
+raw_disparity_topic_name | Publish topic name for raw disparity map                                   | camera/disparity/raw
+ogmap_topic_name         | Publish topic name for ego-centric occupancy grid map                      | detection3D/ogmap
+estop_topic_name         | Publish topic name for binary emergency stop message, indicating whether obstacle(s) is in proximity to the  robot or not | detection3D/estop
+ssmap_output_rgb         | Flag to indicate if the output semantic segmentation map is published in RGB format | true, false
+_                        | The output semantic segmentation map is published in YUV420 if false        | _
 
-## `rosparam` Parameters
+## ROSPARAM Parameters
 
 ### Basic input, LDC and SDE Parameters
 
- Parameter                | Description                                                                  | Value
---------------------------|------------------------------------------------------------------------------|----------
- left_lut_file_path       | LDC rectification table path for left image                                  | String
- right_lut_file_path      | LDC rectification table path for right image                                 | String
- input_format             | Input image format, 0: U8, 1: YUV422                                         | 0, 1
- sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE                  | 0, 1
- num_layers               | Number of layers in multi-layer SDE                                          | 2, 3
- sde_confidence_threshold | Disparity with confidence less than this value is invalidated                | 0 ~ 7
- disparity_min            | Minimum disparity to search, 0: 0, 1: -3                                     | 0, 1
- disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191                           | 0 ~ 2
+Parameter                | Description                                                                  | Value
+-------------------------|------------------------------------------------------------------------------|----------
+left_lut_file_path       | LDC rectification table path for left image                                  | String
+right_lut_file_path      | LDC rectification table path for right image                                 | String
+input_format             | Input image format, 0: U8, 1: YUV422                                         | 0, 1
+sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE                  | 0, 1
+num_layers               | Number of layers in multi-layer SDE                                          | 2, 3
+sde_confidence_threshold | Disparity with confidence less than this value is invalidated                | 0 ~ 7
+disparity_min            | Minimum disparity to search, 0: 0, 1: -3                                     | 0, 1
+disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191                           | 0 ~ 2
 
 ### Camera Parameters
 
- Parameter                | Description                                                                  | Value
---------------------------|------------------------------------------------------------------------------|----------
- camera_height            | Camera mounting height                                                       | Float32
- camera_pitch             | Camera pitch angle in radian                                                 | Float32
+Parameter                | Description                                                                  | Value
+-------------------------|------------------------------------------------------------------------------|----------
+camera_height            | Camera mounting height                                                       | Float32
+camera_pitch             | Camera pitch angle in radian                                                 | Float32
 
 ### Occupancy Grid Map Parameters
 
- Parameter                | Description                                                                  | Value
---------------------------|------------------------------------------------------------------------------|----------
- grid_x_size              | Horizontal width of a grid of a OG map in millimeter                         | Integer
- grid_y_size              | Vertical length of a grid of a OG map in millimeter                          | Integer
- min_x_range              | Minimum horizontal range in millimeter to be covered by a OG map             | Integer
- max_x_range              | Maximum horizontal range in millimeter to be covered by a OG map             | Integer
- min_y_range              | Minimum vertical range in millimeter to be covered by a OG map               | Integer
- max_y_range              | Maximum vertical range in millimeter to be covered by a OG map               | Integer
+Parameter                | Description                                                                  | Value
+-------------------------|------------------------------------------------------------------------------|----------
+grid_x_size              | Horizontal width of a grid of a OG map in millimeter                         | Integer
+grid_y_size              | Vertical length of a grid of a OG map in millimeter                          | Integer
+min_x_range              | Minimum horizontal range in millimeter to be covered by a OG map             | Integer
+max_x_range              | Maximum horizontal range in millimeter to be covered by a OG map             | Integer
+min_y_range              | Minimum vertical range in millimeter to be covered by a OG map               | Integer
+max_y_range              | Maximum vertical range in millimeter to be covered by a OG map               | Integer
 
 The number of grids in one row is defined by (max_x_range - min_x_range) / grid_x_size. Likewise, the number of grids in one column is defined by (max_y_range - min_y_range) / grid_y_size.
 
 ### Obstacle Detection Parameters
-
- Parameter                     | Description                                                             | Value
--------------------------------|-------------------------------------------------------------------------|----------
- min_pixel_count_grid          | Minimum number of pixels for a grid to be occupied                      | Integer
- min_pixel_count_object        | Minimum number of pixels for connected grids to be an object            | Integer
- max_object_to_detect          | Maximum number of objects to detect in a frame                          | Integer
- num_neighbor_grid             | Number of neighboring grids to check for connected component analysis   | 8, 24
- enable_spatial_obj_merge      | Enabling flag of merging spatially close objects                        | 0, 1
- enable_temporal_obj_merge     | Enabling flag of use of temporal information                            | 0, 1
- enable_temporal_obj_smoothing | Enabling flag of use of a corresponding object in a previous frame to compute an object position      | 0, 1
- object_distance_mode          | Method to compute distance between objects (0: distance between centers, 1: distance between corners) | 0, 1
+Parameter                     | Description                                                             | Value
+------------------------------|-------------------------------------------------------------------------|----------
+min_pixel_count_grid          | Minimum number of pixels for a grid to be occupied                      | Integer
+min_pixel_count_object        | Minimum number of pixels for connected grids to be an object            | Integer
+max_object_to_detect          | Maximum number of objects to detect in a frame                          | Integer
+num_neighbor_grid             | Number of neighboring grids to check for connected component analysis   | 8, 24
+enable_spatial_obj_merge      | Enabling flag of merging spatially close objects                        | 0, 1
+enable_temporal_obj_merge     | Enabling flag of use of temporal information                            | 0, 1
+enable_temporal_obj_smoothing | Enabling flag of use of a corresponding object in a previous frame to compute an object position      | 0, 1
+object_distance_mode          | Method to compute distance between objects (0: distance between centers, 1: distance between corners) | 0, 1
 
 ### e-Stop Parameters
 
- Parameter                     | Description                                                             | Value
--------------------------------|-------------------------------------------------------------------------|----------
- min_estop_distance            | Minimum distance of e-Stop area. Should be 0                            | 0
- max_estop_distance            | Maximum distance of e-Stop area in millimeter                           | Integer
- min_estop_width               | Width of e-Stop area in millimeter at min_estop_distance                | Integer
- max_estop_width               | Width of e-Stop area in millimeter at max_estop_distance                | Integer
- min_free_frame_run            | Minimum number of consecutive frames without any obstacle in e-Stop area to be determined free   | Integer
- min_obs_frame_run             | Minimum number of consecutive frames with any obstacle in e-Stop area to be determined infringed | Integer
+Parameter                     | Description                                                             | Value
+------------------------------|-------------------------------------------------------------------------|----------
+min_estop_distance            | Minimum distance of e-Stop area. Should be 0                            | 0
+max_estop_distance            | Maximum distance of e-Stop area in millimeter                           | Integer
+min_estop_width               | Width of e-Stop area in millimeter at min_estop_distance                | Integer
+max_estop_width               | Width of e-Stop area in millimeter at max_estop_distance                | Integer
+min_free_frame_run            | Minimum number of consecutive frames without any obstacle in e-Stop area to be determined free   | Integer
+min_obs_frame_run             | Minimum number of consecutive frames with any obstacle in e-Stop area to be determined infringed | Integer
 
-e-Stop area forms a trapezoid defined by first four values. When obstacles are detected in e-Stop area, a robot is forced to stop.
+e-Stop area forms a trapezoid defined by the first four parameters. When obstacles are detected in the e-Stop area, `detection3D/estop` topic is turned on `1`, so that the robot can be forced to stop.
 
 
 ## Camera Setup
@@ -127,4 +130,4 @@ e-Stop area forms a trapezoid defined by first four values. When obstacles are d
 To create LDC-format LUT for ZED camera, please refer to [zed_capture/README.md](../../drivers/zed_capture/README.md).
 
 ### Camera Mounting
-For accurate obstacle detection, it is important to mount properly and correct values of `camera_height` and `camera_pitch` should be provided. For example, incorrect values of camera pitch angle result in 3D object boxes being overlaid in front of or behind obstacles on images. It is recommended to install the stereo camera parallel to the ground plane or slightly tilted downward, e.g., 0° ~ 10°. In general, camera pitch angle should be close to 0 when a camera's height is low, while camera pitch angle can be larger to some extent when the camera is mounted higher.
+For accurate obstacle detection, it is important to mount properly and correct values of `camera_height` and `camera_pitch` should be provided. For example, incorrect values of camera pitch angle result in 3D object boxes being overlaid in front of or behind obstacles on images. It is recommended to install the stereo camera parallel to the ground plane or slightly tilted downward, e.g., between 0° and 10°. In general, camera pitch angle should be close to 0 when a camera's height is low, while camera pitch angle can be larger to some extent when the camera is mounted higher.

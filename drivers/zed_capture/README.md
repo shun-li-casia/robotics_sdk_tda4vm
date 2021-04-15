@@ -19,7 +19,6 @@ ZED stereo camera ROS node based on OpenCV VideoCapture API for publishing left 
 
     Update the ZED camera SN string, `zed_sn_str`, in `<zed_capture>/launch/zed_capture.launch`
 
-
 2. Generate `camera_info` YAML files and undistortion & rectification LUT files (already done for `SN29788442` and `SN5867575`)
 
     Run the following script:
@@ -40,7 +39,7 @@ ZED stereo camera ROS node based on OpenCV VideoCapture API for publishing left 
 
     ```
     cd $CATKIN_WS
-    catkin_make -j1
+    catkin_make
     ```
 
 4. Launch the ZED camera node
@@ -74,8 +73,10 @@ $ roslaunch zed_capture zed_capture.launch
 ```
 4. On the second terminal, to capture into ROS bag files, run one of two examples below
 ```
-$ roslaunch zed_capture recordbag.launch        # collect 15 seconds of data and stop itself
-$ roslaunch zed_capture recordbag_split.launch  # save into a series of bag files, each keeping 15 seconds of data, until terminated with Ctrl+C
+# Collect 15 seconds of data and stop itself
+$ roslaunch zed_capture recordbag.launch
+# Save into a series of bag files, each keeping 15 seconds of data, until terminated with Ctrl+C
+$ roslaunch zed_capture recordbag_split.launch
 ```
 5. (Optional to check the ROS topics) On 3rd terminal,
 ```

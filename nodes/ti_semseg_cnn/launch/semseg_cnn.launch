@@ -3,13 +3,16 @@
     <!-- openVX CNN graph node -->
     <node pkg = "ti_semseg_cnn" type = "semseg_cnn" name = "semseg_cnn" output = "screen" args = "" required = "true">
 
-        <!-- Input topic name to subscribe to -->
+        <!-- Configuration file for the openVX CNN graph -->
+        <rosparam file="$(find ti_semseg_cnn)/config/params.yaml" subst_value="true" />
+
+        <!-- Input topic name to subscribe -->
         <param name = "input_topic_name" value = "camera/right/image_raw"/>
 
-        <!-- Output recitified image topic name to publish to -->
+        <!-- Output rectified image topic name to publish -->
         <param name = "rectified_image_topic" value = "camera/right/image_rect_mono"/>
 
-        <!-- Output semantic segmentation image topic name to publish to -->
+        <!-- Output semantic segmentation image topic name to publish -->
         <param name = "semseg_cnn_out_image" value = "semseg_cnn/out_image"/>
 
         <!-- Flag to indcate if the output should be published in RGB format -->
@@ -17,9 +20,6 @@
 
         <!-- Output semantic segmentation tensor topic name to publish to -->
         <param name = "semseg_cnn_tensor_topic" value = "semseg_cnn/tensor"/>
-
-        <!-- Configuration file for the openVX CNN graph -->
-        <rosparam file="$(find ti_semseg_cnn)/config/params.yaml" subst_value="true" />
 
     </node>
 

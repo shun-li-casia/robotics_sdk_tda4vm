@@ -14,10 +14,10 @@
         <!-- Right camera parameter topic name to subscribe to -->
         <param name = "camera_info_topic" value = "camera/right/camera_info"/>
 
-        <!-- Output topic name to publish to -->
+        <!-- Output topic name for semantic segmentation output image -->
         <param name = "semseg_cnn_out_image" value = "semseg_cnn/out_image"/>
 
-        <!-- Output topic name to publish to -->
+        <!-- Output topic name for semantic segmentation output tensor -->
         <param name = "semseg_cnn_tensor_topic" value = "semseg_cnn/tensor"/>
 
         <!-- Output recitified image topic name to publish to -->
@@ -35,7 +35,7 @@
         <!-- Output EStop topic name to publish to -->
         <param name = "estop_topic_name" value = "detection3D/estop"/>
 
-        <!-- Flag to indcate if the output should be published in RGB format -->
+        <!-- Flag to indicate if the output should be published in RGB format -->
         <param name = "ssmap_output_rgb" value = "true"/>
     </node>
 

@@ -45,16 +45,18 @@ roslaunch ti_semseg_cnn bag_semseg_cnn.launch ratefactor:=2.0
 ```
 
 ## Launch File Parameters
-`semseg_cnn.launch` file specifies the followings:
 
-* YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to Parameter section below. For the description of all parameters, please see a yaml file.
-* Input topic name to read input images.
-* Output undistorted or rectified image topic name.
-* Output semantic segmentation image topic name when an color-coded semantic segmentation map is published.
-* Flag that indicates the color-coded semantic segmentation map is published in RGB format. If this flag is false, it is published in YUV420 format.
-* Output semantic segmentation tensor topic name when the output tensor is published.
+Parameter               | Description                                                               | Value
+------------------------|---------------------------------------------------------------------------|-------------------
+rosparam file           | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
+input_topic_name        | Subscribe topic name for input camera image                               | camera/right/image_raw
+rectified_image_topic   | Publish topic name for output rectified image                             | camera/right/image_rect_mono
+semseg_cnn_out_image    | Publish topic name for semantic segmentation output image                 | semseg_cnn/out_image
+output_rgb              | Flag for indicating color-coded semantic segmentation map is published in RGB format | true, false
+_                       | If this flag is false, it is published in YUV420 format                   | _
+semseg_cnn_tensor_topic | Publish topic name for output semantic segmentation tensor                | semseg_cnn/tensor
 
-## `rosparam` Parameters
+## ROSPARAM Parameters
 The table below describes the parameters in `config/params.yaml`:
 
 

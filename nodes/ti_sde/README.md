@@ -50,40 +50,43 @@ roslaunch ti_sde zed_sde_pcl.launch
 roslaunch ti_sde rviz_pcl.launch
 ```
 ## Launch File Parameters
-`sde.launch` file specifies the followings:
-* YAML file that includes algorithm configuration parameters. For the descriptions of important parameters, refer to "`rosparam` Parameters" section below. For the descriptions of all parameters, please see `config/params.yaml`.
-* Left input topic name to read left images from a stereo camera.
-* Right input topic name to read right images from a stereo camera.
-* Right camera parameter topic name to read width, height, distortion centers and focal length
-* Output disparity topic name to publish raw disparity maps.
-* Output point cloud topic name to publish point cloud data.
 
-## `rosparam` Parameters
+Parameter          | Description                                                               | Value
+-------------------|---------------------------------------------------------------------------|-------------------
+rosparam file      | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
+enable_pc          | Enable point-cloud. This overrides setting in `config/params.yaml`        | 0, 1
+left_input_topic   | Subscribe topic name for left camera image                                | camera/left/image_raw
+right_input_topic  | Subscribe topic name for right camera image                               | camera/right/image_raw
+camera_info_topic  | Subscribe topic name for right camera info                                | camera/right/camera_info
+disparity_topic    | Publish topic name topic for raw disparity                                | camera/disparity/raw
+point_cloud_topic  | Publish topic name for point cloud                                        | point_cloud
+
+## ROSPARM Parameters
 
 ### Basic input, LDC and SDE Parameters
- Parameter                | Description                                                                  | Value
---------------------------|------------------------------------------------------------------------------|----------
- left_lut_file_path       | LDC rectification table path for left image                                  | String
- right_lut_file_path      | LDC rectification table path for right image                                 | String
- input_format             | Input image format, 0: U8, 1: YUV422                                         | 0, 1
- sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE                  | 0, 1
- num_layers               | Number of layers in multi-layer SDE                                          | 2, 3
- disparity_min            | Minimum disparity to search, 0: 0, 1: -3                                     | 0, 1
- disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191                           | 0, 1, 2
- stereo_baseline          | Stereo camera baseline in meter                                              | Float32
+Parameter                | Description                                                         | Value
+-------------------------|---------------------------------------------------------------------|----------
+left_lut_file_path       | LDC rectification table path for left image                         | String
+right_lut_file_path      | LDC rectification table path for right image                        | String
+input_format             | Input image format, 0: U8, 1: YUV422                                | 0, 1
+sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE         | 0, 1
+num_layers               | Number of layers in multi-layer SDE                                 | 2, 3
+disparity_min            | Minimum disparity to search, 0: 0, 1: -3                            | 0, 1
+disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191                  | 0, 1, 2
+stereo_baseline          | Stereo camera baseline in meter                                     | Float32
 
 ### Point Cloud Parameters
- Parameter                | Description                                                                  | Value
---------------------------|------------------------------------------------------------------------------|----------
- enable_pc                | Flag to enable/disable point cloud creation                                  | 0, 1
- use_pc_config            | Flag to use the following point cloud configurations                         | 0, 1
- sde_confidence_threshold | Disparity with confidence less than this value is invalidated                | Integer, [0, 7]
- point_low_x              | Min X position of a point to be rendered                                     | Float32
- point_high_x             | Max X position of a point to be rendered                                     | Float32
- point_low_y              | Min Y position of a point to be rendered                                     | Float32
- point_high_y             | Max Y position of a point to be rendered                                     | Float32
- point_low_z              | Min Z position of a point to be rendered                                     | Float32
- point_high_z             | Max Z position of a point to be rendered                                     | Float32
+Parameter                | Description                                                         | Value
+-------------------------|---------------------------------------------------------------------|----------
+enable_pc                | Flag to enable/disable point cloud creation                         | 0, 1
+use_pc_config            | Flag to use the following point cloud configurations                | 0, 1
+sde_confidence_threshold | Disparity with confidence less than this value is invalidated       | Integer, [0, 7]
+point_low_x              | Min X position of a point to be rendered                            | Float32
+point_high_x             | Max X position of a point to be rendered                            | Float32
+point_low_y              | Min Y position of a point to be rendered                            | Float32
+point_high_y             | Max Y position of a point to be rendered                            | Float32
+point_low_z              | Min Z position of a point to be rendered                            | Float32
+point_high_z             | Max Z position of a point to be rendered                            | Float32
 
 ## Processing Blocks
 
@@ -163,7 +166,7 @@ The triangulation process produces point cloud form the raw disparity map, which
   <figcaption> <center>Figure 2. Triangulation process </center></figcaption>
 </figure>
 
-The color conversion block converts the format of the rectified right image to RGB, and the RGB image goes to the triangulation block. The triangulation block takes this RGB image and raw disparity map as inputs to produce the point cloud in the (X,Y,Z,R,G,B) format.
+The color conversion block converts the format of the rectified right image to RGB, and the RGB image goes to the triangulation block. The triangulation block takes this RGB image and raw disparity map as inputs to produce the point cloud in the `(X, Y, Z, R, G, B)` format.
 
 Every disparity value whose confidence is larger than or equal to `sde_confidence_threshold` is mapped to 3D position with the corresponding color information. For a pixel at `(x, y)` on image, let's say `d` is its disparity, `b` is baseline, and `(dcx, dcy)` is distortion center. Then, its 3D position. `(X, Y, Z)` is computed as follows:
 ```
