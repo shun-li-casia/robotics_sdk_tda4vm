@@ -4,6 +4,7 @@ Setting Up Robotics Kit Environment
 ## 1. Requirements & Dependency
 
 ### Supported Hardware Platforms
+
  Platform    | Supported Devices                           | Supported EVM
 -------------|---------------------------------------------|-------------------------------------------------
  J721E       | [TDA4VM](https://www.ti.com/product/TDA4VM) | [TDA4VMXEVM](https://www.ti.com/tool/TDA4VMXEVM)
@@ -17,21 +18,22 @@ A Ubuntu (18.04 recommended) PC is required. For RViz visualization of ROS topic
 ### USB Stereo Camera [Optional]
 The Robotics SDK provides a OpenCV-based ROS driver for [ZED stereo camera](https://www.stereolabs.com/zed/). All the demo applications can be tried out with a live stereo camera as well as a ROSBAG file provided. For configuration of a stereo camera, please see `drivers/zed_capture/README.md`.
 
-<figure class="image">
-    <center><img src="docs/tiovx_ros_setup.svg"/></center>
-    <figcaption> <center>Figure 1. Robotics Kit: Setup and Installation Steps</center></figcaption>
-</figure>
+![](docs/tiovx_ros_setup.svg)
+<figcaption>Figure 1. Robotics Kit: Setup and Installation Steps</figcaption>
+<br />
 
 <!-- ================================================================================= -->
 ## 2. Set Up the J7 Target and Development Environment
 Figure 1 shows the hardware setup and high-level installation steps on the J7 target and the Ubuntu PC.
 
 ### Build SD Card
+
 1. From Ubuntu PC, download [Processor SDK RTOS 7.3.0 pre-built package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_03_00_07/exports/ti-processor-sdk-rtos-j721e-evm-07_03_00_07-prebuilt.tar.gz)
 
 2. Install the pre-built package to a SD card (minimum 32GB high-performance) by referring to the instruction on [this page](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_03_00_07/exports/docs/psdk_rtos/docs/user_guide/out_of_box_j721e.html)
 
 ### Connect Remotely to the J7 Target
+
 1. To find the IP address assigned to J7 EVM, use a serial port communications program (for example, `sudo minicom -D /dev/ttyUSBx` where `/dev/ttyUSBx` is the device for the UART serial port), log in with `root` account, and run `ifconfig`.
 
 2. From a terminal on the PC, open a SSH session to connect remotely to the J7 target:
@@ -44,11 +46,11 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 
 1. Set up the project directory and the catkin workspace:
     ```
-    root@j7-evm:~# WORK_DIR=$HOME/j7ros_home
-    root@j7-evm:~# CATKIN_WS=$WORK_DIR/catkin_ws
+    root@j7-evm:~$ WORK_DIR=$HOME/j7ros_home
+    root@j7-evm:~$ CATKIN_WS=$WORK_DIR/catkin_ws
 
-    root@j7-evm:~# mkdir -p $CATKIN_WS/src
-    root@j7-evm:~# cd $CATKIN_WS/src
+    root@j7-evm:~$ mkdir -p $CATKIN_WS/src
+    root@j7-evm:~$ cd $CATKIN_WS/src
     ```
 
 2. Clone the project GIT repository:
@@ -60,13 +62,13 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 
 1. For convenience, set up a soft-link:
     ```
-    root@j7-evm:~/j7ros_home/catkin_ws/src# cd $WORK_DIR
-    root@j7-evm:~/j7ros_home# ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
+    root@j7-evm:~/j7ros_home/catkin_ws/src$ cd $WORK_DIR
+    root@j7-evm:~/j7ros_home$ ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
     ```
 
 2. To download data files, run the following in `$WORK_DIR`:
     ```
-    root@j7-evm:~/j7ros_home# make data_download
+    root@j7-evm:~/j7ros_home$ make data_download
     ```
     Two tarballs (for deep-learning model artifacts, and a ROSBAG file) are downloaded and uncompressed under `$WORK_DIR/data`. If preferred, each tarball can be downloaded individually with `make model_download` and `make rosbag_download`, respectively.
 
@@ -77,18 +79,18 @@ check that Docker and network work correctly on the J7 host Linux.
 
 2. To generate bash scripts for building and running a Docker image for the Robotics Kit:
     ```
-    root@j7-evm:~/j7ros_home# make scripts
+    root@j7-evm:~/j7ros_home$ make scripts
     ```
     Make sure that two bash scripts, `docker_build.sh` and `docker_run.sh`, are generated.
 
     **Note**: The default Dockerfile installs `ros-perception` ROS package group in the Docker image. In case you want to minimize the size of Docker image by installing only minimal dependency required to build and run the ROS nodes under `$CATKIN_WS/src`, use the scripts generated with the following:
     ```
-    root@j7-evm:~/j7ros_home# make scripts_rosdep
+    root@j7-evm:~/j7ros_home$ make scripts_rosdep
     ```
 
 3. To build the Docker image, in `$WORK_DIR` run:
     ```
-    root@j7-evm:~/j7ros_home# ./docker_build.sh
+    root@j7-evm:~/j7ros_home$ ./docker_build.sh
     ```
     It will take several minutes to build the Docker image. The Docker image built can be listed with `docker images`.
 
@@ -136,7 +138,7 @@ Open another terminal on Ubuntu PC to set up environment for RViz visualization.
 
 1. To run the Docker image:
     ```
-    root@j7-evm:~/j7ros_home# ./docker_run.sh
+    root@j7-evm:~/j7ros_home$ ./docker_run.sh
     ```
 
 2. To build the ROS applications, inside the Docker container:

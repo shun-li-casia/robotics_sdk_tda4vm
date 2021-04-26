@@ -1,9 +1,13 @@
 Stereo Vision Demo Application
 ==============================
 
-<figure class="image">
-  <center><img src="docs/sde_disparity_rviz.png"/></center>
-</figure>
+![](docs/sde_disparity_rviz.png)
+<figcaption>Stereo demo: disparity and confidence maps</figcaption>
+<br />
+
+![](docs/sde_pcl_rviz.png)
+<figcaption>Stereo demo: point cloud</figcaption>
+<br />
 
 This demonstrates the stereo application that uses J7 LDC (Lens Distortion Correction) and DMPAC SDE (Stereo Depth Engine) hardware accelerators (HWAs). This application outputs not only raw disparity map, but also point-cloud with 3D position, (X,Y,Z) and color information (R,G,B).
 
@@ -13,10 +17,9 @@ The SDE produces disparity map from the rectified stereo images. Two different d
 
 Finally, when configured, the output disparity map and the rectified right image can be mapped to 3D point cloud by the triangulation process. Each point in the point cloud has 3D position (X, Y, Z) and color information (R, G, B).
 
-<figure class="image">
-  <center><img src="docs/stereo_demo_block_diagram.svg"/></center>
-  <figcaption> <center>Figure 1. Stereo demo: block diagram</center></figcaption>
-</figure>
+![](docs/stereo_demo_block_diagram.svg)
+<figcaption>Figure 1. Stereo demo: block diagram</figcaption>
+<br />
 
 ## How to Run the ROS Application
 
@@ -64,6 +67,7 @@ point_cloud_topic  | Publish topic name for point cloud                         
 ## ROSPARM Parameters
 
 ### Basic input, LDC and SDE Parameters
+
 Parameter                | Description                                                         | Value
 -------------------------|---------------------------------------------------------------------|----------
 left_lut_file_path       | LDC rectification table path for left image                         | String
@@ -76,6 +80,7 @@ disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191   
 stereo_baseline          | Stereo camera baseline in meter                                     | Float32
 
 ### Point Cloud Parameters
+
 Parameter                | Description                                                         | Value
 -------------------------|---------------------------------------------------------------------|----------
 enable_pc                | Flag to enable/disable point cloud creation                         | 0, 1
@@ -151,20 +156,18 @@ When `sde_algo_type = 0` in `params.yaml`, the output disparity map is simply th
 #### Multi-Layer SDE Refinement
 When `sde_algo_type = 1` in `params.yaml`, the multi-layer SDE refinement is applied with post processing to improve the quality of the disparity map. The number of layers is configured by `num_layers` in `params.yaml`, and it should be 2 or 3.
 
-<figure class="image">
-  <center><img src="./docs/sde_multilayer_data_flow.png"></center>
-  <figcaption> <center>Figure 2. Multi-layer SDE refinement </center></figcaption>
-</figure>
+![](docs/sde_multilayer_data_flow.png)
+<figcaption>Figure 2. Multi-layer SDE refinement</figcaption>
+<br />
 
 Figure 2 shows the overall block diagram of the multi-layer SDE refinement approach. The rectified stereo pair at full resolution are down-sampled by half to smaller resolutions by the MSC (Multi-Scaler) HWA. The stereo pair at each layers are provided to SDEs to produce the disparity maps at different resolutions. Then the low-resolution disparity map is up-sampled and merged with the high-resolution disparity map successively. The merged disparity map is further processed by hole-filling algorithm.
 
-### Triangulation
-The triangulation process produces point cloud form the raw disparity map, which is output of SDE, and the rectified right image, which is output of LDC. The triangulation process consists of two functional blocks, color conversion and triangulation, as shown in the below figure.
+### Point Could Generation
+This process produces point cloud from the raw disparity map (output of SDE) and the rectified right image (output of LDC). The point could generation process consists of two functional blocks, color conversion and triangulation, as shown in the below figure.
 
-<figure class="image">
-  <center><img src="./docs/triangulation_process.png"></center>
-  <figcaption> <center>Figure 2. Triangulation process </center></figcaption>
-</figure>
+![](docs/triangulation_process.png)
+<figcaption>Figure 3. Point could generation</figcaption>
+<br />
 
 The color conversion block converts the format of the rectified right image to RGB, and the RGB image goes to the triangulation block. The triangulation block takes this RGB image and raw disparity map as inputs to produce the point cloud in the `(X, Y, Z, R, G, B)` format.
 

@@ -1,18 +1,16 @@
-Semantic Segmentation Application on ROS
-========================================
+Semantic Segmentation Application
+=================================
 
-<figure class="image">
-  <center><img src="docs/semseg_rviz.png"/></center>
-</figure>
+![](docs/semseg_rviz.png)
+<br />
 
 This demonstrates the semantic segmentation application using a deep-learning network running on J7 C7x/MMA. Figure 1 shows the high-level block diagram of the application, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
 
-<figure class="image">
-  <center><img src="docs/semseg_demo_block_diagram.svg"/></center>
-  <figcaption> <center>Figure 1. Semantic segmentation demo: block diagram</center></figcaption>
-</figure>
+![](docs/semseg_demo_block_diagram.svg)
+<figcaption>Figure 1. Semantic segmentation demo: block diagram</figcaption>
+<br />
 
-## Semantic Segmentation CNN with TI Deep-Learning (TIDL) Development Tool
+## Semantic Segmentation Model
 A CNN model for semantic segmentation has been developed using [Jacinto AI DevKit (PyTorch)](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/).
 
 * Model: deeplabv3lite_mobilenetv2_tv (for details, see [LINK](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/docs/Semantic_Segmentation.md))
@@ -58,7 +56,6 @@ semseg_cnn_tensor_topic | Publish topic name for output semantic segmentation te
 
 ## ROSPARAM Parameters
 The table below describes the parameters in `config/params.yaml`:
-
 
  Parameter                | Description                                                                  | Value
 --------------------------|------------------------------------------------------------------------------|----------

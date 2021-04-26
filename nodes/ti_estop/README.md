@@ -1,17 +1,14 @@
-3D Obstacle Detection (e-Stop) Application on ROS
-=================================================
+3D Obstacle Detection Application
+=================================
 
-<figure class="image">
-  <center><img src="docs/estop_rviz.png"/></center>
-</figure>
+![](docs/estop_rviz.png)
+<br />
 
 This demonstrates the 3D obstacle detection application using the disparity map from stereo depth engine and the semantic segmentation map from the deep-learning network. As shown in Figure 1, this application consists of the following three main processes:
 
-<figure class="image">
-  <!-- <center><img src="./docs/ti_estop_data_flow.png"></center> -->
-  <center><img src="docs/estop_demo_block_diagram.svg"/></center>
-  <figcaption> <center>Figure 1. 3D obstacle detection demo: block diagram</center></figcaption>
-</figure>
+![](docs/estop_demo_block_diagram.svg)
+<figcaption>Figure 1. 3D obstacle detection demo: block diagram</figcaption>
+<br />
 
 * Stereo Vision Processing
   - This is the same process described in [Stereo Vision Application](../ti_sde/README.md) without the point-cloud generation process. The output disparity map is fed to the 3D obstacle detection process as an input.
@@ -22,8 +19,6 @@ This demonstrates the 3D obstacle detection application using the disparity map 
 
 
 ## How to Run the ROS Application
-
-### Launch `ti_estop` on J7 Target
 
 **[J7]** To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
@@ -99,6 +94,7 @@ max_y_range              | Maximum vertical range in millimeter to be covered by
 The number of grids in one row is defined by (max_x_range - min_x_range) / grid_x_size. Likewise, the number of grids in one column is defined by (max_y_range - min_y_range) / grid_y_size.
 
 ### Obstacle Detection Parameters
+
 Parameter                     | Description                                                             | Value
 ------------------------------|-------------------------------------------------------------------------|----------
 min_pixel_count_grid          | Minimum number of pixels for a grid to be occupied                      | Integer
@@ -122,7 +118,6 @@ min_free_frame_run            | Minimum number of consecutive frames without any
 min_obs_frame_run             | Minimum number of consecutive frames with any obstacle in e-Stop area to be determined infringed | Integer
 
 e-Stop area forms a trapezoid defined by the first four parameters. When obstacles are detected in the e-Stop area, `detection3D/estop` topic is turned on `1`, so that the robot can be forced to stop.
-
 
 ## Camera Setup
 

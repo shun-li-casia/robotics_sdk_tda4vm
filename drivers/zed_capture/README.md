@@ -2,7 +2,7 @@ ZED Stereo Camera ROS Node
 ==========================
 ZED stereo camera ROS node based on OpenCV VideoCapture API for publishing left and right raw images and their camera_info.
 
-## Usage:
+## Usage
 
 1. Obtain the stereo camera calibration data file for your ZED camera (for a particular serial  number) with one of two ways described below (already done for `SN29788442` and  `SN5867575`):
 
@@ -49,23 +49,24 @@ ZED stereo camera ROS node based on OpenCV VideoCapture API for publishing left 
 
 ## Launch File Parameters
 
- Parameter                    |           Description                                       |              Value
-------------------------------|-------------------------------------------------------------|-------------------------
- zed_sn_str                   | ZED camera SN string                                        | string
- device_name                  | camera device_name. Typically `/dev/video0` on the target   | string
- camera_mode                  | ZED camera mode                                             | '2K' (2208x1242)
- _                            | _                                                           | 'FHD' (1920x1080)
- _                            | _                                                           | 'HD' (1280x720)
- _                            | _                                                           | 'HD2' (1280x720)*
- _                            | _                                                           | 'VGA' (672x376)
- frame_rate                   | rate at which images are published                          | int
- encoding                     | image encoding                                              | 'yuv422' (default) or 'bgr8'
+ Parameter                    |           Description                                                   |              Value
+------------------------------|-------------------------------------------------------------------------|-------------------------
+ zed_sn_str                   | ZED camera SN string                                                    | string
+ device_name                  | camera device_name. Typically `/dev/video0` on the target               | string
+ camera_mode                  | ZED camera mode                                                         | '2K' (2208x1242)
+ _                            | _                                                                       | 'FHD' (1920x1080)
+ _                            | _                                                                       | 'HD' (1280x720)
+ _                            | _                                                                       | 'HD2' (1280x720)*
+ _                            | _                                                                       | 'VGA' (672x376)
+ frame_rate                   | rate at which images are published                                      | int
+ encoding                     | image encoding                                                          | 'yuv422' (default) or 'bgr8'
+ _                            | when set to 'yuv422', YUYV format from the camera is converted to UYVY  | _
 
 **'HD2'** is a newly added mode that provides 720p resolution for experiments that need a longer focal length than the native 'HD'. The images are obtained by center-cropping the original 1080p images captured from the 'FHD' mode.
 
 ## Data Collection Steps
 
-1. Connect the ZED camera to **UBS 3** Type-C port and check it with `ls /dev/video*`. In my Ubuntu PC setup, ZED camera is recognized as `/dev/video2`; while J7 host Linux, recognized as `/dev/video0`.
+1. Connect the ZED camera to **UBS 3** Type-C port and check it with `ls /dev/video*`. In a Ubuntu PC with a built-in webcam, ZED camera can be recognized as `/dev/video2`; while J7 host Linux, recognized as `/dev/video0`.
 2. If necessary, update `launch/zed_capture.launch` to change video device, camera mode, frame rate, and etc.
 3. On the first terminal, launch the ZED capture node with following, and **keep it running**:
 ```
