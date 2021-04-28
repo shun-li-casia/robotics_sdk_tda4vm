@@ -243,11 +243,11 @@ def main(calib_file, camera_mode):
     file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_camera_info_right.yaml")
     save_camera_info(image_size, "camera/right", dist_model, K2, D2, R2, P2, file_path)
 
-    # write undist/rect LUT
-    file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_remap_LUT_left.txt")
-    save_remap_lut(map_left_x, map_left_y, file_path)
-    file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_remap_LUT_right.txt")
-    save_remap_lut(map_right_x, map_right_y, file_path)
+    # # write undist/rect LUT
+    # file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_remap_LUT_left.txt")
+    # save_remap_lut(map_left_x, map_left_y, file_path)
+    # file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_remap_LUT_right.txt")
+    # save_remap_lut(map_right_x, map_right_y, file_path)
 
     # write LDC undist/rect LUT
     file_path  = os.path.join(zed_capture_path, "config", sn_str+"_"+camera_mode+"_LUT_left.bin")
@@ -260,8 +260,10 @@ def main(calib_file, camera_mode):
 if __name__ == "__main__":
     # input argument parser
     parser = argparse.ArgumentParser(description='ZED camera camera_info & LCD LUT generation tool')
-    parser.add_argument('--input', '-i', type=str, default='SN5867575.conf', help='ZED camera factory calibration data filename')
-    parser.add_argument('--mode', '-m', type=str, default=None, help="Camera mode. Valid camera mode: 2K, FHD, HD, HD2, VGA")
+    parser.add_argument('--input', '-i', type=str, default='SN5867575.conf',
+        help='Factory calibration data filename for ZED camera. The calibration data file should be placed under <zed_capture>/config.')
+    parser.add_argument('--mode', '-m', type=str, default=None,
+        help="Camera mode. Valid camera mode: 2K, FHD, HD, HD2, VGA")
     args = parser.parse_args()
 
     # calibration file that is stored under <zed_capture>/config folder

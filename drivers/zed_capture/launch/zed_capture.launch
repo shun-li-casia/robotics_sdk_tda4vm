@@ -1,14 +1,14 @@
 <!--
 	Launch for for ZED capture node.
-	Requirement: run <zed_cature>/script/generate_undist_rect_lut.py with factory calibration params file
-	   	for generating camera_info .yaml files and unsidt/rect LUT files
+	Requirement: run <zed_cature>/script/gen_rect_map.py with factory calibration params file as input
+	   	for generating camera_info .yaml files and undistortion/rectification look-up table files for LDC hardware accelerator
 -->
 
 <launch>
 	<!-- string for ZED camera serial number -->
 	<!-- TI-Internal: SN5867575.conf:  ZED1 Camera -->
 	<!--              SN29788442.conf: ZED2 Camera -->
-	<arg name="zed_sn_str"             default="SN29788442"/>
+	<arg name="zed_sn_str"             default="SN5867575"/>
 	<!-- to find your device name, use ls /dev/video* and look for the name begin with video -->
 	<!-- typically camera recoginized as "/dev/video0" on the target -->
 	<arg name="device_name"            default="/dev/video0"/>
@@ -16,7 +16,7 @@
 	<arg name="camera_mode"            default="HD"/>
 	<!-- frame rate -->
 	<arg name="frame_rate"             default="15"/>
-	<!-- encoding: "yuv422" (default), "bgr8" -->
+	<!-- encoding: "yuv422" (default, output in YUV422:UYVY format), "bgr8" -->
 	<arg name="encoding"               default="yuv422"/>
 
 	<node pkg="zed_capture" type="zed_capture" name="zed_capture" output="screen" required="true">

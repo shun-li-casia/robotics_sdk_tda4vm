@@ -16,7 +16,7 @@ A CNN model for semantic segmentation has been developed using [Jacinto AI DevKi
 * Model: deeplabv3lite_mobilenetv2_tv (for details, see [LINK](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/docs/Semantic_Segmentation.md))
 * Input image: 768 x 432 pixels in RGB
 * Training data: [Cityscapes Dataset](https://www.cityscapes-dataset.com), and a small dataset collected from ZED camera
-* Model compilation: TVM compilation for generating DLR model artifacts. See "Open Source Runtime" section of [TI Deep Learning Library User Guide](http://gtweb.dal.design.ti.com/nightly_builds/PSDKRA_INSTALLER/114-2021-04-09_22-52-01/artifacts/output/webgen/publish/PROCESSOR-SDK-RTOS-J721E/07_03_00_06/exports/docs/tidl_j7_02_00_00_06/ti_dl/docs/user_guide_html/index.html)
+* Model compilation: TVM compilation for generating DLR model artifacts. For more details on open-source deep-learning runtime on J7/TDA4x, please check [TI Edge AI Cloud](https://dev.ti.com/edgeai/).
 
 ## How to Run the ROS Application
 

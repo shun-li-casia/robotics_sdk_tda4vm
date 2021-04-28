@@ -1,8 +1,10 @@
 Robotics Software Development Kit
 =================================
 ## Git Repository
-[Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/).
 
+[Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
+
+[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/00_03_00_05/docs/index.html)
 ## TI OpenVX + ROS Development Framework
 
 ![](docker/docs/tiovx_ros_sw_stack.png)
@@ -37,7 +39,7 @@ The J721E Processor SDK RTOS 7.3.0 also supports the following open-source deep-
 * TFLite Runtime
 * ONNX Runtime
 
-We provides two demo applications that include a deep-learning model that is implemented on TVM/Neo-AI-DLR runtime library.
+For more details on open-source deep-learning runtime on J7/TDA4x, please check [TI Edge AI Cloud](https://dev.ti.com/edgeai/). We provides two demo applications that include a deep-learning model that is implemented in the TVM/Neo-AI-DLR workflow.
 
 ## Setting Up Robotics SDK Docker Container Environment on J7 Target
 <a href="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/ros_perception/j7ros_docker_readme_00_03_00.pdf" download>Click to Download "j7ros_docker_readme.pdf"</a>

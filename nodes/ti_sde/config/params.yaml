@@ -1,8 +1,8 @@
 # left image LDC LUT definition
-left_lut_file_path:                 $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_left.bin
+left_lut_file_path:                 $(find zed_capture)/config/SN5867575_HD_LUT_left.bin
 
 # right image LDC LUT definition
-right_lut_file_path:                $(find ti_sde)/../ldc_lut/SN5867575_HD_LUT_right.bin
+right_lut_file_path:                $(find zed_capture)/config/SN5867575_HD_LUT_right.bin
 
 # input_format
 # should be 1: YUV422
