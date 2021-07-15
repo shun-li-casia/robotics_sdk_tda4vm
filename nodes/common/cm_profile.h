@@ -71,6 +71,12 @@
 #include <chrono>
 
 
+/**
+ * \defgroup group_applib_common_profile Processing time profiling codes
+ * \ingroup  group_applib_common
+ *
+ */
+
 using namespace std;
 
 #define GET_TIME() chrono::system_clock::now()
@@ -79,10 +85,35 @@ using namespace std;
         chrono::duration_cast<chrono::milliseconds>(_END - _START).count()
 
 
+/**
+ * \brief Function to collect processing time statistics 
+ *
+ * \param [in] tag functional block name for which statistics is collected
+ *
+ * \param [in] value processing time
+ *
+ * \return 
+ *
+ * \ingroup group_applib_common_profile
+ */
 void CM_reportProctime(string tag, float value);
 
+/**
+ * \brief Function to report processing time statistics 
+ * 
+ * \return 
+ *
+ * \ingroup group_applib_common_profile
+ */
 void CM_printProctime();
 
+/**
+ * \brief Function to reset all processing time statistics 
+ * 
+ * \return 
+ *
+ * \ingroup group_applib_common_profile
+ */
 void CM_resetProctime();
 
 #endif // _CM_PROFILE_H_

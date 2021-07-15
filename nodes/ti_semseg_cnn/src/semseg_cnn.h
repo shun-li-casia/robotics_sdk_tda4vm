@@ -108,8 +108,6 @@ extern "C" {
 #define SEMSEG_CNN_MAX_LINE_LEN         (1024U)
 #define SEMSEG_CNN_NUM_BUFF_DESC        (1U)
 
-#define SEMSEG_CNN_MAX_TENSOR_DIMS      (4u)
-
 #define SEMSEG_CNN_STATE_INVALID        (0U)
 #define SEMSEG_CNN_STATE_INIT           (1U)
 #define SEMSEG_CNN_STATE_SHUTDOWN       (2U)

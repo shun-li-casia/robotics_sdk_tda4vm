@@ -10,8 +10,8 @@
 	<!--              SN29788442.conf: ZED2 Camera -->
 	<arg name="zed_sn_str"             default="SN5867575"/>
 	<!-- to find your device name, use ls /dev/video* and look for the name begin with video -->
-	<!-- typically camera recoginized as "/dev/video0" on the target -->
-	<arg name="device_name"            default="/dev/video0"/>
+	<!-- typically camera recoginized as "/dev/video2" on the target with Edge AI base image -->
+	<arg name="device_name"            default="/dev/video2"/>
 	<!-- camera_mode: '2K' - 2208x1242, 'FHD' - 1920x1080, 'HD' - 1280x720, 'HD2' - 1280x720: center-cropped from 1080p -->
 	<arg name="camera_mode"            default="HD"/>
 	<!-- frame rate -->

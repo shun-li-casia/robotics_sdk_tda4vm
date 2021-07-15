@@ -253,7 +253,7 @@ class EStopNode
         int32_t                                m_obsRun;
 
         /** EStop flag */
-        bool                                   m_eStop;
+        std_msgs::Bool                         m_eStop;
 };
 
 #endif /* _APP_ESTOP_NODE_H_ */

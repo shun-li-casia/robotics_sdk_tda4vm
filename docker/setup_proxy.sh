@@ -30,45 +30,38 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Should run on PSDK host linux
-OPKG_REPO_DIR=/opkg_repo
+if [ "$USE_PROXY" = "1" ]; then
 
-FILE=/etc/opkg/base-feeds.conf
-if [ -f "${FILE}_org" ]
-then
-	echo "It looks like $FILE already updated. Here is content:"
-	echo "cat $FILE"
-	cat $FILE
+	# env variables
+	source ~/proxy/envs.sh
+
+	# docker proxy
+	mkdir -p ~/.docker
+	ln -snf ~/proxy/config.json ~/.docker/config.json
+
+	# apt proxy
+	ln -snf ~/proxy/apt.conf /etc/apt/apt.conf
+
+	# wget proxy
+	ln -snf ~/proxy/.wgetrc ~/.wgetrc
+
+	# pip3 proxy
+	mkdir -p ~/.config/pip/
+	ln -snf ~/proxy/pip.conf ~/.config/pip/pip.conf
+
+	# git proxy
+   	ln -snf ~/proxy/.gitconfig ~/.gitconfig
+	ln -snf ~/proxy/git-proxy.sh ~/git-proxy.sh
+
+	# curl proxy
+	ln -snf ~/proxy/.curlrc ~/.curlrc
+
 else
-	mv "$FILE" "${FILE}_org"
-	# Update base-feeds.conf to use a local OPKG repository
-	echo "# Original $FILE file was copied to ${FILE}_org" > $FILE
-	echo "Updated $FILE"
-	echo "cat $FILE"
-	cat $FILE
+	unset http_proxy https_proxy ftp_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY noproxy
+	rm -rf ~/.docker/config.json
+	rm -rf /etc/apt/apt.conf
+	rm -rf ~/.wgetrc
+	rm -rf ~/.config/pip/pip.conf
+	rm -rf ~/.gitconfig ~/git-proxy.sh
+	rm -rf ~/.curlrc
 fi
-
-FILE=/etc/opkg/opkg.conf
-if [ -f "${FILE}_org" ]
-then
-	echo ""
-	echo "It looks like $FILE already updated. Here is content:"
-	echo "cat $FILE"
-	cat $FILE
-else
-	mv "$FILE" "${FILE}_org"
-	# Update opkg.conf to use a local OPKG repository
-	echo "# Original $FILE file was copied to ${FILE}_org" > $FILE
-	echo "# Settings for a local OPKG repository" >> $FILE
-	echo "src/gz local file://$OPKG_REPO_DIR"     >> $FILE
-	echo "dest root /"                            >> $FILE
-	echo "option lists_dir /var/lib/opkg/lists"   >> $FILE
-
-	echo ""
-	echo "Updated $FILE"
-	echo "cat $FILE"
-	cat $FILE
-fi
-
-echo ""
-echo "$0: Completed"

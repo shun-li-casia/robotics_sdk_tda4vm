@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp cv_bridge
     image_transport
     camera_info_manager
-    nodelet
 )
 
 find_package(OpenCV REQUIRED)

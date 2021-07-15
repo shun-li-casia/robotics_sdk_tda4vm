@@ -1,4 +1,4 @@
-Setting Up Robotics Kit Environment
+Setting Up Robotics SDK Environment
 ===================================
 
 ## 1. Requirements & Dependency
@@ -9,17 +9,17 @@ Setting Up Robotics Kit Environment
 -------------|---------------------------------------------|-------------------------------------------------
  J721E       | [TDA4VM](https://www.ti.com/product/TDA4VM) | [TDA4VMXEVM](https://www.ti.com/tool/TDA4VMXEVM)
 
-### J7 Processor SDK RTOS
-The Robotics SDK requires [the pre-built package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_03_00_07/exports/ti-processor-sdk-rtos-j721e-evm-07_03_00_07-prebuilt.tar.gz) of [J721E Processor SDK RTOS 7.3.0](https://www.ti.com/tool/download/PROCESSOR-SDK-RTOS-J721E/07.03.00.07). The pre-built package contains Processor SDK Linux and libraries that are necessary for setting up the Robotics development environment.
+### TI Edge AI Development Kit
+The Robotics SDK requires [the SD card image](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/exports/ti_edge_ai_sd_card_etcher.zip) of [TI Edge AI Development Kit 0.5](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/index.html). The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
 
 ### Ubuntu PC
-A Ubuntu (18.04 recommended) PC is required. For RViz visualization of ROS topics published from the J7 target, it is assumed that ROS (Melodic recommended) is installed on the PC. For ROS installation steps, please refer to [this ROS wiki page](http://wiki.ros.org/melodic/Installation/Ubuntu).
+A Ubuntu (18.04 recommended) PC is required. For RViz visualization of ROS topics published from the J7 target, it is assumed that ROS (Melodic recommended) is installed on the Ubuntu PC. For ROS installation steps, please refer to [this ROS wiki page](http://wiki.ros.org/melodic/Installation/Ubuntu).
 
 ### USB Stereo Camera [Optional]
-The Robotics SDK provides a OpenCV-based ROS driver for [ZED stereo camera](https://www.stereolabs.com/zed/). All the demo applications can be tried out with a live stereo camera as well as a ROSBAG file provided. For configuration of a stereo camera, please see `drivers/zed_capture/README.md`.
+The Robotics SDK provides a OpenCV-based ROS driver for [ZED stereo camera](https://www.stereolabs.com/zed/). All the demo applications can be tried out with a live stereo camera as well as a ROSBAG file that is provided. For configuration of a stereo camera, please see `drivers/zed_capture/README.md`.
 
 ![](docs/tiovx_ros_setup.svg)
-<figcaption>Figure 1. Robotics Kit: Setup and Installation Steps</figcaption>
+<figcaption>Figure 1. Robotics SDK Setup and Installation Steps</figcaption>
 <br />
 
 <!-- ================================================================================= -->
@@ -28,9 +28,9 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 
 ### Build SD Card
 
-1. From Ubuntu PC, download [Processor SDK RTOS 7.3.0 pre-built package](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_03_00_07/exports/ti-processor-sdk-rtos-j721e-evm-07_03_00_07-prebuilt.tar.gz)
+1. From Ubuntu PC, download [the SD card image for Edge AI Development Kit 0.5](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/exports/ti_edge_ai_sd_card_etcher.zip).
 
-2. Install the pre-built package to a SD card (minimum 32GB high-performance) by referring to the instruction on [this page](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_03_00_07/exports/docs/psdk_rtos/docs/user_guide/out_of_box_j721e.html)
+2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena etcher tool. For detailed instruction, please refer to [this section](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/exports/docs/getting_started.html#preparing-sd-card-image).
 
 ### Connect Remotely to the J7 Target
 
@@ -40,7 +40,8 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
     ```
     user@pc:~$ ssh root@<J7_IP_address>
     ```
-    **Note**: It is recommended to use a *static* IP for the J7 EVM to make ROS network setting easy.
+    **Note**: It is recommended to use a *static* IP for the J7 EVM to make ROS network setting easy.<br />
+    You can consider using VS Code with "remote development extension pack" for better experience, in a similar way as described in [this section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/exports/docs/getting_started.html#connecting-remotely)
 
 ### Clone Git Repository
 
@@ -63,7 +64,7 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
 1. For convenience, set up a soft-link:
     ```
     root@j7-evm:~/j7ros_home/catkin_ws/src$ cd $WORK_DIR
-    root@j7-evm:~/j7ros_home$ ln -s $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
+    root@j7-evm:~/j7ros_home$ ln -sf $CATKIN_WS/src/jacinto_ros_perception/docker/Makefile
     ```
 
 2. To download data files, run the following in `$WORK_DIR`:
@@ -73,6 +74,8 @@ Figure 1 shows the hardware setup and high-level installation steps on the J7 ta
     Two tarballs (for deep-learning model artifacts, and a ROSBAG file) are downloaded and uncompressed under `$WORK_DIR/data`. If preferred, each tarball can be downloaded individually with `make model_download` and `make rosbag_download`, respectively.
 
 ### Set Up Docker Environment
+
+The TI Robotics SDK runs in a Docker container environment on J7 Processor SDK Linux provided with TI Edge AI base image. In the Robotics SDK Docker environment, ROS-Melodic and necessary libraries and tools are installed.
 
 1. Following [this link](https://docs.docker.com/get-started/#test-docker-installation),
 check that Docker and network work correctly on the J7 host Linux.
@@ -94,6 +97,10 @@ check that Docker and network work correctly on the J7 host Linux.
     ```
     It will take several minutes to build the Docker image. The Docker image built can be listed with `docker images`.
 
+**Proxy Network**: If the board running the Docker container is behind a proxy server, the default settings for downloading files and installing packages via `apt-get` may not work. If you are running the board from TI network, docker build and run scripts will automatically detects and configures necessary proxy settings. For other cases, you may need to modify the configuration files under `docker/proxy` folder and to add the custom proxy settings required for your network, and relevant port of `docker_build.sh` and `docker_run.sh`
+
+**Note**: After "`docker build`" is completed, it is important to use `docker_run.sh` script to start a Docker container, since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the Jacinto device. Please note that `docker_run.sh` includes "`--rm`" argument. Just remove "`--rm`" argument in `docker_run.sh` in case you want to do "`docker commit`" after exiting a Docker container. A short information about several useful Docker commands is provided in [this link](https://software-dl.ti.com/jacinto7/esd/edgeai-devkit/00_05_00_02/exports/docs/docker_environment.html#additional-docker-commands).
+
 <!-- ================================================================================= -->
 ## 3. Set Up the Ubuntu PC for Visualization
 Open another terminal on Ubuntu PC to set up environment for RViz visualization.
@@ -114,7 +121,7 @@ Open another terminal on Ubuntu PC to set up environment for RViz visualization.
 
 3. ROS network setting: For convenience, set up a soft-link:
     ```
-    user@pc:~/j7ros_home/catkin_ws$ ln -s src/jacinto_ros_perception/setup_env_pc.sh
+    user@pc:~/j7ros_home/catkin_ws$ ln -sf src/jacinto_ros_perception/setup_env_pc.sh
     ```
 
     Update the following lines in `setup_env_pc.sh`:
@@ -157,7 +164,7 @@ Open another terminal on Ubuntu PC to set up environment for RViz visualization.
     ```
     root@j7-docker:~/j7ros_home/catkin_ws$ roslaunch ti_sde bag_sde.launch
     ```
-    To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch`  in the above.
+    To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch` in the above.
 
 2. **[PC]** For visualization, on the PC:
     ```

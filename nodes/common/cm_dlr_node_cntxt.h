@@ -169,7 +169,7 @@ typedef struct
     int32_t                 dim;
 
     /** Shape information. */
-    int64_t                shape[CM_DLR_MAX_NUM_DIMS];
+    int64_t                 shape[CM_DLR_MAX_NUM_DIMS];
 
     /** Data buffer. */
     void                   *data;

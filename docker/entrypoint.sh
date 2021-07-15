@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# setup proxy as required
+/root/setup_proxy.sh
+
 # set up ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 

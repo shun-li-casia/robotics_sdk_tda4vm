@@ -1,13 +1,13 @@
 add_compile_options(-std=c++14)
 
-find_package(catkin REQUIRED COMPONENTS nodelet roscpp cv_bridge image_transport sensor_msgs std_msgs message_generation common_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp cv_bridge image_transport sensor_msgs std_msgs message_generation common_msgs)
 
 # for custom ROS messages
 if (DEPENDENT_PKG_LIST)
     generate_messages(DEPENDENCIES ${DEPENDENT_PKG_LIST})
 endif()
 
-catkin_package(CATKIN_DEPENDS nodelet roscpp cv_bridge image_transport sensor_msgs message_runtime)
+catkin_package(CATKIN_DEPENDS roscpp cv_bridge image_transport sensor_msgs message_runtime)
 
 find_package(OpenCV REQUIRED)
 
@@ -22,8 +22,7 @@ set(PSDK_DIR $ENV{PSDK_BASE_PATH})
 
 set(CGT7X_ROOT          ti-cgt-c7000_1.4.2.LTS)
 set(PDK_PACKAGE_ROOT    pdk/packages/ti)
-set(TIDL_PACKAGE_ROOT   tidl_j7_02_00_00_07/ti_dl)
-set(MMALIB_PACKAGE_ROOT mmalib_02_00_00_02)
+set(TIDL_PACKAGE_ROOT   tidl_j7_02_00_00_13/ti_dl)
 set(TIADALG_PATH        tiadalg)
 
 SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
@@ -94,10 +93,6 @@ set(PTK_INCLUDE_DIRS
     ${PSDK_DIR}/perception/include
 )
 
-set(MMALIB_INCLUDE_DIRS
-    ${PSDK_DIR}/${MMALIB_PACKAGE_ROOT}/include
-)
-
 set(TIDL_INCLUDE_DIRS
     ${PSDK_DIR}/${TIDL_PACKAGE_ROOT}/inc
 )
@@ -128,7 +123,7 @@ set(VISION_APP_KERNEL_INCLUDE_DIRS
 )
 
 set(OTHER_INCLUDE_DIRS
-    ${PSDK_DIR}/${CGT7X_ROOT}/host_emulation/include/C7100
+    ${PSDK_DIR}/${CGT7X_ROOT}/host_emulation/include/C7100  # PC emulation mode only
     ${PSDK_DIR}/j7_c_models/include
     ${PSDK_DIR}/ivision
 )
@@ -138,7 +133,6 @@ include_directories(
     ${PTK_INCLUDE_DIRS}
     ${VISION_APP_INCLUDE_DIRS}
     ${VISION_APP_KERNEL_INCLUDE_DIRS}
-    ${MMALIB_INCLUDE_DIRS}
     ${TIDL_INCLUDE_DIRS}
     ${TIADALG_INCLUDE_DIRS}
     ${OTHER_INCLUDE_DIRS}
@@ -158,16 +152,6 @@ function(build_node)
     add_executable(${app} ${${src}})
     target_link_libraries(${app} ${TARGET_LINK_LIBS})
     add_dependencies(${app} ${common_msgs_EXPORTED_TARGETS})
-endfunction()
-
-# Function for building a nodelet:
-# ARG0: lib name
-# ARG1: source list
-function(build_nodelet)
-    set(lib ${ARGV0})
-    set(src ${ARGV1})
-    add_library(${lib} ${${src}})
-    target_link_libraries(${lib} ${TARGET_LINK_LIBS})
 endfunction()
 
 # BUILD and LINK
@@ -211,4 +195,3 @@ else() # static
         ${ION_LIB_DIR}  # only for J7
     )
 endif()
-

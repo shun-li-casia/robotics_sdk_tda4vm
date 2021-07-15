@@ -348,9 +348,9 @@ void EStopNode::publisherThread()
     ROS_INFO_STREAM("Created Publisher for topic: " << ogMapTopic);
 
     /* E-Stop grid init */
-    m_freeRun = 0;
-    m_obsRun  = 0;
-    m_eStop   = false;
+    m_freeRun     = 0;
+    m_obsRun      = 0;
+    m_eStop.data  = false;
 
     // define eSTOP area
     m_eStopGridIdx = new int32_t[m_ogMapSize];
@@ -1380,7 +1380,7 @@ vx_status EStopNode::makeEStopDecision(int8_t     * ogData,
         if (m_freeRun >= m_minFreeRun)
         {
             m_obsRun = 0;
-            m_eStop  = false;
+            m_eStop.data  = false;
         }
     } else
     {
@@ -1389,7 +1389,7 @@ vx_status EStopNode::makeEStopDecision(int8_t     * ogData,
         if (m_obsRun >= m_minObsRun)
         {
             m_freeRun = 0;
-            m_eStop   = true;
+            m_eStop.data   = true;
         }
     }
 

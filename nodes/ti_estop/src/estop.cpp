@@ -415,7 +415,7 @@ vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
         }
     } else
     {
-        vxStatus == (vx_status)VX_FAILURE;
+        vxStatus = (vx_status)VX_FAILURE;
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)

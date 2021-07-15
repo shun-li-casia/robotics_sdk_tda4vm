@@ -61,10 +61,102 @@
  */
 #include <cm_common.h>
 
-#define MAX_TENSOR_DIMS    (4u)
-
 #define clip3(x, min, max) ((x) > (max)?(max):((x) < (min)?(min):(x)))
 #define normalize(x, mean, scale) (((x) - (mean))*(scale))
+
+vx_status CM_loadImage(char *fname, vx_image image)
+{
+    vx_status  vxStatus = (vx_status)VX_SUCCESS;
+
+    vx_rectangle_t             rect;
+    vx_imagepatch_addressing_t image_addr;
+    vx_map_id                  map_id;
+    void                     * data_ptr;
+    vx_uint32                  img_width;
+    vx_uint32                  img_height;
+    vx_df_image                img_format;
+    vx_int32                   j;
+    vx_int32                   data_read;
+
+    FILE *fp= fopen(fname, "rb");
+    if(fp==NULL)
+    {
+        PTK_printf("Unable to open input file [%s]\n",
+                    __FUNCTION__, __LINE__, fname);
+        return(VX_FAILURE);
+    }
+
+    vxQueryImage(image, VX_IMAGE_WIDTH, &img_width, sizeof(vx_uint32));
+    vxQueryImage(image, VX_IMAGE_HEIGHT, &img_height, sizeof(vx_uint32));
+    vxQueryImage(image, VX_IMAGE_FORMAT, &img_format, sizeof(vx_df_image));
+
+    rect.start_x = 0;
+    rect.start_y = 0;
+    rect.end_x = img_width;
+    rect.end_y = img_height;
+
+    // Copy Luma or Luma+Chroma
+    vxStatus = vxMapImagePatch(image,
+                               &rect,
+                               0,
+                               &map_id,
+                               &image_addr,
+                               &data_ptr,
+                               VX_WRITE_ONLY,
+                               VX_MEMORY_TYPE_HOST,
+                               VX_NOGAP_X);
+
+    if (vxStatus != (vx_status)VX_SUCCESS)
+    {
+        PTK_printf("vxMapImagePatch() failed\n",
+                    __FUNCTION__, __LINE__);
+    }
+
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        for (j = 0; j < image_addr.dim_y; j++)
+        {
+            data_read = fread(data_ptr, 1, image_addr.dim_x*image_addr.stride_x, fp);
+            data_ptr = (vx_uint8 *)data_ptr + image_addr.stride_y;
+        }
+        vxUnmapImagePatch(image, map_id);
+    }
+
+
+    // Copy Chroma for NV12
+    if (img_format == VX_DF_IMAGE_NV12)
+    {
+        vxStatus = vxMapImagePatch(image,
+                                   &rect,
+                                   1,
+                                   &map_id,
+                                   &image_addr,
+                                   &data_ptr,
+                                   VX_WRITE_ONLY,
+                                   VX_MEMORY_TYPE_HOST,
+                                   VX_NOGAP_X);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            PTK_printf("vxMapImagePatch() failed\n",
+                        __FUNCTION__, __LINE__);
+        }
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            for (j = 0; j < img_height/2; j++)
+            {
+                data_read = fread(data_ptr, 1, image_addr.dim_x, fp);
+                data_ptr = (vx_uint8 *)data_ptr + image_addr.stride_y;
+            }
+
+            vxUnmapImagePatch(image, map_id);
+        }
+    }
+
+    fclose(fp);
+    return vxStatus;
+}
 
 vx_status CM_saveImage(const char *fname, vx_image image)
 {
@@ -181,6 +273,65 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
 }
 
+vx_status CM_CopyImage2Image(vx_image srcImage, vx_image dstImage)
+{
+    vx_map_id                  map_id;
+    vx_rectangle_t             rect;
+    vx_imagepatch_addressing_t  image_addr_1;
+    vx_imagepatch_addressing_t  image_addr_2;
+    vx_df_image                img_format;
+    vx_uint32                  img_width;
+    vx_uint32                  img_height;
+    vx_status                  vxStatus;
+
+    uint8_t                    *data_ptr_src_1;
+    uint8_t                    *data_ptr_src_2;
+
+    vxQueryImage(srcImage, VX_IMAGE_FORMAT, &img_format, sizeof(vx_df_image));
+    vxQueryImage(srcImage, VX_IMAGE_WIDTH, &img_width, sizeof(vx_uint32));
+    vxQueryImage(srcImage, VX_IMAGE_HEIGHT, &img_height, sizeof(vx_uint32));
+
+    rect.start_x = 0;
+    rect.start_y = 0;
+    rect.end_x   = img_width;
+    rect.end_y   = img_height;
+
+    // get source pointer
+    vxStatus = vxMapImagePatch(srcImage,
+                               &rect,
+                               0,
+                               &map_id,
+                               &image_addr_1,
+                               (void **)&data_ptr_src_1,
+                               VX_READ_ONLY,
+                               VX_MEMORY_TYPE_HOST,
+                               VX_NOGAP_X);
+    PTK_assert(VX_SUCCESS == vxStatus);
+    vxUnmapImagePatch(srcImage, map_id);
+
+    vxCopyImagePatch(dstImage, &rect, 0, &image_addr_1, data_ptr_src_1, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
+
+    // chroma
+    if (img_format == VX_DF_IMAGE_NV12)
+    {
+        // get source pointer
+        vxStatus = vxMapImagePatch(srcImage,
+                                   &rect,
+                                   1,
+                                   &map_id,
+                                   &image_addr_2,
+                                   (void **)&data_ptr_src_2,
+                                   VX_READ_ONLY,
+                                   VX_MEMORY_TYPE_HOST,
+                                   VX_NOGAP_X);
+        PTK_assert(VX_SUCCESS == vxStatus);
+        vxUnmapImagePatch(srcImage, map_id);
+
+        vxCopyImagePatch(dstImage, &rect, 1, &image_addr_2, data_ptr_src_2, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
+    }
+
+    return vxStatus;
+}
 
 vx_status CM_convertYUV2RGB(uint8_t        *rgbImage,
                             const uint8_t  *yuvImage[2],
@@ -264,7 +415,6 @@ vx_status CM_convertYUV2RGB(uint8_t        *rgbImage,
 
     return vxStatus;
 }
-
 
 vx_status CM_SEMSEG_CNN_convertYUV2RGB(float          *rgbImage,
                                        const uint8_t  *yuvImage[2],
@@ -463,16 +613,16 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
     uint8_t * output_buffer = NULL;
     vx_map_id map_id;
     vx_size   num_dims;
-    vx_size   start[MAX_TENSOR_DIMS];
-    vx_size   tensor_strides[MAX_TENSOR_DIMS];
-    vx_size   tensor_sizes[MAX_TENSOR_DIMS];
+    vx_size   start[CM_MAX_TENSOR_DIMS];
+    vx_size   tensor_strides[CM_MAX_TENSOR_DIMS];
+    vx_size   tensor_sizes[CM_MAX_TENSOR_DIMS];
     vx_status vxStatus = VX_SUCCESS;
 
     start[0] = start[1] = start[2] = 0;
     vxQueryTensor(tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_dims, sizeof(vx_size));
     vxQueryTensor(tensor, VX_TENSOR_DIMS, tensor_sizes, 3 * sizeof(vx_size));
 
-    if (num_dims >= MAX_TENSOR_DIMS)
+    if (num_dims >= CM_MAX_TENSOR_DIMS)
     {
         PTK_printf("Invalid number of dims read [%d].", num_dims);
         vxStatus = VX_FAILURE;
@@ -487,7 +637,6 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
             PTK_printf("tivxMapTensorPatch() failed.");
-            vxStatus = VX_FAILURE;
         }
     }
 
@@ -499,14 +648,11 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
             PTK_printf("tivxUnmapTensorPatch() failed.");
-            vxStatus = VX_FAILURE;
         }
     }
 
     return vxStatus;
 }
-
-
 
 vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
                                    const vx_user_data_object pointCloud,
@@ -578,4 +724,171 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
 
 
     return vxStatus;
+}
+
+vx_int32 CM_fill1DTensor(vx_tensor in_tensor, const vx_char* in_file)
+{
+    vx_status status = VX_SUCCESS;
+    vx_map_id map_id_tensor;
+    vx_uint8* tensor_buffer;
+
+    FILE* fp;
+    vx_int32 bytes_read = 0;
+
+    vx_size    start[CM_MAX_TENSOR_DIMS];
+
+    vx_size num_dims;
+    vx_size size[3];
+    vx_enum data_type;
+
+    vxQueryTensor(in_tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_dims, sizeof(num_dims));
+    vxQueryTensor(in_tensor, VX_TENSOR_DIMS, &size, sizeof(vx_size)*3);
+    vxQueryTensor(in_tensor, VX_TENSOR_DATA_TYPE, &data_type, sizeof(data_type));
+
+    start[0]         = 0;
+    start[1]         = 0;
+    start[2]         = 0;
+
+    vx_int32 tensor_size=1;
+    for(int32_t i=0; i <  num_dims; i++){
+        tensor_size *= size[i];
+    }
+
+    if((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
+    {
+        tensor_size *= sizeof(vx_int32);
+    }
+
+    if((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
+    {
+        tensor_size *= sizeof(vx_int16);
+    }
+
+    status = tivxMapTensorPatch(in_tensor, num_dims, start, size, &map_id_tensor,
+                                size,(void**) &tensor_buffer,
+                                VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
+
+    if (status == VX_SUCCESS)
+    {
+        fp = fopen(in_file,"rb");
+        if(fp == NULL)
+        {
+            printf("input binary file %s could not be opened \n", in_file);
+        }
+        else
+        {
+            fseek(fp,0L,SEEK_END);
+            size[0] = ftell(fp);
+            fseek(fp,0L,SEEK_SET);
+
+            if(size[0] != tensor_size)
+            {
+                printf("Size of the tensor is lesser than binary file size\n");
+            }
+            else
+            {
+                bytes_read = fread(tensor_buffer, 1, size[0], fp);
+            }
+            fclose(fp);
+      }
+
+      tivxUnmapTensorPatch(in_tensor, map_id_tensor);
+    }
+
+    return (bytes_read);
+}
+
+vx_int32 CM_fill1DTensorFrom2Bin(vx_tensor in_tensor, const vx_char* in_file1, const vx_char* in_file2)
+{
+    vx_status status = VX_SUCCESS;
+    vx_map_id map_id_tensor;
+    vx_uint8* tensor_buffer;
+
+    FILE* fp1;
+    FILE* fp2;
+
+    vx_int32 bytes_read = 0;
+
+    vx_size    start[CM_MAX_TENSOR_DIMS];
+
+    vx_size num_dims;
+    vx_size size[3];
+    vx_enum data_type;
+
+    vxQueryTensor(in_tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_dims, sizeof(num_dims));
+    vxQueryTensor(in_tensor, VX_TENSOR_DIMS, &size, sizeof(vx_size)*3);
+    vxQueryTensor(in_tensor, VX_TENSOR_DATA_TYPE, &data_type, sizeof(data_type));
+
+    start[0]  = 0;
+    start[1]  = 0;
+    start[2]  = 0;
+
+    vx_int32 tensor_size=1;
+
+    for(int32_t i=0; i <  num_dims; i++)
+    {
+        tensor_size *= size[i];
+    }
+
+    if((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
+    {
+        tensor_size *= sizeof(vx_int32);
+    }
+
+    if((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
+    {
+        tensor_size *= sizeof(vx_int16);
+    }
+
+    status = tivxMapTensorPatch(in_tensor, num_dims, start, size, &map_id_tensor,
+                                size,(void**) &tensor_buffer,
+                                VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
+
+    if (status == VX_SUCCESS)
+    {
+        fp1 = fopen(in_file1,"rb");
+        fp2 = fopen(in_file2,"rb");
+
+        if((fp1 == NULL) && (fp2 == NULL))
+        {
+            printf("input binary file %s and %s could not be opened \n", in_file1, in_file2);
+        }
+        else if ((fp1 != NULL) && (fp2 == NULL))
+        {
+            printf("input binary file %s could not be opened \n", in_file1);
+            fclose(fp1);
+        }
+        else if ((fp1 == NULL) && (fp2 != NULL))
+        {
+            printf("input binary file %s could not be opened \n", in_file2);
+            fclose(fp2);
+        }
+        else
+        {
+            fseek(fp1,0L,SEEK_END);
+            size[0] = ftell(fp1);
+            fseek(fp1,0L,SEEK_SET);
+
+            fseek(fp2,0L,SEEK_END);
+            size[1] = ftell(fp2);
+            fseek(fp2,0L,SEEK_SET);
+
+            if((size[0] + size[1])  != tensor_size)
+            {
+                printf("Size of the tensor is lesser than binary file size\n");
+            }
+            else
+            {
+                bytes_read  = fread(tensor_buffer, 1, size[0], fp1);
+                bytes_read += fread(tensor_buffer+bytes_read, 1, size[1], fp2);
+            }
+
+            fclose(fp1);
+            fclose(fp2);
+        }
+
+        tivxUnmapTensorPatch(in_tensor, map_id_tensor);
+    }
+
+    return (bytes_read);
 }

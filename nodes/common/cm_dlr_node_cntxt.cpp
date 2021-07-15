@@ -229,7 +229,7 @@ static int32_t CM_dlrGetOutputInfo(
                             __FUNCTION__, __LINE__, i, DLRGetLastError());
                 status = status1;
                 break;
-            }
+            } 
 
             if (outputInfo->dim > CM_DLR_MAX_NUM_DIMS)
             {

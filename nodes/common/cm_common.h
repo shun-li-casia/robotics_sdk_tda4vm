@@ -81,6 +81,12 @@
  */
 
 /**
+ * \brief Constant for max file name length
+ * \ingroup group_applib_common
+ */
+#define CM_MAX_FILE_LEN          (1024U)
+
+/**
  * \brief Constant for use in handling strings. The specified size is in bytes.
  * \ingroup group_applib_common
  */
@@ -93,11 +99,30 @@
 #define CM_MAX_PIPELINE_DEPTH    (8U)
 
 
+/**
+ * \brief Constant for max tensor dimension
+ * \ingroup group_applib_common
+ */
+#define CM_MAX_TENSOR_DIMS       (4u)
+
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * \brief Function for loading an image from a file.
+ *
+ * \param [in] fname Name of the file to read the image.
+ *
+ * \param [out] image OpenVX image object that image data is loaded.
+ *
+ * \return VX_SUCCESS on success
+ *
+ * \ingroup group_applib_common
+ */
+vx_status CM_loadImage(char *fname, vx_image image);
 
 /**
  * \brief Function for saving an image.
@@ -111,6 +136,19 @@ extern "C" {
  * \ingroup group_applib_common
  */
 vx_status CM_saveImage(const char *fname, vx_image image);
+
+/**
+ * \brief Function for copying OpenVX imge object to OpenVX image object.
+ *
+ * \param [in] srcImage source image object
+ *
+ * \param [in] dstImage output image object
+ *
+ * \return VX_SUCCESS on success
+ *
+ * \ingroup group_applib_common
+ */
+vx_status CM_CopyImage2Image(vx_image srcImage, vx_image dstImage);
 
 /**
  * \brief Function to convert a YUV420 image to planar RGB format.
@@ -147,7 +185,7 @@ vx_status CM_convertYUV2RGB(uint8_t        *rgbImage,
  * \param [in] mean mean value of RGB channels 
  *
  * \param [in] scale standard deviation of RGB channels 
- * 
+ *
  * \param [in] width Width of the image in pixels.
  *
  * \param [in] height Height of the image in pixels.
@@ -181,6 +219,10 @@ vx_status CM_SEMSEG_CNN_convertYUV2RGB(float          *rgbImage,
  * \param [in] width Width of the image in pixels.
  *
  * \param [in] height Height of the image in pixels.
+ * 
+ * \param [in] height Height of the image in pixels.
+ * 
+ * \param [in] numPlanes Number of planes in the input Image object (yuvImage)
  *
  * \param [in] rgbFlag Flag to indicate if the image data needs to be converted to
  *                     RGB format.
@@ -219,6 +261,40 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
                                uint32_t         height);
 
 /**
+ * \brief Function to extract pose data from an openVX matrix object.
+ *
+ * \param [out] outPose Output position data 
+ *
+ * \param [out] outQuaternion Output quaternion data 
+ *
+ * \param [in]  pose OpenVX Matrix object
+ *
+ * \return VX_SUCCESS on success
+ *
+ * \ingroup group_applib_common
+ */
+vx_int32  CM_fill1DTensor(vx_tensor        in_tensor, 
+                          const vx_char  * in_file);
+
+
+/**
+ * \brief Function to read two binary files and fill 1-D tensor object's data
+ *
+ * \param [in/out] in_tensor tensor that reads in file files
+ *
+ * \param [in]  in_file1 input file name 1
+ * 
+ * \param [in]  in_file2 input file name 2
+ * 
+ * \return The number of bytes 
+ *
+ * \ingroup group_applib_common
+ */
+vx_int32  CM_fill1DTensorFrom2Bin(vx_tensor        in_tensor, 
+                                  const vx_char  * in_file1, 
+                                  const vx_char  * in_file2);
+
+/**
  * \brief Function to extract point cloud (XYZRGB) data from an OpenVX user data object.
  *
  * \param [out]     outPcData Output point cloud data, which inclues X,Y,Z and R, G, B for each point. 
@@ -228,7 +304,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
  *
  * \param [in]      pointSize  size of one point in byte 
  * 
- * \param [in/out]  outPcSize  the number of points in pointCloud object. 
+ * \param [in/out]  numPoints  the number of points in pointCloud object. 
  *
  * \return VX_SUCCESS on success
  *
