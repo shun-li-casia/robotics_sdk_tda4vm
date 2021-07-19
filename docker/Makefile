@@ -150,7 +150,7 @@ docker_run_sh:
 	@echo "$(DOCKER_RUN_SH) is generated"
 
 ## data files
-data_download: tidl_net_download rosbag_download
+data_download: model_download rosbag_download
 
 model_download: check_data_dir
 	wget -O $(DATA_DIR)/$(TIDL_MODEL_FILE) "$(TIDL_MODEL_URL)"
@@ -184,4 +184,4 @@ data_clean:
 
 ## .PHONY
 .PHONY: docker_build_sh docker_run_sh ip_show \
-        tidl_net_download rosbag_download check_data_dir
+        model_download rosbag_download check_data_dir
