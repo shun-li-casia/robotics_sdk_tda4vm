@@ -68,14 +68,14 @@ ADD catkin_ws/src/${GIT_REPO}/docker/proxy /root/proxy
 
 RUN /root/setup_proxy.sh
 
-# settings for tivision_apps.so: install OpenGL, libdevil-dev
+# install dependency for tivision_apps.so: OpenGL, libdevil-dev
 RUN apt-get update && apt-get install -y \
     libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # install utils
 RUN apt-get update && apt-get install -y \
-    wget curl git vim tmux net-tools iputils-ping corkscrew && \
+    wget curl git vim tmux net-tools iputils-ping corkscrew usbutils && \
     rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
@@ -146,7 +146,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-melodic-perception=1.4.1-0* \
     && rm -rf /var/lib/apt/lists/*
 
-## .profile and .bashrc
+#=========================================================================
+FROM ubuntu-ros
+ARG DEBIAN_FRONTEND
+
+# install python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python-pip && \
+    python2 -m pip install configparser argparse && \
+    rm -rf /var/lib/apt/lists/*
+
+# update USB IDs
+RUN update-usbids -q
+
+# .profile and .bashrc
 WORKDIR /root
 RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
     echo "    # include .bashrc if it exists"    >> .profile && \
