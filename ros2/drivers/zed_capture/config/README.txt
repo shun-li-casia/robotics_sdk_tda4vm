@@ -1,0 +1,2 @@
+* SN29788442.conf: ZED2
+* SN5867575.conf: ZED1

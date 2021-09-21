@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- ti_vision_cnn -->
+    <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
+
+        <!-- Configuration file for the openVX CNN graph -->
+        <rosparam file="$(find ti_vision_cnn)/config/objdet_params.yaml" subst_value="true" />
+
+        <!-- Input topic name to subscribe -->
+        <param name = "input_topic_name" value = "camera/image_raw"/>
+
+        <!-- Output rectified image topic name to publish -->
+        <param name = "rectified_image_topic" value = "camera/image_rect_nv12"/>
+
+        <!-- Output semantic segmentation tensor topic name to publish to -->
+        <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
+
+    </node>
+
+</launch>

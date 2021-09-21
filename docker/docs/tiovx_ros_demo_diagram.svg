@@ -236,18 +236,6 @@
 			<v:textRect cx="38.9764" cy="231.404" width="77.96" height="42.5197"/>
 			<rect x="0" y="210.144" width="77.9528" height="42.5197" class="st11"/>
 			<text x="13.71" y="234.1" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Visualization</text>		</g>
-		<g id="shape14-39" v:mID="14" v:groupContext="shape" transform="translate(354.122,-105.18)">
-			<title>Rectangle.14</title>
-			<desc>ROS MASTER</desc>
-			<v:userDefs>
-				<v:ud v:nameU="visVersion" v:val="VT0(14):26"/>
-				<v:ud v:nameU="msvThemeColors" v:val="VT0(36):26"/>
-				<v:ud v:nameU="msvThemeEffects" v:val="VT0(16):26"/>
-			</v:userDefs>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="35.4331" cy="242.034" width="70.87" height="21.2598"/>
-			<rect x="0" y="231.404" width="70.8661" height="21.2598" class="st12"/>
-			<text x="5.68" y="244.73" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>ROS MASTER</text>		</g>
 		<g id="group17-44" transform="translate(264.122,-95.2586)" v:mID="17" v:groupContext="group">
 			<v:userDefs>
 				<v:ud v:nameU="msvThemeColors" v:val="VT0(36):26"/>
@@ -404,7 +392,7 @@
 		</g>
 		<g id="shape20-56" v:mID="20" v:groupContext="shape" transform="translate(618.673,-42.4545)">
 			<title>Sheet.20</title>
-			<desc>Ubuntu PC</desc>
+			<desc>Ubuntu 20.04</desc>
 			<v:userDefs>
 				<v:ud v:nameU="msvThemeColors" v:val="VT0(36):26"/>
 				<v:ud v:nameU="msvThemeEffects" v:val="VT0(16):26"/>
@@ -412,7 +400,7 @@
 			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
 			<v:textRect cx="40.1732" cy="244.664" width="80.35" height="16"/>
 			<rect x="0" y="236.664" width="80.3465" height="16" class="st15"/>
-			<text x="14.35" y="247.66" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Ubuntu PC</text>		</g>
+			<text x="14.35" y="247.66" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Ubuntu 20.04</text>		</g>
 		<g id="shape21-59" v:mID="21" v:groupContext="shape" transform="translate(162.783,-73.9988)">
 			<title>Rectangle.21</title>
 			<desc>UBUNTU</desc>

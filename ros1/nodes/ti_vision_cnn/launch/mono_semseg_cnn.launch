@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- ti_vision_cnn -->
+    <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
+        <rosparam file="$(find ti_vision_cnn)/config/semseg_params.yaml" subst_value="true" />
+        <param name = "input_topic_name" value = "camera/image_raw"/>
+        <param name = "rectified_image_topic" value = "camera/image_rect_nv12"/>
+        <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
+    </node>
+
+    <!-- mono_capture -->
+    <include file="$(find mono_capture)/launch/mono_capture.launch">
+        <arg name="topic_ns" value="camera"/>
+    </include>
+
+</launch>

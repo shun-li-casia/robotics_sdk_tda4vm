@@ -1,0 +1,63 @@
+# LDC LUT definition file path
+lut_file_path:          $(find zed_capture)/config/SN5867575_HD_LUT_right.bin
+
+# location of DL model
+# Known Issue: ONR-OD-8080-yolov3 has initial loading time ~20 seconds
+dl_model_path: /opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512
+# dl_model_path: /opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
+
+## Models below are all detection models from edge AI model zoo. Not all models yet tested.
+# dl_model_path: /opt/model_zoo/ONR-OD-8000-ssd1200-resNet34-mlperf-1200x1200
+# dl_model_path: /opt/model_zoo/ONR-OD-8020-ssd-lite-mobv2-coco-512x512
+# dl_model_path: /opt/model_zoo/ONR-OD-8030-ssd-lite-mobv2-fpn-coco-512x512
+# dl_model_path: /opt/model_zoo/ONR-OD-8040-ssd-lite-regNetX-200mf-fpn-bgr-coco-320x320
+# dl_model_path: /opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-coco-512x512
+# dl_model_path: /opt/model_zoo/ONR-OD-8060-ssd-lite-regNetX-1.6gf-bifpn168x4-bgr-coco-768x768
+# dl_model_path: /opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512
+# dl_model_path: /opt/model_zoo/ONR-OD-8090-retina-lite-regNetX-800mf-fpn-bgr-coco-512x512
+# dl_model_path: /opt/model_zoo/TFL-OD-2000-ssd-mobV1-coco-mlperf-300x300
+# dl_model_path: /opt/model_zoo/TFL-OD-2010-ssd-mobV2-coco-mlperf-300x300
+# dl_model_path: /opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
+# dl_model_path: /opt/model_zoo/TFL-OD-2030-ssdLite-mobDet-EdgeTPU-coco-320x320
+# dl_model_path: /opt/model_zoo/TFL-OD-2060-ssdlite-mobV2-coco-300x300
+# dl_model_path: /opt/model_zoo/TFL-OD-2070-ssd-mobV1-fpn-coco-tpu-8-640x640
+# dl_model_path: /opt/model_zoo/TFL-OD-2080-ssd-mobV2-fpnlite-coco-tpu-8-320x320
+# dl_model_path: /opt/model_zoo/TFL-OD-2090-ssd-mobV2-fpnlite-coco-tpu-8-640x640
+# dl_model_path: /opt/model_zoo/TFL-OD-2110-efficient-det-ti-lite0-512x512
+# dl_model_path: /opt/model_zoo/TFL-OD-2130-ssd-mobV2-coco-tpu-8-320x320
+# dl_model_path: /opt/model_zoo/TVM-OD-5020-yolov3-mobv1-gluon-mxnet-416x416
+
+# input data width in pixels
+width:                  1280
+
+# input data height in lines
+height:                 720
+
+# Maximum number of Semantic Segmentation classes
+num_classes:            20
+
+# interactive mode
+is_interactive:         0
+
+# to enable showing output on display when display_option = 1
+display_option:         1
+
+# pipeline depth
+pipeline_depth:         4
+
+# flag to indicate if the graph should be exported
+#  0 - disable
+#  1 - enable
+exportGraph:            0
+
+# teal-time logging enable.
+#  0 - disable
+#  1 - enable
+rtLogEnable:            0
+
+# log level for the app
+# 0 - DEBUG: Used to show general debug messages
+# 1 - INFO: Used to show run-time processing debug
+# 2 - WARN: Used to warning developers of possible issues
+# 3 - ERROR: Used for most errors
+log_level:              2

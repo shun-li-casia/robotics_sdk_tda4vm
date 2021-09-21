@@ -30,12 +30,32 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# DL runtime libs DIR
+if [ "$ROS_VERSION" == "1" ]; then
+    DLRT_DIR=/opt/dl_runtime/dlrt-libs-aarch64-ubuntu18.04
+else # ROS2
+    DLRT_DIR=/host/usr/lib
+fi
+
 # set up TI Processor SDK environment
 ln -snf /host/usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so.$TIVA_LIB_VER
 ln -snf /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so
-ln -snf /host/usr/lib/libvx_tidl_rt.so /usr/lib/libvx_tidl_rt.so
+ln -snf /host/usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so.1.0
+ln -snf /usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so
 ln -snf /host/usr/include/processor_sdk /usr/include/processor_sdk
 ln -snf /host/usr/lib/libion.so /usr/lib/libion.so
 ln -snf /host/usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so.0
+
+# link headers and libraries for DLR
 ln -snf /host/usr/lib/python3.8/site-packages/dlr/libdlr.so /usr/lib/libdlr.so
 ln -snf /host/usr/include/dlr.h /usr/include/dlr.h
+
+# link libraries for TFLite
+ln -snf ${DLRT_DIR}/libtensorflow-lite.a /usr/lib/libtensorflow-lite.a
+ln -snf /host/usr/lib/libtidl_tfl_delegate.so /usr/lib/libtidl_tfl_delegate.so
+
+# link libraries and python packages for ONNXRT
+ln -snf ${DLRT_DIR}/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so.1.7.0
+ln -snf /usr/lib/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so
+ln -snf /host/usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so.1.0
+ln -snf /usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so

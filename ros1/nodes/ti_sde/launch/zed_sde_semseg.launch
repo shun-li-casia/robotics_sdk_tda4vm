@@ -1,0 +1,19 @@
+<launch>
+
+    <!-- ti_sde -->
+    <include file="$(find ti_sde)/launch/sde.launch"/>
+
+    <!-- ti_vision_cnn -->
+    <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
+        <rosparam file="$(find ti_vision_cnn)/config/semseg_params.yaml" subst_value="true" />
+        <param name = "input_topic_name" value = "camera/right/image_raw"/>
+        <param name = "rectified_image_topic" value = "camera/right/image_rect_nv12"/>
+        <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
+    </node>
+
+    <!-- zed_capture -->
+    <include file="$(find zed_capture)/launch/zed_capture.launch">
+        <arg name="frame_rate" value="15"/>
+    </include>
+
+</launch>

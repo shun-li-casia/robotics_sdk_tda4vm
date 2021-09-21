@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- ti_vision_cnn -->
+    <include file="$(find ti_vision_cnn)/launch/semseg_cnn.launch"/>
+
+    <!-- zed_capture -->
+    <include file="$(find zed_capture)/launch/zed_capture.launch">
+        <arg name="frame_rate" value="15"/>
+        <arg name="topic_ns_right" value="camera"/>
+    </include>
+
+</launch>

@@ -1,6 +1,0 @@
-<launch>
-
-    <!-- rviz -->
-    <node pkg="rviz" type="rviz" name="rviz_sde_pcl" args="-d $(find ti_sde)/rviz/sde_pcl.rviz" />
-
-</launch>

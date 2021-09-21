@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.5.0 (2021-09-21)
+* TO ADD
+
 ## 0.4.0 (2021-07-14)
 * ROS development environment in a Docker container on top of TI Edge AI 0.5 base image
 * Proxy settings are provided for building and running the Docker image behind a proxy network (TI network as an example)
