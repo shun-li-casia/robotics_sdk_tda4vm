@@ -63,10 +63,10 @@ namespace ti::utils {
             {
             }
 
-            T peek()
+            T *peek()
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
-                T                           val;
+                T                          *val{nullptr};
 
                 /* Check if we have descriptors available. */
                 if (!m_q.empty())
@@ -77,13 +77,13 @@ namespace ti::utils {
                 return val;
             }
 
-            T pop()
+            T *pop()
             {
                 /* Check if we have data. */
                 m_sem.wait();
 
                 std::unique_lock<MutexT>    lock(m_mutex);
-                T                           val;
+                T                          *val{nullptr};
 
                 /* Check if we have descriptors available. */
                 if (!m_q.empty())
@@ -95,7 +95,7 @@ namespace ti::utils {
                 return val;
             }
 
-            int32_t push(T val)
+            int32_t push(T *val)
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
 
@@ -124,7 +124,7 @@ namespace ti::utils {
 
         private:
             /** A queue for holding free descriptors. */
-            std::queue<T>   m_q;
+            std::queue<T*>  m_q;
 
             /** Resource lock. Used get/put from/to freeQ. */
             MutexT          m_mutex;

@@ -110,7 +110,7 @@ extern "C" {
 #define VISION_LDC_BLOCK_HEIGHT         (16)
 #define VISION_LDC_PIXEL_PAD            (1)
 
-#define VISION_CNN_PERF_OUT_FILE        "apps_vison_cnn"
+#define VISION_CNN_PERF_OUT_FILE        "app_vison_cnn"
 
 #define VISION_CNN_MAX_FILE_PATH        (1024U)
 
@@ -158,7 +158,7 @@ struct VISION_CNN_graphParams
 };
 
 using VISION_CNN_Queue =
-     MultiThreadQ<VISION_CNN_graphParams*>;
+     MultiThreadQ<VISION_CNN_graphParams>;
 
 struct VISION_CNN_Context
 {

@@ -543,6 +543,8 @@ void VISION_CNN_printStats(VISION_CNN_Context * appCntxt)
     PTK_printf("\n");
     appPerfPointPrintFPS(&appCntxt->visonPerf);
     PTK_printf("\n");
+    CM_printProctime(stdout);
+    PTK_printf("\n");
 }
 
 

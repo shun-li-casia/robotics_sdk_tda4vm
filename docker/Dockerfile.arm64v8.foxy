@@ -52,7 +52,7 @@ ARG DEBIAN_FRONTEND
 
 # setup proxy settings
 ARG GIT_REPO
-ARG DOCKER_PATH=ros_ws/src/${GIT_REPO}/docker
+ARG DOCKER_PATH=${GIT_REPO}/docker
 ADD ${DOCKER_PATH}/setup_proxy.sh /root/
 ADD ${DOCKER_PATH}/proxy /root/proxy
 RUN /root/setup_proxy.sh
@@ -127,7 +127,7 @@ RUN apt-get update && \
     pip3 install rosbags \
     && rm -rf /var/lib/apt/lists/*
 
-## settings for tivision_apps.so: install OpenGL, libdevil-dev
+# settings for tivision_apps.so: install OpenGL, libdevil-dev
 RUN apt-get update && apt-get install -y \
     libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -151,25 +151,21 @@ RUN apt-get update -y && apt-get dist-upgrade -y && apt-get install -y \
     corkscrew \
     && rm -rf /var/lib/apt/lists/*
 
-## install ROS apps
-COPY ./ros_ws/src $ROS_WS/src
+# install ROS apps
+COPY . $ROS_WS/src
 
-## install ROS dependency and remove ROS2 apps. ROS2 apps will be volume-mapped at "docker run"
+# install ROS dependency and remove ROS2 apps. ROS2 apps will be volume-mapped at "docker run"
 RUN apt-get update && \
     rosdep install --from-paths $ROS_WS/src/jacinto_ros_perception/ros2 --ignore-src -r -y && \
     rm -rf $ROS_WS/src && \
     rm -rf /var/lib/apt/lists/*
 
-# Exprimental: increases ipfrag_high_thresh to 128 MB
-# Ref: https://docs.ros.org/en/foxy/Guides/DDS-tuning.html
-RUN sysctl net.ipv4.ipfrag_high_thresh=134217728
-
 # add scripts
 ARG  GIT_REPO
-COPY ros_ws/src/${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
-ADD  ros_ws/src/${GIT_REPO}/docker/ros_setup.sh /root/
+COPY ${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
+ADD  ${GIT_REPO}/docker/ros_setup.sh /root/
 
-## .profile and .bashrc
+# .profile and .bashrc
 WORKDIR /root
 RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
     echo "    # include .bashrc if it exists"    >> .profile && \

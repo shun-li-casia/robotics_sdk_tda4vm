@@ -33,7 +33,7 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
 
 4. Compile the Hector SLAM inside the Docker container:
     ```
-    root@j7-evm:~/j7ros_home/ros_ws$ catkin_make --source ./src/jacinto_ros_perception/ros1/slam/hector_slam
+    root@j7-evm:~/j7ros_home/ros_ws$ catkin_make --source src/jacinto_ros_perception/ros1
     ```
 
 5. Run the hector SLAM

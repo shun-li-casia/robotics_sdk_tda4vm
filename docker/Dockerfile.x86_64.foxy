@@ -53,7 +53,7 @@ ARG DEBIAN_FRONTEND
 
 # setup proxy settings
 ARG GIT_REPO
-ARG DOCKER_PATH=ros_ws/src/${GIT_REPO}/docker
+ARG DOCKER_PATH=${GIT_REPO}/docker
 ADD ${DOCKER_PATH}/setup_proxy.sh /root/
 ADD ${DOCKER_PATH}/proxy /root/proxy
 RUN /root/setup_proxy.sh
@@ -137,7 +137,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ## install ROS apps
-COPY ./ros_ws/src $ROS_WS/src
+COPY . $ROS_WS/src
 
 ## install ROS dependency and remove ROS2 apps. ROS2 apps will be volume-mapped at "docker run"
 RUN apt-get update && \
@@ -153,14 +153,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcanberra-gtk3-module && \
     rm -rf /var/lib/apt/lists/*
 
-# Exprimental: increases ipfrag_high_thresh to 128 MB
-# Ref: https://docs.ros.org/en/foxy/Guides/DDS-tuning.html
-RUN sysctl net.ipv4.ipfrag_high_thresh=134217728
-
 # add scripts
 ARG  GIT_REPO
-COPY ros_ws/src/${GIT_REPO}/docker/entrypoint_x86_64.sh /root/entrypoint.sh
-ADD  ros_ws/src/${GIT_REPO}/docker/ros_setup.sh /root/
+COPY ${GIT_REPO}/docker/entrypoint_x86_64.sh /root/entrypoint.sh
+ADD  ${GIT_REPO}/docker/ros_setup.sh /root/
 
 ## .profile and .bashrc
 WORKDIR /root

@@ -224,8 +224,7 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
     status = appInit();
     if (status < 0)
     {
-        PTK_printf("[%s:%d] appInit() failed.\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("appInit() failed.\n");
         vxStatus = VX_FAILURE;
     }
 
@@ -257,8 +256,7 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
         appCntxt->vxContext = vxCreateContext();
         if (appCntxt->vxContext == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateContext() failed.\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxCreateContext() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -269,8 +267,7 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
         appCntxt->vxGraph = vxCreateGraph(appCntxt->vxContext);
         if (appCntxt->vxGraph == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateGraph() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxCreateGraph() failed\n");
             vxStatus = VX_FAILURE;
         } else
         {
@@ -332,8 +329,7 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
             vxStatus = vxVerifyGraph(appCntxt->vxGraph);
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] vxVerifyGraph() failed\n",
-                            __FUNCTION__, __LINE__);
+                LOG_ERROR("vxVerifyGraph() failed\n");
             }
         }
     } else
@@ -420,8 +416,7 @@ vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
     vxStatus = SDEAPP_getFreeParamRsrc(appCntxt, &gpDesc);
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] SDEAPP_getFreeParamRsrc() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("SDEAPP_getFreeParamRsrc() failed. Incoming Frame is dropped!\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -438,8 +433,7 @@ vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_copyData2Image() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_copyData2Image() failed\n");
         }
     }
 
@@ -457,8 +451,7 @@ vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_copyData2Image() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_copyData2Image() failed\n");
         }
     }
 
@@ -472,8 +465,7 @@ vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SDEAPP_process() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("SDEAPP_process() failed\n");
         }
     }
 
@@ -564,7 +556,7 @@ static void SDEAPP_exitProcThreads(SDEAPP_Context *appCntxt)
 
     if (vxStatus != VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] vxSendUserEvent() failed.\n");
+        LOG_ERROR("vxSendUserEvent() failed.\n");
     }
 
     if (appCntxt->evtHdlrThread.joinable())
@@ -582,6 +574,27 @@ static void SDEAPP_exitProcThreads(SDEAPP_Context *appCntxt)
 
 }
 
+static void SDEAPP_dumpStats(SDEAPP_Context *appCntxt)
+{
+    const char *name = SDEAPP_PERF_OUT_FILE;
+    FILE       *fp;
+
+    fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+    if (fp != NULL)
+    {
+        SDEAPP_exportStats(appCntxt, fp, true);
+
+        CM_printProctime(fp);
+        appPerfStatsExportCloseFile(fp);
+    }
+    else
+    {
+        PTK_printf("Could not open [%s] for exporting "
+                   "performance data\n", name);
+    }
+}
+
 void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
 {
     if (appCntxt->state == SDEAPP_STATE_INVALID)
@@ -597,8 +610,8 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     appPerfStatsPrintAll();
     SDEAPP_printStats(appCntxt);
+    SDEAPP_dumpStats(appCntxt);
 
-    CM_printProctime();
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");    
 
     if (appCntxt->rtLogEnable == 1)
@@ -701,30 +714,12 @@ static int32_t SDEAPP_userControlThread(SDEAPP_Context *appCntxt)
                     appPerfStatsPrintAll();
                     SDEAPP_printStats(appCntxt);
 
-                    CM_printProctime();
                     CM_resetProctime();
                     break;
 
                 case 'e':
-                {
-                    FILE *fp;
-                    const char *name = SDEAPP_PERF_OUT_FILE;
-
-                    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-                    if (fp != NULL)
-                    {
-                        SDEAPP_exportStats(appCntxt, fp, true);
-
-                        appPerfStatsExportCloseFile(fp);
-                    }
-                    else
-                    {
-                        PTK_printf("Could not open [%s] for exporting "
-                                   "performance data\n", name);
-                    }
-                }
-                break;
+                    SDEAPP_dumpStats(appCntxt);
+                    break;
 
                 case 'x':
                     done = 1;
@@ -746,8 +741,7 @@ static int32_t SDEAPP_userControlThread(SDEAPP_Context *appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SDEAPP_waitGraph() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("SDEAPP_waitGraph() failed\n");
         }
 
         SDEAPP_cleanupHdlr(appCntxt);
@@ -785,8 +779,7 @@ void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] SDEAPP_waitGraph() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("SDEAPP_waitGraph() failed\n");
         }
 
         SDEAPP_cleanupHdlr(appCntxt);

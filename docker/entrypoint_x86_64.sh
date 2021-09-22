@@ -24,6 +24,10 @@ elif [ "$ROS_VERSION" == "2" ]; then
     if [ -f $SETUP_FILE ]; then
         source $SETUP_FILE
     fi
+
+    # exprimental: https://docs.ros.org/en/foxy/Guides/DDS-tuning.html
+    sysctl net.ipv4.ipfrag_high_thresh=134217728
+
 else
     echo "Invalid ROS_VERSION"
 fi

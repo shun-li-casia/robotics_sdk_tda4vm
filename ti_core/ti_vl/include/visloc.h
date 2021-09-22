@@ -112,7 +112,7 @@ extern "C" {
 #define VISLOC_LDC_BLOCK_HEIGHT           (16)
 #define VISLOC_LDC_PIXEL_PAD              (1)
 
-#define VISLOC_PERF_OUT_FILE              "apps_visloc"
+#define VISLOC_PERF_OUT_FILE              "app_visloc"
 
 #define VISLOC_MAX_LINE_LEN               (1024U)
 #define VISLOC_NUM_MODEL_OUTPUT           (2U)
@@ -163,7 +163,7 @@ struct VISLOC_graphParams
 };
 
 using VISLOC_Queue =
-     MultiThreadQ<VISLOC_graphParams*>;
+     MultiThreadQ<VISLOC_graphParams>;
 
 struct VISLOC_Context
 {

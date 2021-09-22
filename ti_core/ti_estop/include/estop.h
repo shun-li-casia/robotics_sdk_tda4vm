@@ -173,7 +173,7 @@ struct ESTOP_APP_graphParams
 };
 
 using ESTOP_APP_Queue =
-     MultiThreadQ<ESTOP_APP_graphParams*>;
+     MultiThreadQ<ESTOP_APP_graphParams>;
 
 struct ESTOP_APP_Context
 {

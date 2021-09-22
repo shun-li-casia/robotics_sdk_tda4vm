@@ -34,15 +34,13 @@
 
 #include <iostream>
 #include <cassert>
-#include <mutex>
-#include <condition_variable>
+#include <semaphore.h>
+
 namespace ti::utils {
     class Semaphore
     {
         private:
-            std::mutex              m_mutex;
-            std::condition_variable m_cond;
-            int32_t                 m_cnt;
+            sem_t   m_sem;
 
         private:
             // Prohibit copying
@@ -50,49 +48,26 @@ namespace ti::utils {
             Semaphore& operator=(const Semaphore &s) = delete;
 
         public:
-            Semaphore(int32_t   cnt = 0):
-                m_cnt(cnt)
+            Semaphore(int32_t   cnt = 0)
             {
+                assert(cnt >= 0);
+                sem_init(&m_sem, 0, cnt);
             }
 
             void notify()
             {
-                // Acquire Mutex
-                std::unique_lock<std::mutex> lock(m_mutex);
-
-                // Increment the count
-                m_cnt++;
-
                 // Post the condition variable
-                m_cond.notify_one();
+                sem_post(&m_sem);
             }
 
             void wait()
             {
-                // Acquire Mutex
-                std::unique_lock<std::mutex> lock(m_mutex);
-
-                // Wait if the count is 0
-                while ( !m_cnt )
-                {
-                    m_cond.wait(lock);
-                }
-
-                // Decrement the count
-                m_cnt--;
+                sem_wait(&m_sem);
             }
 
-            bool try_wait()
+            ~Semaphore()
             {
-                // Acquire Mutex
-                std::unique_lock<std::mutex> lock(m_mutex);
-
-                while ( !m_cnt )
-                {
-                    return ( false );
-                }
-
-                return ( true );
+                sem_destroy(&m_sem);
             }
 
     }; // class Semaphore

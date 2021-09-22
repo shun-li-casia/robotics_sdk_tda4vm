@@ -28,16 +28,6 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#=========================================================================
-# This Dockerfile is for installing ROS-Melodic (ros-perception packages) on
-# arm64v8/ubuntu:18.04 base image along with other depedencidies to build
-# and run the applications provided in Robotics SDK.
-#
-# Note: 1. "jacinto_ros_perception" is assumed to be populated under $WORK_DIR/ros_ws/src
-#       2. "docker build" should be run in $WORK_DIR, for example:
-# cd $WORK_DIR
-# docker build -t <tag> -f ./ros_ws/src/jacinto_ros_perception/docker/Dockerfile.ros-melodic .
-
 ARG USE_PROXY
 ARG HTTP_PROXY
 ARG REPO_LOCATION=arm64v8
@@ -61,7 +51,7 @@ ARG DEBIAN_FRONTEND
 
 # setup proxy settings
 ARG GIT_REPO
-ARG DOCKER_PATH=ros_ws/src/${GIT_REPO}/docker
+ARG DOCKER_PATH=${GIT_REPO}/docker
 ADD ${DOCKER_PATH}/setup_proxy.sh /root/
 ADD ${DOCKER_PATH}/proxy /root/proxy
 RUN /root/setup_proxy.sh
@@ -164,8 +154,8 @@ RUN update-usbids -q
 
 # add scripts
 ARG  GIT_REPO
-COPY ros_ws/src/${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
-ADD  ros_ws/src/${GIT_REPO}/docker/ros_setup.sh /root/
+COPY ${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
+ADD  ${GIT_REPO}/docker/ros_setup.sh /root/
 
 # .profile and .bashrc
 WORKDIR /root

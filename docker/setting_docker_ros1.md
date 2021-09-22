@@ -32,25 +32,7 @@ In ROS 1 Docker, ROS Melodic and necessary libraries and tools are installed.
 
 You can choose any folder, but this section assumes installation under `${HOME}/j7ros_home`.
 
-1. Clone the GIT repository:
-    ```
-    user@pc:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/tree/initial_setup.sh
-    user@pc:~$ source initial_setup.sh
-    ```
-    <!-- ```
-    user@pc:~$ ROS_WS=$HOME/j7ros_home/ros_ws
-    user@pc:~$ mkdir -p $ROS_WS/src
-    user@pc:~$ cd $ROS_WS/src
-    git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
-    ``` -->
-
-<!-- 2. For convenience, set up soft-links:
-    ```
-    root@pc:~/j7ros_home$ ln -sf ros_ws/src/jacinto_ros_perception/docker/Makefile
-    user@pc:~/j7ros_home/ros_ws$ ln -sf src/jacinto_ros_perception/setup_env_pc.sh
-    ``` -->
-
-2. To generate bash scripts for building and running a Docker image for the Robotics Kit:
+1. To generate bash scripts for building and running a Docker image for the Robotics Kit:
     ```
     user@pc:~/j7ros_home$ make scripts ROS_VER=1
     ```
@@ -60,24 +42,24 @@ You can choose any folder, but this section assumes installation under `${HOME}/
     ```
     Make sure that two bash scripts, `docker_build_ros1.sh` and `docker_run_ros1.sh`, are generated.
 
-3. To build the Docker image, in `$WORK_DIR` run:
+2. To build the Docker image, in `$WORK_DIR` run:
     ```
     user@pc:~/j7ros_home$ ./docker_build_ros1.sh
     ```
     It will take several minutes to build the Docker image. The Docker image built can be listed with "docker images".
 
-4. Run the Docker container
+3. Run the Docker container
     ```
     user@pc:~/j7ros_home$ ./docker_run_ros1.sh
     ```
 
-5. Build the ROS nodes for visualization:
+4. Build the ROS nodes for visualization:
     ```
     user@pc:~/j7ros_home/ros_ws/src$ cd $ROS_WS
     user@pc:~/j7ros_home/ros_ws$ catkin_make
     ```
 
-6. ROS network setting: Update the following lines in `setup_env_pc.sh`:
+5. ROS network setting: Update the following lines in `setup_env_pc.sh`:
     ```
     PC_IP_ADDR=<PC_IP_address>
     J7_IP_ADDR=<J7_IP_address>
@@ -195,4 +177,4 @@ In the follolwing, **[J7]** and **[PC]** indicate the steps to run on the TDA4/J
 
 ### 3.7. Build and Run Hector SLAM Application
 
-Many open source SLAM algorithms can run on J7. Among them, it is demonstrated how to setup and run Hector SLAM on 2D Lidar data. Please refer to [Hector SLAM Application](./ros1/slam/README.md) for details.
+Many open source SLAM algorithms can run on J7. Among them, it is demonstrated how to setup and run Hector SLAM on 2D Lidar data. Please refer to [Hector SLAM Application](../ros1/slam/README.md) for details.

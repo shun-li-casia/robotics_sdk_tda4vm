@@ -41,6 +41,13 @@ if [[ ! -d "$ROS_WS/src/jacinto_ros_perception" ]]; then
     git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
     cd $WORK_DIR
     ln -sf $ROS_WS/src/jacinto_ros_perception/docker/Makefile
+
+    if [[ $ARCH == "aarch64" ]]; then
+        mkdir -p $WORK_DIR/.ros
+    fi
+    if [[ $ARCH == "x86_64" ]]; then
+        ln -sf $ROS_WS/src/jacinto_ros_perception/setup_env_pc.sh $ROS_WS/setup_env_pc.sh
+    fi
 fi
 
 if [[ $ARCH == "aarch64" ]]; then
@@ -66,8 +73,8 @@ if [[ $ARCH == "aarch64" ]]; then
     fi
 
     # Download model zoo: all detection and segmentation  models
-    ## TODO: select 3-4 models for each of detection and segmentation
-    bash /opt/edge_ai_apps/download_models.sh -d detection segmentation
+    bash /opt/edge_ai_apps/download_models.sh -d detection
+    bash /opt/edge_ai_apps/download_models.sh -d segmentation
 fi
 
 sync

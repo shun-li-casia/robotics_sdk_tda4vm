@@ -89,11 +89,11 @@ void CM_reportProctime(string tag, float value)
     }
 }
 
-void CM_printProctime()
+void CM_printProctime(FILE *fp)
 {
-    printf("+------------------------------------------------------------+\n");
-    printf("|                   Average processing time                  |\n");
-    printf("+------------------------------------------------------------+\n");
+    fprintf(fp, "+------------------------------------------------------------+\n");
+    fprintf(fp, "|                   Average processing time                  |\n");
+    fprintf(fp, "+------------------------------------------------------------+\n");
 
     for (auto lat : _proctime) 
     {
@@ -101,12 +101,12 @@ void CM_printProctime()
         float avg = lat.second.average;
         uint64_t samples = lat.second.samples;
 
-        printf("| %-25s:", tag.c_str());
-        printf("%8.4f ms", avg);
-        printf(" from %7ld samples |\n", samples);
+        fprintf(fp, "| %-25s:", tag.c_str());
+        fprintf(fp, "%8.4f ms", avg);
+        fprintf(fp, " from %7ld samples |\n", samples);
     }
 
-    printf("+------------------------------------------------------------+\n");
+    fprintf(fp, "+------------------------------------------------------------+\n");
 }
 
 void CM_resetProctime()

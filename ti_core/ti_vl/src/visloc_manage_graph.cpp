@@ -691,6 +691,8 @@ void VISLOC_printStats(VISLOC_Context * appCntxt)
     PTK_printf("\n");
     appPerfPointPrintFPS(&appCntxt->vlPerf);
     PTK_printf("\n");
+    CM_printProctime(stdout);
+    PTK_printf("\n");
 }
 
 

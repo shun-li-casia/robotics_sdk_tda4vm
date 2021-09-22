@@ -34,19 +34,7 @@ In ROS 2 Docker environment, ROS Foxy and necessary libraries and tools are inst
 
 ## 2. Set Up Docker Environment on PC
 
-1. Clone the GIT repository:
-    ```
-    user@pc:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/tree/initial_setup.sh
-    user@pc:~$ source initial_setup.sh
-    ```
-    <!-- ```
-    user@pc:~$ ROS_WS=$HOME/j7ros_home/ros_ws
-    user@pc:~$ mkdir -p $ROS_WS/src
-    user@pc:~$ cd $ROS_WS/src
-    git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
-    ``` -->
-
-2. To generate bash scripts for building and running a Docker image for the Robotics Kit:
+1. To generate bash scripts for building and running a Docker image for the Robotics Kit:
     ```
     user@pc:~/j7ros_home$ make scripts ROS_VER=2
     ```
@@ -56,18 +44,18 @@ In ROS 2 Docker environment, ROS Foxy and necessary libraries and tools are inst
     ```
     Make sure that two bash scripts, `docker_build_ros2.sh` and `docker_run_ros2.sh`, are generated.
 
-3. To build the Docker image, in `$WORK_DIR` run:
+2. To build the Docker image, in `$WORK_DIR` run:
     ```
     user@pc:~/j7ros_home$ ./docker_build_ros2.sh
     ```
     It will take several minutes to build the Docker image. The Docker image built can be listed with `docker images`.
 
-4. Run the Docker container
+3. Run the Docker container
     ```
     user@pc:~/j7ros_home$ ./docker_run_ros2.sh
     ```
 
-5. Build the ROS nodes for visualization:
+4. Build the ROS nodes for visualization:
     ```
     user@pc:~/j7ros_home/ros_ws/src$ cd $ROS_WS
     user@pc:~/j7ros_home/ros_ws$ colcon build

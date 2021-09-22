@@ -1,4 +1,5 @@
 #!make
+MAKEFLAGS += --no-print-directory
 
 # Defaults. These can be changed from command line
 ROS_VER          ?= 2
@@ -103,7 +104,7 @@ info:
 	$(info SCRIPTS_DIR      = $(SCRIPTS_DIR))
 
 ## Docker
-docker_build: info
+docker_build:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
@@ -123,7 +124,7 @@ docker_build: info
 	@echo "    --build-arg USE_PROXY=\$$USE_PROXY \\"         >> $(TGT_NAME)
 	@echo "    --build-arg REPO_LOCATION=\$$REPO_LOCATION \\" >> $(TGT_NAME)
 	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
-	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ."             >> $(TGT_NAME)
+	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./ros_ws/src"  >> $(TGT_NAME)
 	@chmod +x $(TGT_NAME)
 	@echo "$(TGT_NAME) is generated"
 
@@ -151,6 +152,7 @@ endif
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)
 	@echo "    -v /root/$(WORK_DIR)/$(WS_NAME_TGT)/src/${REPO_NAME}/${EXCLUDE} \\" >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
+	@echo "    -v $(WORK_PATH_HOST)/.ros:/root/.ros \\"       >> $(TGT_NAME)
 	@echo "    -v /usr:/host/usr:ro \\"                       >> $(TGT_NAME)
 	@echo "    -v /opt/edge_ai_apps:/opt/edge_ai_apps \\"     >> $(TGT_NAME)
 	@echo "    -v /opt/dl_runtime:/opt/dl_runtime \\"         >> $(TGT_NAME)

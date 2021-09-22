@@ -103,11 +103,13 @@ void CM_reportProctime(string tag, float value);
 /**
  * \brief Function to report processing time statistics 
  * 
+ * \param [in] fp File pointer to write the information to
+ *
  * \return 
  *
  * \ingroup group_ticore_profile
  */
-void CM_printProctime();
+void CM_printProctime(FILE *fp);
 
 /**
  * \brief Function to reset all processing time statistics 

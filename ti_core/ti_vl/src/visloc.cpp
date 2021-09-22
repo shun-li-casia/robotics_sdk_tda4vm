@@ -295,7 +295,7 @@ vx_status VISLOC_run(VISLOC_Context       *appCntxt,
     vxStatus = VISLOC_popFreeInputDesc(appCntxt, &gpDesc);
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        LOG_ERROR("VISLOC_popFreeInputDesc() failed\n");
+        LOG_ERROR("VISLOC_popFreeInputDesc() failed. Incoming Frame is dropped!\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -457,6 +457,27 @@ static void VISLOC_exitProcThreads(VISLOC_Context *appCntxt)
     }
 }
 
+static void VISLOC_dumpStats(VISLOC_Context *appCntxt)
+{
+    const char *name = VISLOC_PERF_OUT_FILE;
+    FILE       *fp;
+
+    fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+    if (fp != NULL)
+    {
+        VISLOC_exportStats(appCntxt, fp, true);
+
+        CM_printProctime(fp);
+        appPerfStatsExportCloseFile(fp);
+    }
+    else
+    {
+        LOG_ERROR("Could not open [%s] for exporting "
+                   "performance data\n", name);
+    }
+}
+
 void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
 {
     if (appCntxt->state == VISLOC_STATE_INVALID)
@@ -472,8 +493,8 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     appPerfStatsPrintAll();
     VISLOC_printStats(appCntxt);
+    VISLOC_dumpStats(appCntxt);
 
-    CM_printProctime();
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
@@ -566,32 +587,11 @@ static int32_t VISLOC_userControlThread(VISLOC_Context *appCntxt)
                 appPerfStatsPrintAll();
                 VISLOC_printStats(appCntxt);
 
-                CM_printProctime();
                 CM_resetProctime();
                 break;
 
-                case 'e':
-                {
-                    FILE *fp;
-                    const char *name = VISLOC_PERF_OUT_FILE;
-
-                    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-                    if (fp != NULL)
-                    {
-                        VISLOC_exportStats(appCntxt,
-                                                      fp,
-                                                      true);
-
-                        appPerfStatsExportCloseFile(fp);
-                    }
-                    else
-                    {
-                        LOG_ERROR("Could not open [%s] for exporting "
-                                   "performance data\n", name);
-                    }
-                }
-
+            case 'e':
+                VISLOC_dumpStats(appCntxt);
                 break;
 
             case 'x':

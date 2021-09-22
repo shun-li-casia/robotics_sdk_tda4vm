@@ -349,7 +349,7 @@ vx_status VISION_CNN_run(VISION_CNN_Context   *appCntxt,
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        LOG_ERROR("VISION_CNN_popFreeInputDesc() failed\n");
+        LOG_ERROR("VISION_CNN_popFreeInputDesc() failed. Incoming Frame is dropped!\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -515,6 +515,27 @@ static void VISION_CNN_exitProcThreads(VISION_CNN_Context *appCntxt)
     }
 }
 
+static void VISION_CNN_dumpStats(VISION_CNN_Context *appCntxt)
+{
+    const char *name = VISION_CNN_PERF_OUT_FILE;
+    FILE       *fp;
+
+    fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+    if (fp != NULL)
+    {
+        VISION_CNN_exportStats(appCntxt, fp, true);
+
+        CM_printProctime(fp);
+        appPerfStatsExportCloseFile(fp);
+    }
+    else
+    {
+        PTK_printf("Could not open [%s] for exporting "
+                   "performance data\n", name);
+    }
+}
+
 void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
 {
     if (appCntxt->state == VISION_CNN_STATE_INVALID)
@@ -530,8 +551,8 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     appPerfStatsPrintAll();
     VISION_CNN_printStats(appCntxt);
+    VISION_CNN_dumpStats(appCntxt);
 
-    CM_printProctime();
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
@@ -630,32 +651,11 @@ static int32_t VISION_CNN_userControlThread(VISION_CNN_Context *appCntxt)
                 appPerfStatsPrintAll();
                 VISION_CNN_printStats(appCntxt);
 
-                CM_printProctime();
                 CM_resetProctime();
                 break;
 
-                case 'e':
-                {
-                    FILE *fp;
-                    const char *name = VISION_CNN_PERF_OUT_FILE;
-
-                    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-                    if (fp != NULL)
-                    {
-                        VISION_CNN_exportStats(appCntxt,
-                                                      fp,
-                                                      true);
-
-                        appPerfStatsExportCloseFile(fp);
-                    }
-                    else
-                    {
-                        PTK_printf("Could not open [%s] for exporting "
-                                   "performance data\n", name);
-                    }
-                }
-
+            case 'e':
+                VISION_CNN_dumpStats(appCntxt);
                 break;
 
             case 'x':
@@ -911,7 +911,7 @@ void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
         vx_status   vxStatus = VX_SUCCESS;
 
         appCntxt->state = VISION_CNN_STATE_SHUTDOWN;
-        LOG_ERROR("Waiting for the graph to finish.\n");
+        PTK_printf("Waiting for the graph to finish.\n");
 
         vxStatus = VISION_CNN_waitGraph(appCntxt);
 

@@ -623,7 +623,7 @@ vx_status ESTOP_APP_run(ESTOP_APP_Context  *appCntxt,
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        LOG_ERROR("ESTOP_APP_popFreeInputDesc() failed\n");
+        LOG_ERROR("ESTOP_APP_popFreeInputDesc() failed. Incoming Frame is dropped!\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -841,6 +841,27 @@ static void ESTOP_APP_exitProcThreads(ESTOP_APP_Context *appCntxt)
 
 }
 
+static void ESTOP_APP_dumpStats(ESTOP_APP_Context *appCntxt)
+{
+    const char *name = ESTOP_APP_PERF_OUT_FILE;
+    FILE       *fp;
+
+    fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+    if (fp != NULL)
+    {
+        ESTOP_APP_exportStats(appCntxt, fp, true);
+
+        CM_printProctime(fp);
+        appPerfStatsExportCloseFile(fp);
+    }
+    else
+    {
+        LOG_ERROR("Could not open [%s] for exporting "
+                   "performance data\n", name);
+    }
+}
+
 void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
 {
     if (appCntxt->state == ESTOP_APP_STATE_INVALID)
@@ -856,8 +877,8 @@ void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     appPerfStatsPrintAll();
     ESTOP_APP_printStats(appCntxt);
+    ESTOP_APP_dumpStats(appCntxt);
 
-    CM_printProctime();
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
@@ -998,30 +1019,12 @@ static int32_t ESTOP_APP_userControlThread(ESTOP_APP_Context *appCntxt)
                 appPerfStatsPrintAll();
                 ESTOP_APP_printStats(appCntxt);
 
-                CM_printProctime();
                 CM_resetProctime();
                 break;
 
             case 'e':
-            {
-                FILE *fp;
-                const char *name = ESTOP_APP_PERF_OUT_FILE;
-
-                fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-                if (fp != NULL)
-                {
-                    ESTOP_APP_exportStats(appCntxt, fp, true);
-
-                    appPerfStatsExportCloseFile(fp);
-                }
-                else
-                {
-                    LOG_ERROR("Could not open [%s] for exporting "
-                               "performance data\n", name);
-                }
-            }
-            break;
+                ESTOP_APP_dumpStats(appCntxt);
+                break;
 
             case 'x':
                 done = 1;

@@ -1294,6 +1294,8 @@ void ESTOP_APP_printStats(ESTOP_APP_Context * appCntxt)
     PTK_printf("\n");
     appPerfPointPrintFPS(&appCntxt->estopPerf);
     PTK_printf("\n");
+    CM_printProctime(stdout);
+    PTK_printf("\n");
 }
 
 vx_status ESTOP_APP_exportStats(ESTOP_APP_Context * appCntxt, FILE *fp, bool exportAll)

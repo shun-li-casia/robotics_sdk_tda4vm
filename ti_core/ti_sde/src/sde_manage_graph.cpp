@@ -995,6 +995,8 @@ void SDEAPP_printStats(SDEAPP_Context * appCntxt)
     PTK_printf("\n");
     appPerfPointPrintFPS(&appCntxt->sdePclPerf);
     PTK_printf("\n");
+    CM_printProctime(stdout);
+    PTK_printf("\n");
 }
 
 vx_status SDEAPP_exportStats(SDEAPP_Context * appCntxt, FILE *fp, bool exportAll)

@@ -42,6 +42,21 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
 
 2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup).
 
+**NOTE**: The etcher image is created for 16 GB SD cards, if you are using larger SD card, it is highly recommended to expand the root filesystem to use the full SD card capacity using below steps on the Ubuntu PC.
+
+```
+# find the SD card device entry using lsblk (Eg: /dev/sdb)
+# use the following commands to expand the filesystem
+
+umount /dev/sdX1
+umount /dev/sdX2
+sudo parted -s /dev/sdX resizepart 2 '100%'
+sudo e2fsck -f /dev/sdX2
+sudo resize2fs /dev/sdX2
+
+# replace /dev/sdX in above commands with SD card device entry
+```
+
 ### 2.2. Connect Remotely to the TDA4 Target
 
 1. To find the IP address assigned to the EVM, use a serial port communications program (for example, `sudo minicom -D /dev/ttyUSBx` where `/dev/ttyUSBx` is the device for the UART serial port), log in with `root` account, and run `ifconfig`.
@@ -54,17 +69,18 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
     You can consider using VS Code with "remote development extension pack" for better experience, in a similar way as described in [this section of Edge AI documentation](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#connect-remotely)
 
 ### 2.3. Clone the Robotics SDK Git Repository and Intial Setup
-You can download `initial_setup.sh` and run the the script:
+### 2.3.1 On TDA4 Target
+You can download `init_setup.sh` and run the the script:
 ```
-root@j7-evm:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/tree/initial_setup.sh
-root@j7-evm:~$ source initial_setup.sh
+root@j7-evm:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
+root@j7-evm:~$ source init_setup.sh
 ```
 This scipt takes care of:
 * Setting up the folders for evaluating the Robotics SDK under $HOME/j7ros_home
 * Downloadding DL runtime libraries, ROSBAG and other data files
 * Downloadding several DL models in the edge AI model zoo
 
-<!-- **NOTE**: Subsections below are just for reference. Equivalent settings are already included in `initial_setup.sh`.
+<!-- **NOTE**: Subsections below are just for reference. Equivalent settings are already included in `init_setup.sh`.
 
 ### 2.3.1. Setting Up Edge AI
 
@@ -107,6 +123,13 @@ This scipt takes care of:
     root@j7-evm:~/j7ros_home$ make data_download
     ```
     This script downloads several tarballs and installs them under `$WORK_DIR/data` and `\opt\dl_runtime`. -->
+
+### 2.3.2 Remote Ubuntu PC
+In a similar way, you can use the same script to set up on the visualization remote Ubuntu PC:
+```
+root@pc:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
+root@pc:~$ source init_setup.sh
+```
 
 ### 2.4. Set Up Docker Environment on TDA4 Target
 
