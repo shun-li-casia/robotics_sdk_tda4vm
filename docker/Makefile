@@ -50,6 +50,18 @@ DOCKER_DIR        = $(ROS_SRC_DIR)/docker
 SCRIPTS_DIR       = $(ROS_SRC_DIR)/docker/scripts
 DLRT_DIR          = /opt/dl_runtime
 
+# artifactory URL in TI network
+REPO_LOC_TI       = artifactory.itg.ti.com/docker-public-arm
+ifeq ($(PLATFORM), pc)
+REPO_LOC_TI       = artifactory.itg.ti.com/docker-public/library/
+endif
+
+REPO_LOC          = arm64v8
+ifeq ($(PLATFORM), pc)
+# make it empty
+REPO_LOC          = ""
+endif
+
 # Environment variable list to pass to the Docker container
 ENV_FILE          = env_list.txt
 ENV_FILE_PATH     = $(DOCKER_DIR)/$(ENV_FILE)
@@ -112,11 +124,11 @@ docker_build:
 	@echo "ping bitbucket.itg.ti.com -c 1 > /dev/null 2>&1"   >> $(TGT_NAME)
 	@echo "if [ \"\$$?\" -eq \"0\" ]; then"                   >> $(TGT_NAME)
 	@echo "    USE_PROXY=1"                                   >> $(TGT_NAME)
-	@echo "    REPO_LOCATION=artifactory.itg.ti.com/docker-public-arm" >> $(TGT_NAME)
+	@echo "    REPO_LOCATION=$(REPO_LOC_TI)"                  >> $(TGT_NAME)
 	@echo "    HTTP_PROXY=http://webproxy.ext.ti.com:80"      >> $(TGT_NAME)
 	@echo "else"                                              >> $(TGT_NAME)
 	@echo "    USE_PROXY=0"                                   >> $(TGT_NAME)
-	@echo "    REPO_LOCATION=$(ARCH)"                         >> $(TGT_NAME)
+	@echo "    REPO_LOCATION=$(REPO_LOC)"                     >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
@@ -165,6 +177,10 @@ endif
 	@echo "    --privileged \\"                               >> $(TGT_NAME)
 	@echo "    --network host \\"                             >> $(TGT_NAME)
 	@echo "    --env USE_PROXY=\$$USE_PROXY \\"               >> $(TGT_NAME)
+ifeq ($(PLATFORM), pc)
+	@echo "    --env J7_IP_ADDR=\$$J7_IP_ADDR \\"             >> $(TGT_NAME)
+	@echo "    --env PC_IP_ADDR=\$$PC_IP_ADDR \\"             >> $(TGT_NAME)
+endif
 ifeq ($(PLATFORM), j7)
 	@echo "    --env TIVA_LIB_VER=$(TIVA_LIB_VER) \\"         >> $(TGT_NAME)
 	@echo "    --env J7_IP_ADDR=\$$IP_ADDR \\"                >> $(TGT_NAME)
@@ -194,8 +210,7 @@ scripts_$(PLATFORM): docker_build_$(PLATFORM) docker_run_$(PLATFORM)
 docker_build_j7:
 	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh \
 	                      DOCKER_FILE=$(DOCKER_FILE_TGT) \
-	                      DOCKER_TAG=$(DOCKER_TAG_TGT) \
-	                      ARCH=$(ARCH_TGT)
+	                      DOCKER_TAG=$(DOCKER_TAG_TGT)
 
 docker_run_j7:
 	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh \
@@ -204,8 +219,7 @@ docker_run_j7:
 docker_build_pc:
 	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh \
 	                      DOCKER_FILE=$(DOCKER_FILE_HOST) \
-	                      DOCKER_TAG=$(DOCKER_TAG_HOST) \
-	                      ARCH=$(ARCH_HOST)
+	                      DOCKER_TAG=$(DOCKER_TAG_HOST)
 
 docker_run_pc:
 	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh \

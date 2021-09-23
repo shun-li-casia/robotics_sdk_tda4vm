@@ -20,13 +20,13 @@ In case of directly installation of ROS on the Ubuntu PC:
 * For ROS Melodic installation steps, please refer to [this ROS wiki page](http://wiki.ros.org/melodic/Installation/Ubuntu).
 * For ROS 2 Foxy installation steps, please refer to [this ROS 2 documentation](https://docs.ros.org/en/foxy/Installation.html).
 
-We also provide Dockefiles that can build and run on the remote Ubuntu PC for both ROS Medlodic and ROX 2 Foxy with detailed steps for setting up Docker environment on the remote PC.
+We also provide Dockefiles that can build and run on the remote Ubuntu PC for both ROS Melodic and ROX 2 Foxy with detailed steps for setting up Docker environment on the remote PC.
 
 ### 1.4. USB Camera [Optional]
 The Robotics SDK provides OpenCV-based ROS drivers for [ZED stereo camera](https://www.stereolabs.com/zed/) and USB mono cameras (Logitech C270, C920, C922). All the demo applications can be tried out with a live camera as well as a ROSBAG file that is provided.
 
-* For configuration of a stereo camera, please see `{ros1,ros2}/drivers/zed_capture/README.md`.
-* For configuration of a USB mono camera, please see `{ros1,ros2}/drivers/mono_capture/README.md`.
+* For configuration of a stereo camera, please see `ros1/drivers/zed_capture/README.md`.
+* For configuration of a USB mono camera, please see `ros1/drivers/mono_capture/README.md`.
 
 ![](docs/tiovx_ros_setup.svg)
 <figcaption>Figure 1. Robotics SDK Setup and Installation Steps</figcaption>
@@ -40,7 +40,7 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
 
 1. From Ubuntu PC, download [the SD card image](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip).
 
-2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup).
+2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup).
 
 **NOTE**: The etcher image is created for 16 GB SD cards, if you are using larger SD card, it is highly recommended to expand the root filesystem to use the full SD card capacity using below steps on the Ubuntu PC.
 
@@ -150,6 +150,6 @@ It will take several minutes to build the Docker image. The Docker image built c
 
 **Docker Start**: After "`docker build`" is completed, it is important to use `docker_run_rosX.sh` script to start a Docker container, since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the Jacinto device. Please note that `docker_run_rosX.sh` includes "`--rm`" argument. Just remove "`--rm`" argument in `docker_run_rosX.sh` in case you want to do "`docker commit`" after exiting a Docker container. A short information about several useful Docker commands is provided in [this link](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/docker_environment.html#additional-docker-commands).
 
-**Switching between ROS 1 and ROS 2 Docker Containers**: When the applications are built under the ROS1 container, two directories, {build, devel} are created under **ros_ws** directory under J7 host and simularly {build, install, log} directories are created when applications are built under ROS2 container. Since the containers share the common space **ros_ws** on J7 host, theese directories need to be removed if switching between ROS1 and ROS2 containers.
+**Switching between ROS 1 and ROS 2 Docker Containers**: When the applications are built under the ROS1 container, two directories, {build, devel} are created under **ros_ws** directory under J7 host and similarly {build, install, log} directories are created when applications are built under ROS2 container. Since the containers share the common space **ros_ws** on J7 host, theese directories need to be removed if switching between ROS1 and ROS2 containers.
 
 ---

@@ -50,7 +50,7 @@ pipeline_depth:         4
 #  1 - enable
 exportGraph:            0
 
-# teal-time logging enable.
+# real-time logging enable.
 #  0 - disable
 #  1 - enable
 rtLogEnable:            0

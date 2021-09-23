@@ -4,7 +4,7 @@ Vision CNN: Semantic Segmentation
 ![](docs/semseg_rviz.png)
 <br />
 
-This `ti_vision_cnn` node is versitile deep-learning (DL) inference ROS node that is optimized on DL cores and hardware acceelrator of TDA4. The `ti_vision_cnn` node supports compute-intensive DL inference operations including 2D object detection and semantic segmentation. Figure 1 shows the high-level block diagram of the applications around the `ti_vision_cnn` node, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
+This `ti_vision_cnn` node is versatile deep-learning (DL) inference ROS node that is optimized on DL cores and hardware accelerator of TDA4. The `ti_vision_cnn` node supports compute-intensive DL inference operations including 2D object detection and semantic segmentation. Figure 1 shows the high-level block diagram of the applications around the `ti_vision_cnn` node, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
 
 ![](docs/semseg_demo_block_diagram.svg)
 <figcaption>Figure 1. Semantic segmentation demo: block diagram</figcaption>
@@ -35,7 +35,7 @@ To process the image stream from a USB mono camera:
 roslaunch ti_vision_cnn mono_semseg_cnn.launch
 ```
 
-**[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow "Set Up the Ubuntu PC for Visualization" section of [docker/README.md](../../docker/README.md)
+**[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md)
 
 The semantic segmentation output tensor is published by the application. For visualization, a color-coded semantic segmentation image is generated. Following command launches the resulting color-mapped semantic segmentation image along with the raw image on RViz:
 ```
@@ -62,13 +62,13 @@ To process the image stream from a USB mono camera:
 roslaunch ti_vision_cnn mono_semseg_cnn.launch
 ```
 
-**[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow "Set Up the Ubuntu PC for Visualization" section of [docker/README.md](../../docker/README.md)
+**[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md)
 
 ```
 ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
 ```
 
-## Objdect Detection Demo
+## Object Detection Demo
 
 See [README_objdet.md](./README_objdet.md).
 

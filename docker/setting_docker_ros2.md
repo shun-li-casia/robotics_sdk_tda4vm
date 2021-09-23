@@ -23,7 +23,7 @@ In ROS 2 Docker environment, ROS Foxy and necessary libraries and tools are inst
 
 4. To build the ROS applications, inside the Docker container:
     ```
-    root@j7-docker:~/j7ros_home/ros_ws$ colcon build
+    root@j7-docker:~/j7ros_home/ros_ws$ colcon build --base-paths src/jacinto_ros_perception/ros2
     root@j7-docker:~/j7ros_home/ros_ws$ source install/setup.bash
     ```
 
@@ -57,11 +57,30 @@ In ROS 2 Docker environment, ROS Foxy and necessary libraries and tools are inst
 
 4. Build the ROS nodes for visualization:
     ```
-    user@pc:~/j7ros_home/ros_ws/src$ cd $ROS_WS
-    user@pc:~/j7ros_home/ros_ws$ colcon build
+    user@pc-docker:~/j7ros_home/ros_ws$ colcon build
     ```
 
 ## 3. Run Demo Applications
+
+Table below summarizes the launch commands that you can use in the Docker container for each demo on the TDA4/J7 and the remote visualization PC. For more details, see the following subsections.
+
+Demo             | Launch command on TDA4/J7          | Launch command on Remote Visualization PC
+-----------------|------------------------------------|-------------------------
+Stereo Vision (ROSBAG)     | ros2 launch ti_sde bag_sde_launch.py  | ros2 launch ti_viz_nodes rviz_sde_launch.py
+Stereo Vision (ZED camera) | ros2 launch ti_sde zed_sde_launch.py  | same as above
+Stereo Vision with point-cloud (ROSBAG)     | ros2 launch ti_sde bag_sde_pcl_launch.py  | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
+Stereo Vision with point-cloud (ZED camera) | ros2 launch ti_sde zed_sde_pcl_launch.py  | same as above
+Semantic Segmentation CNN (ROSBAG)      | ros2 launch ti_vision_cnn bag_semseg_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
+Semantic Segmentation CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py   | same as above
+Semantic Segmentation CNN (Mono camera) | ros2 launch ti_vision_cnn mono_semseg_cnn_launch.py  | same as above
+Object Detection CNN (ROSBAG)      | ros2 launch ti_vision_cnn bag_objdet_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
+Object Detection CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py   | same as above
+Object Detection CNN (Mono camera) | ros2 launch ti_vision_cnn mono_objdet_cnn_launch.py  | same as above
+3D Obstacle Detection (ROSBAG)     | ros2 launch ti_estop bag_estop_launch.py  | ros2 launch ti_viz_nodes rviz_estop_launch.py
+3D Obstacle Detection (ZED camera) | ros2 launch ti_estop zed_estop_launch.py  | same as above
+Visual Localization (ROSBAG)       | ros2 launch ti_vl bag_visloc_launch.py    | ros2 launch ti_viz_nodes rviz_visloc_launch.py
+
+In the follolwing, **[J7]** and **[PC]** indicate the steps to run on the TDA4/J7 target and on the PC, respectively.
 
 ### 3.1. Run Stereo Vision Application
 

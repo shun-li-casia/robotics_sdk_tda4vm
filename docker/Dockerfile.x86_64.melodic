@@ -28,25 +28,16 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#=========================================================================
-# This Dockerfile is for installing ROS-Melodic (ros-perception packages) on
-# x86_64/ubuntu:18.04 base image along with other depedencidies to build
-# and run the applications provided in Robotics SDK.
-#
-# Note: 1. "jacinto_ros_perception" is assumed to be populated under $WORK_DIR/ros_ws/src
-#       2. "docker build" should be run in $WORK_DIR, for example:
-# cd $WORK_DIR
-# docker build -t <tag> -f ./ros_ws/src/jacinto_ros_perception/docker/Dockerfile.ros-melodic .
-
 ARG USE_PROXY
 ARG HTTP_PROXY
-ARG REPO_LOCATION=x86_64
+ARG REPO_LOCATION
 ARG GIT_REPO=jacinto_ros_perception
 ARG DEBIAN_FRONTEND=noninteractive
 
 #=========================================================================
-#FROM ${REPO_LOCATION}/ubuntu:18.04 AS base-0
-FROM ubuntu:18.04 AS base-0
+# The environment variable REPO_LOCATION is set from outside as needed,
+# based on network
+FROM ${REPO_LOCATION}ubuntu:18.04 AS base-0
 
 #=========================================================================
 FROM base-0 AS base-1

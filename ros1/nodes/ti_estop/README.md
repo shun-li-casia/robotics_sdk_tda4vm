@@ -13,14 +13,14 @@ This demonstrates the 3D obstacle detection application using the disparity map 
 * Stereo Vision Processing
   - This is the same process described in [Stereo Vision Application](../ti_sde/README.md) without the point-cloud generation process. The output disparity map is fed to the 3D obstacle detection process as an input.
 * Semantic Segmentation Processing
-  - This is the same process described in [Semantic Segmentation Application](../ti_semseg_cnn/README.md). The output tensor for the CNN network is fed to the 3D obstacle detection process as another input.
+  - This is the same process described in [Semantic Segmentation Application](../ti_vision_cnn/README.md). The output tensor for the CNN network is fed to the 3D obstacle detection process as another input.
 * 3D Obstacle Detection Processing
   - This process outputs the 3D bounding box coordinates of the detected obstacles. First, it creates 3D point cloud using the disparity map and the camera parameters. Note that it maps only pixels that belongs to particular classes, e.g., car, pedestrian, bicycle, rider, etc. into the 3D space. Then it projects the 3D point cloud on a 2D occupancy grid map. Finally it detects individual obstacles by grouping closely-located occupied cells with an identical class using a "connected component analysis" algorithm.
 
 
 ## How to Run the Application in ROS1
 
-**[J7]** For setting up the ROS1 environment on J7 host, please follow "3.1. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[J7]** For setting up the ROS1 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
 roslaunch ti_estop bag_estop.launch
 ```
@@ -28,7 +28,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ```
 roslaunch ti_estop zed_estop.launch
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow "3.2. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros1.md).
 
 As shown in the "Launch File Parameters" section below, this application publishes many topics regarding 3D bounding box coordinates, semantic segmentation output tensor and disparity map. Using these information, we can produce color-coded disparity map, color-coded semantic segmentation map and 3D bounding boxes overlaid on image. To visualize them on PC, run
 ```
@@ -42,7 +42,7 @@ roslaunch ti_estop rviz_ogmap.launch
 
 ## How to Run the Application in ROS2
 
-**[J7]** For setting up the ROS2 environment on J7 host, please follow "4.1. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[J7]** For setting up the ROS2 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
 ros2 launch ti_estop bag_estop_launch.py
 ```
@@ -51,7 +51,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ros2 launch ti_estop zed_estop_launch.py
 ```
 
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow "4.2. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros2.md).
 
 To visualize outputs on PC, run
 ```

@@ -35,14 +35,21 @@ set -e
 # set up ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 
-# ROS network settings
-export ROS_MASTER_URI=http://$J7_IP_ADDR:11311
-export ROS_IP=$J7_IP_ADDR
-
 if [ "$ROS_VERSION" == "1" ]; then
     # ROS network settings
+    if [ -z "$J7_IP_ADDR" ]; then
+        echo "env variable J7_IP_ADDR is not set"
+    fi
     export ROS_MASTER_URI=http://$J7_IP_ADDR:11311
-    export ROS_IP=$J7_IP_ADDR
+
+    if [[ `arch` == "aarch64" ]]; then
+        export ROS_IP=$J7_IP_ADDR
+    else
+        if [ -z "$PC_IP_ADDR" ]; then
+            echo "env variable PC_IP_ADDR is not set"
+        fi
+        export ROS_IP=$PC_IP_ADDR
+    fi
 
     # source catkin_ws setup.bash if exists
     SETUP_FILE=$ROS_WS/devel/setup.bash

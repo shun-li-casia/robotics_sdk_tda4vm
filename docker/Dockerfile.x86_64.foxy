@@ -30,14 +30,14 @@
 
 ARG USE_PROXY
 ARG HTTP_PROXY
-ARG REPO_LOCATION=x86_64
+ARG REPO_LOCATION
 ARG GIT_REPO=jacinto_ros_perception
 ARG DEBIAN_FRONTEND=noninteractive
 
 #=========================================================================
-#FROM ros:foxy-ros-core-focal AS base-0
-#FROM ${REPO_LOCATION}/ubuntu:20.04 AS base-0
-FROM ubuntu:20.04 AS base-0
+# The environment variable REPO_LOCATION is set from outside as needed,
+# based on network
+FROM ${REPO_LOCATION}ubuntu:20.04 AS base-0
 
 #=========================================================================
 FROM base-0 AS base-1

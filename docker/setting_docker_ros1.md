@@ -24,7 +24,7 @@ In ROS 1 Docker, ROS Melodic and necessary libraries and tools are installed.
 
 4. To build the ROS applications, inside the Docker container:
     ```
-    root@j7-docker:~/j7ros_home/ros_ws$ catkin_make
+    root@j7-docker:~/j7ros_home/ros_ws$ catkin_make --source src/jacinto_ros_perception/ros1
     root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     ```
 
@@ -48,31 +48,49 @@ You can choose any folder, but this section assumes installation under `${HOME}/
     ```
     It will take several minutes to build the Docker image. The Docker image built can be listed with "docker images".
 
-3. Run the Docker container
+4. ROS network setting: We need to set up two enviroment variables which will be passed to the Docker container and used in configuring ROS network settings. Update the following lines in `setup_env_pc.sh`:
+    ```
+    export J7_IP_ADDR=<J7_IP_address>
+    export PC_IP_ADDR=<PC_IP_address>
+    ```
+    `<J7_IP_address>` can be found by running `make ip_show` on a TDA4 terminal.
+
+    Then, source the script:
+    ```
+    user@pc:~/j7ros_home$ source setup_env_pc.sh
+    ```
+
+4. Run the Docker container
     ```
     user@pc:~/j7ros_home$ ./docker_run_ros1.sh
     ```
 
-4. Build the ROS nodes for visualization:
+5. Build the ROS nodes for visualization:
     ```
-    user@pc:~/j7ros_home/ros_ws/src$ cd $ROS_WS
-    user@pc:~/j7ros_home/ros_ws$ catkin_make
+    user@pc-docker:~/j7ros_home/ros_ws$ catkin_make
     ```
 
-5. ROS network setting: Update the following lines in `setup_env_pc.sh`:
-    ```
-    PC_IP_ADDR=<PC_IP_address>
-    J7_IP_ADDR=<J7_IP_address>
-    ```
-    `<J7_IP_address>` can be found by running `make ip_show` on a TDA4 terminal.
-
-    To set up the PC environment, run the following inside the Docker container:
-    ```
-    user@pc-docker:~/j7ros_home/ros_ws$ source setup_env_pc.sh
-    ```
-    **NOTE**: Make sure running this script before launching vizualization on the PC.
 
 ## 3. Run Demo Applications
+
+Table below summarizes the launch commands that you can use in the Docker container for each demo on the TDA4/J7 and the remote visualization PC. For more details, see the following subsections.
+
+Demo             | Launch command on TDA4/J7          | Launch command on Remote Visualization PC
+-----------------|------------------------------------|-------------------------
+Stereo Vision (ROSBAG)     | roslaunch ti_sde bag_sde.launch  | roslaunch ti_viz_nodes rviz_sde.launch
+Stereo Vision (ZED camera) | roslaunch ti_sde zed_sde.launch  | same as above
+Stereo Vision with point-cloud (ROSBAG)     | roslaunch ti_sde bag_sde_pcl.launch  | roslaunch ti_viz_nodes rviz_sde_pcl.launch
+Stereo Vision with point-cloud (ZED camera) | roslaunch ti_sde zed_sde_pcl.launch  | same as above
+Semantic Segmentation CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch
+Semantic Segmentation CNN (ZED camera)  | roslaunch ti_vision_cnn zed_semseg_cnn.launch   | same as above
+Semantic Segmentation CNN (Mono camera) | roslaunch ti_vision_cnn mono_semseg_cnn.launch  | same as above
+Object Detection CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch
+Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.launch   | same as above
+Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn mono_objdet_cnn.launch  | same as above
+3D Obstacle Detection (ROSBAG)     | roslaunch ti_estop bag_estop.launch  | roslaunch ti_viz_nodes rviz_estop.launch
+3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch  | same as above
+Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | roslaunch ti_viz_nodes rviz_visloc.launch
+
 
 In the follolwing, **[J7]** and **[PC]** indicate the steps to run on the TDA4/J7 target and on the PC, respectively.
 ### 3.1. Run Stereo Vision Application
@@ -125,7 +143,7 @@ In the follolwing, **[J7]** and **[PC]** indicate the steps to run on the TDA4/J
     user@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_semseg_cnn.launch
     ```
 
-### 3.4. Run Objdect Detection CNN Application
+### 3.4. Run Object Detection CNN Application
 
 1. **[J7]** To launch object detection demo with playing back a ROSBAG file, run the following in `$WORK_DIR` on the J7 host Linux:
     ```

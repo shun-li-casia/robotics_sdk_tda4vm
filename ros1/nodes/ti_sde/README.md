@@ -24,7 +24,7 @@ Finally, when configured, the output disparity map and the rectified right image
 ## How to Run the Application in ROS 1
 
 ### Run the Stereo Demo
-**[J7]** For setting up the ROS1 environment on J7 host, please follow "3.1. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[J7]** For setting up the ROS1 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
 roslaunch ti_sde bag_sde.launch
 ```
@@ -32,7 +32,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ```
 roslaunch ti_sde zed_sde.launch
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow "3.2. Set Up the Ubuntu PC for Visualization" section of [Setting Up Robotics SDK Environment](../../docker/README.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros1.md).
 
 To display the disparity map using RViz on PC, run:
 ```
@@ -56,7 +56,7 @@ roslaunch ti_viz_nodes rviz_sde_pcl.launch
 ## How to Run the Application in ROS 2
 
 ### Run the Stereo Demo
-**[J7]** For setting up the ROS2 environment on J7 host, please follow "4.1. Set Up Docker Environment on PC" in [Setting Up Robotics SDK Environment](../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[J7]** For setting up the ROS2 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
 ```
 ros2 launch ti_sde bag_sde_launch.py
 ```
@@ -64,7 +64,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ```
 ros2 launch ti_sde zed_sde_launch.py
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow "4.2. Set Up the Ubuntu PC for Visualization" section of [Setting Up Robotics SDK Environment](../../docker/README.md)
+**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros2.md)
 
 To display the disparity map using RViz on PC, run:
 ```

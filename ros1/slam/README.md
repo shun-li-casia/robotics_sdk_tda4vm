@@ -5,9 +5,9 @@ Hector SLAM Application
 <figcaption> Figure 1. 2D Lidar map using Hector SLAM </figcaption>
 <br />
 
-SLAM (Simultaneous Localization and Mapping) is a critical technology in Robotics applications. It helps map unknown environment and localize a robot using a pre-built map. There are many open-source SLAM algorithms with camera and 2D/3D Lidar and they can run on J7 in Docker container. For example, in this demo, it is demontrated how to build and run Hector SLAM on J7 in Docker container. 2D Lidar data, which was collected from TurtleBot3 is provided for this demo.
+SLAM (Simultaneous Localization and Mapping) is a critical technology in Robotics applications. It helps map unknown environment and localize a robot using a pre-built map. There are many open-source SLAM algorithms with camera and 2D/3D Lidar and they can run on J7 in Docker container. For example, in this demo, it is demonstrated how to build and run Hector SLAM on J7 in Docker container. 2D Lidar data, which was collected from TurtleBot3 is provided for this demo.
 
-Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot3. For more details on Hector SLAM, plese refer to [http://wiki.ros.org/hector_slam](http://wiki.ros.org/hector_slam).
+Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot3. For more details on Hector SLAM, please refer to [http://wiki.ros.org/hector_slam](http://wiki.ros.org/hector_slam).
 
 ## How to Run the Hector SLAM Application
 

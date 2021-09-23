@@ -3,7 +3,7 @@ Change Log
 
 ## 0.5.0 (2021-09-21)
 
-* ROS development environment in a Docker container on top of Processor Linux SDK for edge AI pre-built image.
+* ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.0.1 pre-built image.
 * A new versatile vision CNN inference ROS node is added. This new CNN inference node supports many 2D object detection, and semantic segmentation models from the TI edge AI model zoo, that run in any of ONNX-RT, TFL-RT, and Neo-AI-DLR runtime frameworks.
 * Added ROS 2 support: Docker environment for ROS 2 Foxy is provided. Most of demo applications run in ROS 2 Foxy as well as in ROS 1 Melodic.
 * A visual localization demo application where DKAZE feature extraction is accelerated on C7/MMA.
