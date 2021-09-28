@@ -72,9 +72,14 @@ if [[ "$ARCH" == "aarch64" ]]; then
         bash /opt/edge_ai_apps/scripts/install_onnx_rt.sh
     fi
 
-    # Download model zoo: all detection and segmentation  models
-    bash /opt/edge_ai_apps/download_models.sh -d detection
-    bash /opt/edge_ai_apps/download_models.sh -d segmentation
+    # Download models in the model zoo
+    Models=(
+        ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512
+        TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
+    )
+    for Model in ${Models[@]}; do
+	    bash /opt/edge_ai_apps/download_models.sh -d $Model
+    done
 fi
 
 sync

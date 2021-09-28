@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-## 0.5.0 (2021-09-21)
+## 0.5.0 (2021-09-28)
 
 * ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.0.1 pre-built image.
 * A new versatile vision CNN inference ROS node is added. This new CNN inference node supports many 2D object detection, and semantic segmentation models from the TI edge AI model zoo, that run in any of ONNX-RT, TFL-RT, and Neo-AI-DLR runtime frameworks.
@@ -9,7 +9,7 @@ Change Log
 * A visual localization demo application where DKAZE feature extraction is accelerated on C7/MMA.
 * USB mono camera support is added: we provide a OpenCV based ROS driver for capturing raw images from a USB camera (e.g., Logitech C920, C922, C270).
 * Camera calibration tool and LDC remap look-up-table generation tool for USB mono cameras are also provided.
-* Open-source 2D Lidar SLAM: we provide a script and instruction for evaluating the Hector SLAM on TDA4 device.
+* Open-source 2D Lidar SLAM: we provide a script and instruction for evaluating open-source Hector SLAM on TDA4 device.
 * Dockerfiles for the remote visualization PC are provided for each of ROS 1 Melodic and ROS 2 Foxy.
 
 ## 0.4.0 (2021-07-14)

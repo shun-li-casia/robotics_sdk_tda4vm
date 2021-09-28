@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <rcutils/logging.h>
 
@@ -12,6 +14,12 @@ using namespace sensor_msgs::msg;
 using namespace message_filters;
 
 #define clip3(x, min, max) ( x > max? max : (x < min ? min : x))
+
+static void sigHandler(int32_t sig)
+{
+    (void) sig;
+    std::exit(EXIT_SUCCESS);
+}
 
 namespace ti_ros2
 {
@@ -305,7 +313,7 @@ namespace ti_ros2
     };
 }
 
-//static std::shared_ptr<ti_ros2::Yuv2Rgb>  colorConv = nullptr;
+// static std::shared_ptr<ti_ros2::Yuv2Rgb>  colorConv = nullptr;
 static ti_ros2::Yuv2Rgb *colorConv = nullptr;
 
 /**
@@ -315,14 +323,21 @@ int main(int argc, char **argv)
 {
     try
     {
-        rclcpp::NodeOptions options;
+        rclcpp::InitOptions initOptions{};
+        rclcpp::NodeOptions nodeOptions{};
 
-        rclcpp::init(argc, argv);
+        /* Prevent the RCLCPP signal handler binding. */
+        initOptions.shutdown_on_sigint = false;
 
-        options.allow_undeclared_parameters(true);
-        options.automatically_declare_parameters_from_overrides(true);
+        rclcpp::init(argc, argv, initOptions);
 
-        colorConv = new ti_ros2::Yuv2Rgb("viz_color_conv_yuv2rgb", options);
+        nodeOptions.allow_undeclared_parameters(true);
+        nodeOptions.automatically_declare_parameters_from_overrides(true);
+
+        signal(SIGINT, sigHandler);
+
+        // colorConv = std::make_shared<ti_ros2::Yuv2Rgb>("viz_color_conv_yuv2rgb", nodeOptions);
+        colorConv = new ti_ros2::Yuv2Rgb("viz_color_conv_yuv2rgb", nodeOptions);
 
         return EXIT_SUCCESS;
     }

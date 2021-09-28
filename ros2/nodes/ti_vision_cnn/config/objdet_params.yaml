@@ -9,6 +9,7 @@ vision_cnn:
         # dl_model_path: /opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
 
         ## Models below are all detection models from edge AI model zoo. Not all models yet tested.
+        ## Please download the models first using /opt/edge_ai_apps/download_models.sh
         # dl_model_path: /opt/model_zoo/ONR-OD-8000-ssd1200-resNet34-mlperf-1200x1200
         # dl_model_path: /opt/model_zoo/ONR-OD-8020-ssd-lite-mobv2-coco-512x512
         # dl_model_path: /opt/model_zoo/ONR-OD-8030-ssd-lite-mobv2-fpn-coco-512x512

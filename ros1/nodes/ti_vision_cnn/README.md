@@ -18,11 +18,11 @@ A CNN model for semantic segmentation has been developed using [Jacinto AI DevKi
 * Model: deeplabv3lite_mobilenetv2_tv (for details, see [LINK](https://git.ti.com/cgit/jacinto-ai/pytorch-jacinto-ai-devkit/about/docs/Semantic_Segmentation.md))
 * Input image: 768 x 432 pixels in RGB
 * Training data: [Cityscapes Dataset](https://www.cityscapes-dataset.com), and a small dataset collected from ZED camera
-* Model compilation: TVM compilation for generating DLR model artifacts. For more details on open-source deep-learning runtime on J7/TDA4x, please check [TI Edge AI Cloud](https://dev.ti.com/edgeai/).
+* Model compilation: TVM compilation for generating DLR model artifacts. For more details on open-source deep-learning runtime on TDA4, please check [TI Edge AI Cloud](https://dev.ti.com/edgeai/).
 
 ### How to Run the Application in ROS 1
 
-**[J7]** To launch semantic segmentation demo with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[TDA4]** To launch semantic segmentation demo with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 roslaunch ti_vision_cnn bag_semseg_cnn.launch
 ```
@@ -49,11 +49,7 @@ roslaunch ti_vision_cnn bag_semseg_cnn.launch ratefactor:=2.0
 
 ### How to Run the Application in ROS 2
 
-**[J7]** To launch semantic segmentation demo with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
-```
-ros2 launch ti_vision_cnn bag_semseg_cnn_launch.py
-```
-To process the image stream from a ZED stereo camera:
+**[TDA4]** To launch semantic segmentation demo with a ZED stereo camera, run the following inside the Docker container on TDA4 target:
 ```
 ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py
 ```
@@ -61,6 +57,10 @@ To process the image stream from a USB mono camera:
 ```
 roslaunch ti_vision_cnn mono_semseg_cnn.launch
 ```
+<!-- To launch semantic segmentation demo with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+```
+ros2 launch ti_vision_cnn bag_semseg_cnn_launch.py
+``` -->
 
 **[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md)
 
@@ -97,7 +97,7 @@ The table below describes the parameters in `config/params.yaml`:
 
 Referring to Figure 1, below are the descriptions of the processing blocks implemented in this application:
 
-1. The first step to process input images with lens distortion, J7 LDC (Lens Distortion Correction) hardware accelerator (HWA) does un-distortion or rectification. Pseudo codes to create LDC tables for rectification are provided [here](../ti_sde/README.md). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes image format. Input image to the application is of YUV422 (UYVY) format, which is converted to YUV420 (NV12) by the LDC.
+1. The first step to process input images with lens distortion, TDA4 LDC (Lens Distortion Correction) hardware accelerator (HWA) does un-distortion or rectification. Pseudo codes to create LDC tables for rectification are provided [here](../ti_sde/README.md). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes image format. Input image to the application is of YUV422 (UYVY) format, which is converted to YUV420 (NV12) by the LDC.
 2. Input images are resized to match to the input tensor size of the semantic segmentation model. The MSC (Multi-Scaler) HWA resizes the images to a desired size.
 3. The pre-processing block, which runs on C6x, converts YUV420 (NV12) to RGB, which is expected input format for the semantic segmentation network.
 4. The semantic segmentation network is accelerated by C7x/MMA with DLR runtime, and outputs a tensor that has class information for every pixel.

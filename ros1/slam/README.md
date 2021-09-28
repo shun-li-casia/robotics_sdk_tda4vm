@@ -24,9 +24,9 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
     root@j7-evm:~/j7ros_home$ export ROS_WS=$HOME/j7ros_home/ros_ws
     root@j7-evm:~/j7ros_home$ $ROS_WS/src/jacinto_ros_perception/ros1/slam/j7_setup_hector_slam.sh
     ```
-    It clones the Hector SLAM git repository and applyes the patch to run it on the 2D Lidar data provided.
+    It clones the Hector SLAM git repository and applies the patch to run it on the 2D Lidar data provided.
 
-3. Launch the Docker image:
+3. Launch the Docker image. For setting up the ROS1 environment on J7 host, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
     ```
     root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh
     ```
@@ -43,9 +43,9 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
 
 ### Visualize map and pose on Ubuntu PC
 
-For setting up environment of the remote PC, please follow "Set Up the Ubuntu PC for Visualization" section of [docker/README.md](../../docker/README.md).
+For setting up the ROS1 environment on the remote PC, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
 
-1. As done on the J7 host Linux, the Hector SLAM git repository:
+1. As done on the J7 host Linux, clone the Hector SLAM git repository:
     ```
     user@pc:~/j7ros_home$ export ROS_WS=$HOME/j7ros_home/ros_ws
     user@pc:~/j7ros_home$ $ROS_WS/src/jacinto_ros_perception/ros1/slam/j7_setup_hector_slam.sh

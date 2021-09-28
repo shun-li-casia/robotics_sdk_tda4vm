@@ -10,7 +10,7 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     build_node(viz_disparity VIZ_DISP_SRCS)
 
     # YUV to RGB conversion
-    set(VIZ_COL_CONV_SRCS src/ros_app_color_conversion_node.cpp)
+    set(VIZ_COL_CONV_SRCS src/viz_color_conversion_node.cpp)
     build_node(viz_color_conv_yuv2rgb VIZ_COL_CONV_SRCS)
 
     # viz_semseg

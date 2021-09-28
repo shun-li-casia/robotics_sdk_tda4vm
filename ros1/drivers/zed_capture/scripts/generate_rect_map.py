@@ -127,8 +127,9 @@ def save_camera_info(image_size, camera_name, dist_model, K, D, R, P, file_path)
     """ save the camera info to given file_path
     """
     cv_file = cv2.FileStorage(file_path, cv2.FILE_STORAGE_WRITE)
-    cv_file.write("image_width",             image_size[0])
-    cv_file.write("image_height",            image_size[1])
+    # work-around. write() has a bug in writing integers (adding .)
+    cv_file.write("image_width",             str(image_size[0]))
+    cv_file.write("image_height",            str(image_size[1]))
     cv_file.write("camera_name",             camera_name)
     cv_file.write("camera_matrix",           K)
     cv_file.write("distortion_model",        dist_model)
@@ -201,7 +202,10 @@ def main(calib_file, camera_mode):
   	# calibration file path
 	# https://github.com/tobybreckon/zed-opencv-native-python
     rospack = rospkg.RosPack()
-    zed_capture_path = rospack.get_path('zed_capture')
+    try:
+        zed_capture_path = rospack.get_path('zed_capture')
+    except:
+        print("Please do 'catkin_make' and 'source devel/setup.bash'. Try again...")
     config_file_path = os.path.join(zed_capture_path, "config", calib_file)
     # parse calibration file
     K1, D1, K2, D2, image_size, R, T = parse_calib_file_wrapper(config_file_path, camera_mode)

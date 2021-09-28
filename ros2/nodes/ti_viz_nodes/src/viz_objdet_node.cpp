@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <rclcpp/rclcpp.hpp>
 
 #include <message_filters/subscriber.h>
@@ -27,6 +29,12 @@ static const uint8_t color_map[20][3] =
     { 70, 130, 180},{220,  20,  60},{255,   0,   0},{  0,   0, 142},{  0,   0,  70},
     {  0,  60, 100},{  0,  80, 100},{  0,   0, 230},{119,  11,  32},{128, 128, 128}
 };
+
+static void sigHandler(int32_t sig)
+{
+    (void) sig;
+    std::exit(EXIT_SUCCESS);
+}
 
 static const std::string classnames_coco[] =
 {
@@ -246,14 +254,20 @@ int main(int argc, char **argv)
 {
     try
     {
-        rclcpp::NodeOptions options;
+        rclcpp::InitOptions initOptions{};
+        rclcpp::NodeOptions nodeOptions{};
 
-        rclcpp::init(argc, argv);
+        /* Prevent the RCLCPP signal handler binding. */
+        initOptions.shutdown_on_sigint = false;
 
-        options.allow_undeclared_parameters(true);
-        options.automatically_declare_parameters_from_overrides(true);
+        rclcpp::init(argc, argv, initOptions);
 
-        objDetViz = new ti_ros2::VizObjDet("viz_objdet", options);
+        nodeOptions.allow_undeclared_parameters(true);
+        nodeOptions.automatically_declare_parameters_from_overrides(true);
+
+        signal(SIGINT, sigHandler);
+
+        objDetViz = new ti_ros2::VizObjDet("viz_objdet", nodeOptions);
 
         return EXIT_SUCCESS;
     }

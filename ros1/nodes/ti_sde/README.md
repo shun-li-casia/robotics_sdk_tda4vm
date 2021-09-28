@@ -9,7 +9,7 @@ Stereo Vision Application
 <figcaption>Stereo demo: point cloud</figcaption>
 <br />
 
-This demonstrates the stereo application that uses J7 LDC (Lens Distortion Correction) and DMPAC SDE (Stereo Depth Engine) hardware accelerators (HWAs). This application outputs not only raw disparity map, but also point-cloud with 3D position, (X,Y,Z) and color information (R,G,B).
+This demonstrates the stereo application that uses TDA4 LDC (Lens Distortion Correction) and DMPAC SDE (Stereo Depth Engine) hardware accelerators (HWAs). This application outputs not only raw disparity map, but also point-cloud with 3D position, (X,Y,Z) and color information (R,G,B).
 
 Input image format to this application is YUV422:UYVY. The LDC coverts input stereo images to YUV420 (NV12) images, also rectifies the input images using the two rectification tables for left and right cameras, respectively. Note that the rectification tables should be provided in the format that LDC can recognize.
 
@@ -24,7 +24,7 @@ Finally, when configured, the output disparity map and the rectified right image
 ## How to Run the Application in ROS 1
 
 ### Run the Stereo Demo
-**[J7]** For setting up the ROS1 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[TDA4]** For setting up the ROS1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 roslaunch ti_sde bag_sde.launch
 ```
@@ -32,7 +32,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ```
 roslaunch ti_sde zed_sde.launch
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros1.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
 To display the disparity map using RViz on PC, run:
 ```
@@ -40,7 +40,7 @@ roslaunch ti_viz_nodes rviz_sde.launch
 ```
 
 ### Run the Stereo Demo with Point-Cloud Enabled
-**[J7]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following inside the Docker container on J7 target:
+**[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 roslaunch ti_sde bag_sde_pcl.launch
 ```
@@ -56,15 +56,17 @@ roslaunch ti_viz_nodes rviz_sde_pcl.launch
 ## How to Run the Application in ROS 2
 
 ### Run the Stereo Demo
-**[J7]** For setting up the ROS2 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
-```
-ros2 launch ti_sde bag_sde_launch.py
-```
+**[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde_launch.py`:
 ```
 ros2 launch ti_sde zed_sde_launch.py
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros2.md)
+<!-- To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+```
+ros2 launch ti_sde bag_sde_launch.py
+``` -->
+
+**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 
 To display the disparity map using RViz on PC, run:
 ```
@@ -72,14 +74,15 @@ ros2 launch ti_viz_nodes rviz_sde_launch.py
 ```
 
 ### Run the Stereo Demo with Point-Cloud Enabled
-**[J7]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following inside the Docker container on J7 target:
-```
-ros2 launch ti_sde bag_sde_pcl_launch.py
-```
-To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde_pcl_launch.py`:
+**[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG fil on a ZED stereo camera, run the following inside the Docker container on TDA4 target:
 ```
 ros2 launch ti_sde zed_sde_pcl_launch.py
 ```
+<!-- run the following inside the Docker container on TDA4 target:
+```
+ros2 launch ti_sde bag_sde_pcl_launch.py
+``` -->
+
 **[Visualization on Ubuntu PC]**  To display the point-cloud data using RViz on PC, run:
 ```
 ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py

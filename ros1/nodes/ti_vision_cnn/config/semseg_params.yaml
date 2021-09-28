@@ -6,6 +6,7 @@ dl_model_path:    $(env TI_DATA_PATH)/tidl_semseg_model/tvmdlr_deeplabv3lite_mob
 # dl_model_path:    $(env TI_DATA_PATH)/tidl_semseg_model/onnxrt_deeplabv3lite_mobilenetv2_tv_768x432_qat-p2_onnx
 
 ## Models below are all segmentation models from edge AI model zoo. Not all models yet tested.
+## Please download the models first using /opt/edge_ai_apps/download_models.sh
 # dl_model_path: /opt/model_zoo/ONR-SS-8610-deeplabv3lite-mobv2-ade20k32-512x512
 # dl_model_path: /opt/model_zoo/ONR-SS-8630-unetlite-aspp-mobv2-tv-ade20k32-512x512
 # dl_model_path: /opt/model_zoo/ONR-SS-8650-fpnlite-aspp-mobv2-ade20k32-512x512

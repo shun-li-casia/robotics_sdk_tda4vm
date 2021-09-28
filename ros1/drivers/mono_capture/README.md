@@ -31,7 +31,7 @@ USB mono camera (Webcam) ROS node based on OpenCV VideoCapture API for publishin
                             Camera name
     ```
 
-2. Rectification Map Generation: A Python tool for generating rectification map is provided: `scripts/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file, and genrates a binary file for undistortion & rectification look-up-table (LUT) which is required in offloading the undistortion/rectification on J7 VPAC/LDC hardware accelerator. Below is the usage of the tool, and for examples, please see `scripts/calib_C920.sh`.
+2. Rectification Map Generation: A Python tool for generating rectification map is provided: `scripts/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file, and generates a binary file for undistortion & rectification look-up-table (LUT) which is required in offloading the undistortion/rectification on J7 VPAC/LDC hardware accelerator. Below is the usage of the tool, and for examples, please see `scripts/calib_C920.sh`.
 
     ```
     usage: generate_rect_map_mono.py [-h] [--input INPUT] [--name NAME]

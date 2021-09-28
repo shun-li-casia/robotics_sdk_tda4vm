@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <rclcpp/rclcpp.hpp>
 
 #include <message_filters/subscriber.h>
@@ -23,6 +25,12 @@ using std::placeholders::_3;
 
 // OpenCV uses BGR format
 static const uint8_t color_map[3] = {128, 64, 128};
+
+static void sigHandler(int32_t sig)
+{
+    (void) sig;
+    std::exit(EXIT_SUCCESS);
+}
 
 namespace ti_ros2
 {
@@ -273,14 +281,20 @@ int main(int argc, char **argv)
 {
     try
     {
-        rclcpp::NodeOptions options;
+        rclcpp::InitOptions initOptions{};
+        rclcpp::NodeOptions nodeOptions{};
 
-        rclcpp::init(argc, argv);
+        /* Prevent the RCLCPP signal handler binding. */
+        initOptions.shutdown_on_sigint = false;
 
-        options.allow_undeclared_parameters(true);
-        options.automatically_declare_parameters_from_overrides(true);
+        rclcpp::init(argc, argv, initOptions);
 
-        estopViz = new ti_ros2::VizEStop("app_viz_estop", options);
+        nodeOptions.allow_undeclared_parameters(true);
+        nodeOptions.automatically_declare_parameters_from_overrides(true);
+
+        signal(SIGINT, sigHandler);
+
+        estopViz = new ti_ros2::VizEStop("app_viz_estop", nodeOptions);
 
         return EXIT_SUCCESS;
     }

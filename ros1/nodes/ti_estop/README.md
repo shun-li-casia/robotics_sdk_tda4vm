@@ -18,9 +18,9 @@ This demonstrates the 3D obstacle detection application using the disparity map 
   - This process outputs the 3D bounding box coordinates of the detected obstacles. First, it creates 3D point cloud using the disparity map and the camera parameters. Note that it maps only pixels that belongs to particular classes, e.g., car, pedestrian, bicycle, rider, etc. into the 3D space. Then it projects the 3D point cloud on a 2D occupancy grid map. Finally it detects individual obstacles by grouping closely-located occupied cells with an identical class using a "connected component analysis" algorithm.
 
 
-## How to Run the Application in ROS1
+## How to Run the Application in ROS 1
 
-**[J7]** For setting up the ROS1 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
+**[TDA4]** For setting up the ROS1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 roslaunch ti_estop bag_estop.launch
 ```
@@ -28,7 +28,7 @@ To process the image stream from a ZED stereo camera, replace the launch file wi
 ```
 roslaunch ti_estop zed_estop.launch
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros1.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
 As shown in the "Launch File Parameters" section below, this application publishes many topics regarding 3D bounding box coordinates, semantic segmentation output tensor and disparity map. Using these information, we can produce color-coded disparity map, color-coded semantic segmentation map and 3D bounding boxes overlaid on image. To visualize them on PC, run
 ```
@@ -40,18 +40,18 @@ The ego-centric occupancy grid map is created based on 3D bounding boxes. To vis
 roslaunch ti_estop rviz_ogmap.launch
 ```
 
-## How to Run the Application in ROS2
+## How to Run the Application in ROS 2
 
-**[J7]** For setting up the ROS2 environment on J7 host, please follow [Setting Up Robotics SDK Environment](../../../docker/README.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on J7 target:
-```
-ros2 launch ti_estop bag_estop_launch.py
-```
-To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
+**[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
 ```
 ros2 launch ti_estop zed_estop_launch.py
 ```
+<!-- To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+```
+ros2 launch ti_estop bag_estop_launch.py
+``` -->
 
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Setting Up Robotics SDK Environment](../../../docker/setting_docker_ros2.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 
 To visualize outputs on PC, run
 ```
