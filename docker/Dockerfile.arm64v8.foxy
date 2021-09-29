@@ -161,6 +161,10 @@ RUN apt-get update && \
     rm -rf $ROS_WS/src && \
     rm -rf /var/lib/apt/lists/*
 
+# install libeigen3-dev
+RUN apt-get update && apt-get install -y libeigen3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 # add scripts
 ARG  GIT_REPO
 COPY ${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
