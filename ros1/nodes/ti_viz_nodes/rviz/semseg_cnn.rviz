@@ -33,7 +33,7 @@ Visualization Manager:
   Displays:
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /camera/image_raw_rgb
+      Image Topic: /camera/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0

@@ -22,7 +22,7 @@ def generate_launch_description():
                          output = "screen",
                          parameters = params)
 
-   # color conversion for image_rect_nv12 for visualization
+    # color conversion for image_rect_nv12 for visualization
     params = [
         {"width":            1280},
         {"height":           720},
@@ -37,7 +37,7 @@ def generate_launch_description():
                          output = "screen",
                          parameters = params)
 
-   # color conversion for image_rect_nv12 for visualization
+    # color conversion for image_rect_nv12 for visualization
     params = [
         {"rectified_image_topic":   "camera/image_rect_rgb"},
         {"vision_cnn_tensor_topic": "vision_cnn/tensor"},

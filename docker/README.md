@@ -2,13 +2,15 @@
 Setting Up Robotics SDK
 =======================
 
+This section describes how to set up the Robotics SDK on the TDA4 Processor SDK Linux.
+
 ## 1. Requirements & Dependency
 
 ### 1.1. Supported Hardware Platforms
 
- Platform | Supported Devices                           | Supported EVM
+ Platform | Supported Devices                           | Supported EVMs
 ----------|---------------------------------------------|-----------------------------------------------
- J721E    | [TDA4VM](https://www.ti.com/product/TDA4VM) | [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM), [TDA4VMXEVM](https://www.ti.com/tool/TDA4VMXEVM)
+ J721E    | [TDA4VM](https://www.ti.com/product/TDA4VM) | [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM), [J721EXSOMXEVM](https://www.ti.com/tool/J721EXSOMXEVM)
 
 ### 1.2. Processor SDK Linux for Edge AI
 The Robotics SDK requires [the SD card image](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) from [Processor SDK Linux for Edge AI](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.00.01.10). The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
@@ -16,11 +18,13 @@ The Robotics SDK requires [the SD card image](http://software-dl.ti.com/jacinto7
 ### 1.3. Ubuntu PC
 A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. It is assumed that matching ROS distro (either Melodic or ROS 2 Foxy) is installed on the remote Ubuntu PC or in a Docker container.
 
-In case of direct installation of ROS on the Ubuntu PC:
+In case when you want to directly install ROS on the Ubuntu PC:
 * For ROS Melodic installation steps, please refer to [this ROS wiki page](http://wiki.ros.org/melodic/Installation/Ubuntu).
 * For ROS 2 Foxy installation steps, please refer to [this ROS 2 documentation](https://docs.ros.org/en/foxy/Installation.html).
 
-We also provide Dockefiles (`docker/Dockerfile.x86_64.{melodic,foxy}`) that can build and run on the remote Ubuntu PC for both ROS Melodic and ROX 2 Foxy with detailed steps for setting up Docker environment on the remote PC.
+We also provide Dockefiles (`docker/Dockerfile.x86_64.{melodic,foxy}`) that can build and run on the remote Ubuntu PC for both ROS Melodic and ROX 2 Foxy with detailed steps for setting up Docker environment on the remote PC. For installation of Docker on the Ubuntu PC, the following links may be useful:
+* [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+* [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
 
 ### 1.4. USB Camera
 The Robotics SDK provides OpenCV-based ROS drivers for [ZED stereo camera](https://www.stereolabs.com/zed/) and USB mono cameras (Logitech C270, C920, C922). All the demo applications can be tried out with a live camera. ROS 1 demos can be launched with a ROSBAG file that is provided.

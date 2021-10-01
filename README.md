@@ -4,7 +4,7 @@ Robotics SDK: Intoduction
 
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
 
-[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/00_05_00_04/docs/index.html)
+[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/00_05_00_05/docs/index.html)
 ## Overview
 
 The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leaveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.00.01.10). We provide detailed steps for setting Docker container environments for ROS Melodic and ROS 2 Foxy on the Processor SDK Linux (see next section). The Robotics SDK allows:
@@ -42,16 +42,21 @@ Figure 2 shows a representative deep-learning and compute-intensive application 
 
 ## Setting Up Robotics SDK Docker Container Environment
 
-See [Setting Up Robotics SDK Environment](docker/README.md)
+This section describes how to set up the Robotics SDK on the TDA4 Processor SDK Linux. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
-**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/00_05_00_04/docs/source/docker/README.html#setting-up-robotics-kit-environment)
+**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/00_05_00_05/docs/source/docker/README.html#setting-up-robotics-kit-environment)
 
 ## Sensor Driver Nodes
+
+Following ROS nodes for cameras are tested and supported by the SDK.
+
 ### [USB Stereo Camera Capture Node for ZED Cameras](ros1/drivers/zed_capture/README.md)
 
 ### [USB Mono Camera Capture Node](ros1/drivers/mono_capture/README.md)
 
 ## Demo Applications
+
+The SDK supports following out-of-box demo applications.
 
 ### [Stereo Vision Processing Accelerated on LDC and SDE](ros1/nodes/ti_sde/README.md)
 
@@ -84,9 +89,8 @@ See [CHANGELOG.md](CHANGELOG.md)
     * While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
 4. The default semantic segmentation model used in `ti_vision_cnn` and `ti_estop` nodes was trained with Cityscapes dataset first, and  re-trained with a small dataset collected from a particular stereo camera (ZED camera, HD mode) for a limited scenarios with coarse annotation. Therefore, the model can show limited accuracy performance if a different camera model is used and/or when it is applied to different environment scenes.
 5. The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512) has initial loading time of about 20 seconds.
-6. The demos in ROS 2 environment with "ROS2BAG play" are currently not stable. Launch commands with ROSBAG are intentionally removed until we find root-cause of the issue. The demos in ROS 2 container currently run more stable with live cameras (ZED stereo camera or USB mono camera).
+6. Launching a demo in ROS 2 environment with "ros2 bag play" in a single launch script currently not stable. It is recommended to launch “ros2 bag play” in a separate terminal. The demos in ROS 2 container currently run more stable with live cameras (ZED stereo camera or USB mono camera).
 7. The USB mono camera capture node currently is tested only with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. 'MJPG' (Motion-JPEG) mode is not yet enabled and tested.
-
 
 ## Questions & Feedback
 
