@@ -576,7 +576,7 @@ void SDEAppNode::readParams()
     m_cntxt->rtLogEnable = (uint8_t)tmp;
 
     /* Get pipeline depth information. */
-    this->get_parameter_or("pipeline_depth", tmp, SDEAPP_MAX_PIPELINE_DEPTH);
+    this->get_parameter_or("pipeline_depth", tmp, GRAPH_MAX_PIPELINE_DEPTH);
     m_cntxt->pipelineDepth = (uint8_t)tmp;
 
     /* Get the disparity merge core information. */
@@ -608,10 +608,10 @@ void SDEAppNode::readParams()
         m_cntxt->height = 128;
     }
 
-    if (m_cntxt->pipelineDepth > SDEAPP_MAX_PIPELINE_DEPTH)
+    if (m_cntxt->pipelineDepth > GRAPH_MAX_PIPELINE_DEPTH)
     {
         RCLCPP_INFO(this->get_logger(), "Pipeline depth is larger than maximum pipeline depth allowed. Clipped..");
-        m_cntxt->pipelineDepth = SDEAPP_MAX_PIPELINE_DEPTH;
+        m_cntxt->pipelineDepth = GRAPH_MAX_PIPELINE_DEPTH;
     }
 
     if (m_cntxt->inputFormat != CM_IMG_FORMAT_UYVY)

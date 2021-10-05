@@ -72,9 +72,11 @@
 
 
 /**
- * \defgroup group_ticore_posecalc_cntxt  Pose Calculation node
- *                                         context setup
- * \ingroup  group_ticore_common
+ * \defgroup group_ticore_node_posecalc  Pose Calculation node
+ * 
+ * \brief Set up the Pose Calculation node
+ * 
+ * \ingroup  group_ticore_node
  *
  */
 
@@ -84,27 +86,27 @@ namespace ti_core_common
 
 /**
  * \brief Constant for representing the Pose Calc node context invalid state.
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 #define CM_POSECALC_NODE_CNTXT_STATE_INVALID     (0U)
 
 /**
  * \brief Constant for representing the Pose Calc node context initialization
  *        state. 
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 #define CM_POSECALC_NODE_CNTXT_STATE_INIT        (1U)
 
 /**
  * \brief Constant for representing the Pose Calc node context setup state.
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 #define CM_POSECALC_NODE_CNTXT_STATE_SETUP       (2U)
 
 
 /**
  * \brief Pose cale node create time parameters.
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 typedef struct
 {
@@ -176,7 +178,7 @@ typedef struct
 
 /**
  * \brief   Pose Calculation node context
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 typedef struct 
 {
@@ -249,13 +251,13 @@ typedef struct
  * 
  * \param [in] numOutTensors The number of output tensors from DKAZE
  * 
- * \param [in] numOutTensors The output tensors' dimensions
+ * \param [in] outTensorDims The output tensors' dimensions
  *
  * \param [in] createParams Pose Calculation node context create parameters.
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
                                    vx_context                      context,
@@ -278,7 +280,7 @@ vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 vx_status CM_poseCalcNodeCntxtSetup(CM_PoseCalcNodeCntxt     *poseCalcObj,
                                     vx_context                context,
@@ -293,7 +295,7 @@ vx_status CM_poseCalcNodeCntxtSetup(CM_PoseCalcNodeCntxt     *poseCalcObj,
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_posecalc_cntxt
+ * \ingroup group_ticore_node_posecalc
  */
 vx_status CM_poseCalcNodeCntxtDeInit(CM_PoseCalcNodeCntxt *poseCalcObj);
 

@@ -68,9 +68,11 @@
 #include <cm_common.h>
 
 /**
- * \defgroup group_ticore_poseviz_cntxt  Pose Visualization node
- *                                         context setup 
- * \ingroup  group_ticore_common
+ * \defgroup group_ticore_node_poseviz  Pose Visualization node
+ *
+ * \brief Set up the Pose Visualization node
+ * 
+ * \ingroup  group_ticore_node
  *
  */
 
@@ -82,27 +84,27 @@ namespace ti_core_common
 
 /**
  * \brief Constant for representing the Pose Calc node context invalid state.
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 #define CM_POSEVIZ_NODE_CNTXT_STATE_INVALID     (0U)
 
 /**
  * \brief Constant for representing the Pose Calc node context initialization
  *        state. 
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 #define CM_POSEVIZ_NODE_CNTXT_STATE_INIT        (1U)
 
 /**
  * \brief Constant for representing the Pose Calc node context setup state.
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 #define CM_POSEVIZ_NODE_CNTXT_STATE_SETUP       (2U)
 
 
 /**
  * \brief Pose visualize node create time parameters.
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 typedef struct
 {
@@ -122,7 +124,7 @@ typedef struct
 
 /**
  * \brief   Pose visualize node context
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 typedef struct 
 {
@@ -167,7 +169,7 @@ typedef struct
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
                                   vx_context                     context,
@@ -186,7 +188,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 vx_status CM_poseVizNodeCntxtSetup(CM_PoseVizNodeCntxt    *poseVizObj,
                                    vx_context              context,
@@ -200,7 +202,7 @@ vx_status CM_poseVizNodeCntxtSetup(CM_PoseVizNodeCntxt    *poseVizObj,
  * 
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_poseviz_cntxt
+ * \ingroup group_ticore_node_poseviz
  */
 vx_status CM_poseVizNodeCntxtDeInit(CM_PoseVizNodeCntxt   *poseVizObj);
 

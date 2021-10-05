@@ -38,13 +38,31 @@
 
 #include <ti_semaphore.h>
 
+/**
+ * \defgroup group_ticore_utils_queue Utility functions for queue
+ *
+ * \brief Provides Queue class for multi-thread processing of graphs
+ *
+ * \ingroup  group_ticore_utils
+ *
+ */
+
 namespace ti::utils {
+
+    /**
+     * \brief Dummy Mutex structure
+     * \ingroup group_ticore_utils_queue
+     */
     struct MutexDummy
     {
         void lock(){}
         void unlock(){};
     };
 
+    /**
+     * \brief Dummy Semaphore structure
+     * \ingroup group_ticore_utils_queue
+     */
     struct SemaphoreDummy
     {
         SemaphoreDummy(int32_t cnt = 0){}
@@ -53,16 +71,28 @@ namespace ti::utils {
         bool try_wait(){ return true; }
     };
 
+    /**
+     * \brief Queue class
+     * \ingroup group_ticore_utils_queue
+     */
     template <typename T,
               typename MutexT = MutexDummy,
               typename SemT = SemaphoreDummy>
     class Queue
     {
         public:
+            /**
+             * \brief Queue class constructor
+             * \ingroup group_ticore_utils_queue
+             */
             Queue()
             {
             }
 
+            /**
+             * \brief Get the oldest element from a queue
+             * \ingroup group_ticore_utils_queue
+             */
             T *peek()
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
@@ -77,6 +107,10 @@ namespace ti::utils {
                 return val;
             }
 
+            /**
+             * \brief Pop the oldest element from a queue
+             * \ingroup group_ticore_utils_queue
+             */
             T *pop()
             {
                 /* Check if we have data. */
@@ -95,6 +129,10 @@ namespace ti::utils {
                 return val;
             }
 
+           /**
+             * \brief Push a value into a queue
+             * \ingroup group_ticore_utils_queue
+             */
             int32_t push(T *val)
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
@@ -106,6 +144,10 @@ namespace ti::utils {
                 return 0;
             }
 
+           /**
+             * \brief Flush a queue
+             * \ingroup group_ticore_utils_queue
+             */
             void flush()
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
@@ -116,6 +158,10 @@ namespace ti::utils {
                 }
             }
 
+            /**
+             * \brief Get the number of elements in a queue
+             * \ingroup group_ticore_utils_queue
+             */
             int32_t size()
             {
                 std::unique_lock<MutexT>    lock(m_mutex);
@@ -123,25 +169,43 @@ namespace ti::utils {
             }
 
         private:
-            /** A queue for holding free descriptors. */
+            /**
+             * \brief A queue for holding free descriptors
+             * \ingroup group_ticore_utils_queue
+             */
             std::queue<T*>  m_q;
 
-            /** Resource lock. Used get/put from/to freeQ. */
+            /**
+             * \brief Resource lock. Used get/put from/to freeQ
+             * \ingroup group_ticore_utils_queue
+             */
             MutexT          m_mutex;
 
-            /** Synchronization control. */
+            /**
+             * \brief Synchronization control
+             * \ingroup group_ticore_utils_queue
+             */
             SemT            m_sem{};
     };
 
-    /* Single thread safe queue with no mutex and semaphore control. */
+    /**
+     * \brief Single thread safe queue with no mutex and semaphore control.
+     * \ingroup group_ticore_utils_queue
+     */
     template <typename T>
     using SingleThreadQ = Queue<T>;
 
-    /* Multi-thread safe queue with mutex control. */
+    /**
+     * \brief Multi-thread safe queue with mutex control.
+     * \ingroup group_ticore_utils_queue
+     */
     template <typename T, typename MutexT = std::mutex>
     using MultiThreadQ = Queue<T, MutexT>;
 
-    /* Multi-thread safe queue with mutex control. */
+    /**
+     * \brief Multi-thread safe queue with mutex control.
+     * \ingroup group_ticore_utils_queue
+     */
     template <typename T,
               typename MutexT = std::mutex,
               typename SemT = Semaphore>

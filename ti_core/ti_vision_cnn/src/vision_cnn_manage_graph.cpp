@@ -66,8 +66,6 @@
 
 #include "vision_cnn.h"
 
-#define VISION_CNN_NUM_GRAPH_PARAMS      (3U)
-
 
 vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 {
@@ -862,35 +860,35 @@ vx_status VISION_CNN_popOutputDesc(VISION_CNN_Context       *appCntxt,
 
 
 void VISION_CNN_enqueInputDesc(VISION_CNN_Context      *appCntxt,
-                               VISION_CNN_graphParams  *desc)
+                               VISION_CNN_graphParams  *gpDesc)
 {
-    appCntxt->freeQ.push(desc);
+    appCntxt->freeQ.push(gpDesc);
 }
 
 
 void VISION_CNN_enquePreprocInputDesc(VISION_CNN_Context      *appCntxt,
-                                      VISION_CNN_graphParams  *desc)
+                                      VISION_CNN_graphParams  *gpDesc)
 {
-    appCntxt->preProcQ.push(desc);
+    appCntxt->preProcQ.push(gpDesc);
 }
 
 void VISION_CNN_enqueDlInferInputDesc(VISION_CNN_Context       *appCntxt,
-                                      VISION_CNN_graphParams   *desc)
+                                      VISION_CNN_graphParams   *gpDesc)
 {
-    appCntxt->dlInferQ.push(desc);
+    appCntxt->dlInferQ.push(gpDesc);
 }
 
 void VISION_CNN_enquePostprocInputDesc(VISION_CNN_Context      *appCntxt,
-                                       VISION_CNN_graphParams  *desc)
+                                       VISION_CNN_graphParams  *gpDesc)
 {
-    appCntxt->postProcQ.push(desc);
+    appCntxt->postProcQ.push(gpDesc);
 }
 
 
 void VISION_CNN_enqueOutputDesc(VISION_CNN_Context      *appCntxt,
-                                VISION_CNN_graphParams  *desc)
+                                VISION_CNN_graphParams  *gpDesc)
 {
-    appCntxt->outputQ.push(desc);
+    appCntxt->outputQ.push(gpDesc);
 }
 
 

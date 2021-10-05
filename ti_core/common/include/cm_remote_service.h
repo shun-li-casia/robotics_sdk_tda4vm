@@ -76,8 +76,9 @@
 #include <utils/remote_service/include/app_remote_service.h>
 
 /**
- * \defgroup group_ticore_vhwa Vhwa codes to reallocate 
- *                                SL2 memory for DMPAC.
+ * \defgroup group_ticore_vhwa DMPAC SL2 memory reallocation
+ * 
+ * \brief  Provide VHWA codes to reallocate SL2 memory for DMPAC
  * \ingroup group_ticore_common
  *
  */

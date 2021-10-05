@@ -71,7 +71,10 @@
 #include <chrono>
 
 /**
- * \defgroup group_ticore_profile Processing time profiling codes
+ * \defgroup group_ticore_profile Processing time profiling
+ * 
+ * \brief Provide processing time profiling codes
+ * 
  * \ingroup  group_ticore_common
  *
  */

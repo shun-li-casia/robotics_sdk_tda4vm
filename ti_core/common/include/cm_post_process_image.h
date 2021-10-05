@@ -37,18 +37,18 @@
 #include <common/include/post_process_image_config.h>
 
 /**
- * \defgroup group_ticore_post_proc Image Post-processing
+ * \defgroup group_ticore_post_proc TI Robotics SDK Image Post-processing
  *
- * \brief \brief Class providing interface for generic post-processing logic.
+ * \brief Class providing interface for generic post-processing logic.
  *
- * \ingroup group_ticore_common
+ * \ingroup group_ticore_base
  */
 
 namespace ti_core_common
 {
     using namespace ti::edgeai::common;
 
-    /** Post-processing for image based object detection.
+    /** Post-processing for CNN output image.
      *
      * \ingroup group_ticore_post_proc
      */

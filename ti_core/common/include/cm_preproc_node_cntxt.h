@@ -66,9 +66,11 @@
 #include <cm_common.h>
 
 /**
- * \defgroup group_ticore_preproc_cntxt Pre-processing node
- *                                        context setup.
- * \ingroup group_ticore_common
+ * \defgroup group_ticore_node_preproc Pre-processing node
+ * 
+ * \brief Set up the pre-processing node
+ * 
+ * \ingroup group_ticore_node
  *
  */
 
@@ -78,45 +80,45 @@ namespace ti_core_common
 /**
  * \brief Constant for representing the max number of channels in the output
  *        image after the pre-processinf phase.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_MAX_IMG_CHANS            (3U)
 
 /**
  * \brief Constant for representing the preproc output tensor count.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_NUM_OUTPUT_TENSORS       (1U)
 
 /**
  * \brief Constant for representing the preproc output tensor dimension count.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_OUTPUT_TENSORS_DIMS      (3U)
 
 /**
  * \brief Constant for representing the preproc node context invalid state.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_NODE_CNTXT_STATE_INVALID (0U)
 
 /**
  * \brief Constant for representing the preproc node context initialization
  *        state.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_NODE_CNTXT_STATE_INIT    (1U)
 
 /**
  * \brief Constant for representing the preproc node context setup state.
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 #define CM_PREPROC_NODE_CNTXT_STATE_SETUP   (2U)
 
 /**
  * \brief Pre-processing node create time parameters.
  *
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 typedef struct
 {
@@ -140,7 +142,7 @@ typedef struct
 /**
  * \brief Pre-processing node context.
  *
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 typedef struct
 {
@@ -185,7 +187,7 @@ typedef struct
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 vx_status CM_preProcNodeCntxtInit(
         CM_PreProcNodeCntxt            *preProcObj,
@@ -208,7 +210,7 @@ vx_status CM_preProcNodeCntxtInit(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 vx_status CM_preProcNodeCntxtSetup(
         CM_PreProcNodeCntxt    *preProcObj,
@@ -223,7 +225,7 @@ vx_status CM_preProcNodeCntxtSetup(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_preproc_cntxt
+ * \ingroup group_ticore_node_preproc
  */
 vx_status CM_preProcNodeCntxtDeInit(
         CM_PreProcNodeCntxt    *preProcObj);

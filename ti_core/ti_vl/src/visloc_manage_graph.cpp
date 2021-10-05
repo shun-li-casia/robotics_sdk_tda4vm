@@ -1086,35 +1086,35 @@ vx_status VISLOC_popOutputDesc(VISLOC_Context       *appCntxt,
 
 
 void VISLOC_enqueInputDesc(VISLOC_Context      *appCntxt,
-                           VISLOC_graphParams  *desc)
+                           VISLOC_graphParams  *gpDesc)
 {
-    appCntxt->freeQ.push(desc);
+    appCntxt->freeQ.push(gpDesc);
 }
 
 
 void VISLOC_enquePreprocInputDesc(VISLOC_Context      *appCntxt,
-                                  VISLOC_graphParams  *desc)
+                                  VISLOC_graphParams  *gpDesc)
 {
-    appCntxt->preProcQ.push(desc);
+    appCntxt->preProcQ.push(gpDesc);
 }
 
 void VISLOC_enqueDlInferInputDesc(VISLOC_Context      *appCntxt,
-                                  VISLOC_graphParams  *desc)
+                                  VISLOC_graphParams  *gpDesc)
 {
-    appCntxt->dlInferQ.push(desc);
+    appCntxt->dlInferQ.push(gpDesc);
 }
 
 void VISLOC_enqueVisLocInputDesc(VISLOC_Context      *appCntxt,
-                                 VISLOC_graphParams  *desc)
+                                 VISLOC_graphParams  *gpDesc)
 {
-    appCntxt->visLocQ.push(desc);
+    appCntxt->visLocQ.push(gpDesc);
 }
 
 
 void VISLOC_enqueOutputDesc(VISLOC_Context      *appCntxt,
-                            VISLOC_graphParams  *desc)
+                            VISLOC_graphParams  *gpDesc)
 {
-    appCntxt->outputQ.push(desc);
+    appCntxt->outputQ.push(gpDesc);
 }
 
 

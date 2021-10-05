@@ -86,6 +86,7 @@ You can choose any folder, but this section assumes installation is made under `
 4. Build the ROS nodes for visualization:
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ colcon build
+    root@pc-docker:~/j7ros_home/ros_ws$ source install/setup.bash
     ```
 
 ## 3. Run Demo Applications

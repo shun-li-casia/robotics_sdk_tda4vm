@@ -36,10 +36,28 @@
 #include <cassert>
 #include <semaphore.h>
 
+/**
+ * \defgroup group_ticore_utils_semaphor Semaphore class definition
+ *
+ * \brief Provides Semaphore class for multi-thread processing of graphs
+ *
+ * \ingroup  group_ticore_utils
+ *
+ */
+
 namespace ti::utils {
+
+    /**
+     * \brief Semaphore class
+     * \ingroup group_ticore_utils_semaphor
+     */    
     class Semaphore
     {
         private:
+            /**
+             * \brief Semaphore class
+             * \ingroup group_ticore_utils_semaphor
+             */
             sem_t   m_sem;
 
         private:
@@ -48,23 +66,39 @@ namespace ti::utils {
             Semaphore& operator=(const Semaphore &s) = delete;
 
         public:
+            /**
+             * \brief  Semaphore class constructor
+             * \ingroup group_ticore_utils_semaphor
+             */
             Semaphore(int32_t   cnt = 0)
             {
                 assert(cnt >= 0);
                 sem_init(&m_sem, 0, cnt);
             }
 
+            /**
+             * \brief  Notify
+             * \ingroup group_ticore_utils_semaphor
+             */
             void notify()
             {
                 // Post the condition variable
                 sem_post(&m_sem);
             }
 
+            /**
+             * \brief  Wait
+             * \ingroup group_ticore_utils_semaphor
+             */
             void wait()
             {
                 sem_wait(&m_sem);
             }
 
+            /**
+             * \brief  Semaphore class destructor
+             * \ingroup group_ticore_utils_semaphor
+             */
             ~Semaphore()
             {
                 sem_destroy(&m_sem);

@@ -66,8 +66,6 @@
 
 #include "estop.h"
 
-#define ESTOP_APP_NUM_GRAPH_PARAMS      (7U)
-
 vx_status ESTOP_APP_init_LDC(ESTOP_APP_Context *appCntxt)
 {
     SDELDCAPPLIB_createParams * createParams;
@@ -1456,34 +1454,34 @@ vx_status ESTOP_APP_popOutputDesc(ESTOP_APP_Context       *appCntxt,
 
 
 void ESTOP_APP_enqueInputDesc(ESTOP_APP_Context      *appCntxt,
-                              ESTOP_APP_graphParams  *desc)
+                              ESTOP_APP_graphParams  *gpDesc)
 {
-    appCntxt->freeQ.push(desc);
+    appCntxt->freeQ.push(gpDesc);
 }
 
 
 void ESTOP_APP_enquePreprocInputDesc(ESTOP_APP_Context      *appCntxt,
-                                     ESTOP_APP_graphParams  *desc)
+                                     ESTOP_APP_graphParams  *gpDesc)
 {
-    appCntxt->preProcQ.push(desc);
+    appCntxt->preProcQ.push(gpDesc);
 }
 
 void ESTOP_APP_enqueDlInferInputDesc(ESTOP_APP_Context     *appCntxt,
-                                     ESTOP_APP_graphParams *desc)
+                                     ESTOP_APP_graphParams *gpDesc)
 {
-    appCntxt->dlrQ.push(desc);
+    appCntxt->dlrQ.push(gpDesc);
 }
 
 void ESTOP_APP_enquePostprocInputDesc(ESTOP_APP_Context      *appCntxt,
-                                      ESTOP_APP_graphParams  *desc)
+                                      ESTOP_APP_graphParams  *gpDesc)
 {
-    appCntxt->postProcQ.push(desc);
+    appCntxt->postProcQ.push(gpDesc);
 }
 
 void ESTOP_APP_enqueOutputDesc(ESTOP_APP_Context      *appCntxt,
-                               ESTOP_APP_graphParams  *desc)
+                               ESTOP_APP_graphParams  *gpDesc)
 {
-    appCntxt->outputQ.push(desc);
+    appCntxt->outputQ.push(gpDesc);
 }
 
 vx_status  ESTOP_APP_process(ESTOP_APP_Context * appCntxt, ESTOP_APP_graphParams * gpDesc)

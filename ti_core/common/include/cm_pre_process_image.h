@@ -37,11 +37,11 @@
 #include <common/include/pre_process_image_config.h>
 
 /**
- * \defgroup group_ticore_pre_proc Image Pre-processing
+ * \defgroup group_ticore_pre_proc TI Robotics SDK Image Pre-processing
  *
  * \brief Class providing interface for generic pre-processing logic.
  *
- * \ingroup group_ticore_common
+ * \ingroup group_ticore_base
  */
 
 namespace ti_core_common

@@ -86,12 +86,12 @@ using namespace ti::edgeai::common;
 #define CM_normalize(x, mean, scale) (((x) - (mean))*(scale))
 
 /**
- * \defgroup group_ticore_common Common code for ROS1 and ROS2.
+ * \defgroup group_ticore_common TI Robotics SDK common
  *
- * \brief Provides common utility functions for image loading/saving, data copy,
+ * \brief Provides common functions for image loading/saving, data copy,
  *        DL buffer creation, etc.
  *
- * \ingroup  group_ticore
+ * \ingroup  group_ticore_base
  *
  */
 
@@ -323,7 +323,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
 /**
  * \brief Function to read a input binary file and fill 1-D tensor object's data
  *
- * \param [in/out] in_tensor tensor that reads in a file 
+ * \param [in,out] in_tensor tensor that reads in a file 
  *
  * \param [in]  in_file input file name
  * 
@@ -338,7 +338,7 @@ vx_int32  CM_fill1DTensor(vx_tensor        in_tensor,
 /**
  * \brief Function to read two binary files and fill 1-D tensor object's data
  *
- * \param [in/out] in_tensor tensor that reads in file files
+ * \param [in,out] in_tensor tensor that reads in file files
  *
  * \param [in]  in_file1 input file name 1
  * 
@@ -363,7 +363,7 @@ vx_int32  CM_fill1DTensorFrom2Bin(vx_tensor        in_tensor,
  *
  * \param [in]      pointSize  size of one point in byte 
  * 
- * \param [in/out]  numPoints  the number of points in pointCloud object. 
+ * \param [in,out]  numPoints  the number of points in pointCloud object. 
  * 
  * \param [in]      copyPointFlag whether to copy points to outPcData
  *
@@ -386,7 +386,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
  *
  * \param [in]      ifInfoList DL tensor info 
  *
- * \param [in/out]   vecVar  DL tensor pointer where buffers are allocated 
+ * \param [in,out]   vecVar  DL tensor pointer where buffers are allocated 
  * 
  * \return VX_SUCCESS on success
  *

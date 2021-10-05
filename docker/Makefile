@@ -143,8 +143,10 @@ docker_build:
 docker_run:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
 	@echo "IP_ADDR=\$$(ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print \$$2}')" >> $(TGT_NAME)
+endif
 	@echo "if [ \"\$$#\" -lt 1 ]; then"                       >> $(TGT_NAME)
 	@echo "    CMD=/bin/bash"                                 >> $(TGT_NAME)
 	@echo "else"                                              >> $(TGT_NAME)
@@ -178,8 +180,10 @@ endif
 	@echo "    --network host \\"                             >> $(TGT_NAME)
 	@echo "    --env USE_PROXY=\$$USE_PROXY \\"               >> $(TGT_NAME)
 ifeq ($(PLATFORM), pc)
+ifeq ($(ROS_VER), 1)
 	@echo "    --env J7_IP_ADDR=\$$J7_IP_ADDR \\"             >> $(TGT_NAME)
 	@echo "    --env PC_IP_ADDR=\$$PC_IP_ADDR \\"             >> $(TGT_NAME)
+endif
 endif
 ifeq ($(PLATFORM), j7)
 	@echo "    --env TIVA_LIB_VER=$(TIVA_LIB_VER) \\"         >> $(TGT_NAME)

@@ -69,6 +69,7 @@ You can choose any folder, but this section assumes installation is made under `
 5. Build the ROS nodes for visualization:
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ catkin_make
+    root@pc-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     ```
 
 ## 3. Run Demo Applications
@@ -93,6 +94,7 @@ Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | rosl
 
 
 In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be launched: either on the TDA4 target, or on the PC.
+
 ### 3.1. Run Stereo Vision Application
 
 1. **[TDA4]** To launch `ti_sde` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker container:

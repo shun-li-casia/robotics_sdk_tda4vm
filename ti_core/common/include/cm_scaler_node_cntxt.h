@@ -65,8 +65,11 @@
 #include <cm_common.h>
 
 /**
- * \defgroup group_ticore_scaler Scaler node context setup.
- * \ingroup group_ticore_common
+ * \defgroup group_ticore_node_scaler Scaler node
+ * 
+ * \brief  Set up the Scaler node
+ * 
+ * \ingroup group_ticore_node
  *
  */
 
@@ -75,27 +78,27 @@ namespace ti_core_common
 
 /**
  * \brief Constant for representing the scaler node context invalid state.
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 #define CM_SCALER_NODE_CNTXT_STATE_INVALID  (0U)
 
 /**
  * \brief Constant for representing the scaler node context initialization
  *        state.
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 #define CM_SCALER_NODE_CNTXT_STATE_INIT     (1U)
 
 /**
  * \brief Constant for representing the scaler node context setup state.
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 #define CM_SCALER_NODE_CNTXT_STATE_SETUP    (2U)
 
 /**
  * \brief Scaler node create time parameters.
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 typedef struct
 {
@@ -108,12 +111,10 @@ typedef struct
     /** Image height in pixels. */
     uint32_t                height;
 
-    /** Image type. Refer to <tt>\ref vx_df_image_e</tt> for enumerations. */
+    /** Image type. */
     int32_t                 imageType;
 
-    /** Interpolation type. Refer to <tt>\ref vx_interpolation_type_e</tt> for
-     * enumerations.
-     */
+    /** Interpolation type. */
     int32_t                 interpolation;
 
 } CM_ScalerCreateParams;
@@ -121,7 +122,7 @@ typedef struct
 /**
  * \brief Scaler node context.
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 typedef struct CM_ScalerNodeCntxt
 {
@@ -155,7 +156,7 @@ typedef struct CM_ScalerNodeCntxt
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 vx_status CM_scalerNodeCntxtInit(
         CM_ScalerNodeCntxt             *scalerObj,
@@ -178,7 +179,7 @@ vx_status CM_scalerNodeCntxtInit(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 vx_status CM_scalerNodeCntxtSetup(
         CM_ScalerNodeCntxt *scalerObj,
@@ -199,7 +200,7 @@ vx_status CM_scalerNodeCntxtSetup(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 vx_status CM_scalerNodeCntxtSetCoeff(
         CM_ScalerNodeCntxt   *scalerObj);
@@ -211,7 +212,7 @@ vx_status CM_scalerNodeCntxtSetCoeff(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_scaler
+ * \ingroup group_ticore_node_scaler
  */
 vx_status CM_scalerNodeCntxtDeInit(
         CM_ScalerNodeCntxt *scalerObj);

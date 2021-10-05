@@ -65,8 +65,11 @@
 #include <cm_common.h>
 
 /**
- * \defgroup group_ticore_ldc_cntxt LDC node context setup
- * \ingroup group_ticore_common
+ * \defgroup group_ticore_node_ldc LDC node 
+ * 
+ * \brief Set up the LDC node
+ * 
+ * \ingroup group_ticore_node
  *
  */
 
@@ -75,27 +78,27 @@ namespace ti_core_common
 
 /**
  * \brief Constant for representing the ldc node context invalid state.
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 #define CM_LDC_NODE_CNTXT_STATE_INVALID     (0U)
 
 /**
  * \brief Constant for representing the ldc node context initialization
  *        state.
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 #define CM_LDC_NODE_CNTXT_STATE_INIT        (1U)
 
 /**
  * \brief Constant for representing the ldc node context setup state.
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 #define CM_LDC_NODE_CNTXT_STATE_SETUP       (2U)
 
 /**
  * \brief Ldc node create time parameters.
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 typedef struct
 {
@@ -125,7 +128,7 @@ typedef struct
 /**
  * \brief Ldc node context.
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 typedef struct CM_LdcNodeCntxt
 {
@@ -167,7 +170,7 @@ typedef struct CM_LdcNodeCntxt
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 vx_status CM_ldcNodeCntxtInit(
         CM_LdcNodeCntxt            *ldcObj,
@@ -192,7 +195,7 @@ vx_status CM_ldcNodeCntxtInit(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 vx_status CM_ldcNodeCntxtSetup(
         CM_LdcNodeCntxt    *ldcObj,
@@ -213,7 +216,7 @@ vx_status CM_ldcNodeCntxtSetup(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 vx_status CM_ldcNodeCntxtSaveOutImage(
         CM_LdcNodeCntxt    *ldcObj,
@@ -226,7 +229,7 @@ vx_status CM_ldcNodeCntxtSaveOutImage(
  *
  * \return VX_SUCCESS on success
  *
- * \ingroup group_ticore_ldc_cntxt
+ * \ingroup group_ticore_node_ldc
  */
 vx_status CM_ldcNodeCntxtDeInit(
         CM_LdcNodeCntxt    *ldcObj);

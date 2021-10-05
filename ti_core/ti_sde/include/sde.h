@@ -87,62 +87,142 @@
 #include <sde_triangulate_applib.h>
 
 
+/**
+ * \defgroup group_ticore_sde Stereo disparity map processing
+ *
+ * \brief It creates disparity map using LDC (Lens Distortion Correction) and
+ *        SDE (Stereo Depth Engine) HWAs. It outputs not only raw disparity map, 
+ *        but also point-cloud with 3D position (X,Y,Z) and color information (R,G,B). <br>
+ *
+ *        Input image format is YUV422:UYVY. The LDC converts input stereo images 
+ *        to YUV420 (NV12) images, also rectifies the input images using the two 
+ *        rectification tables for left and right cameras, respectively. Note that 
+ *        the rectification tables should be provided in the format that LDC can recognize. <br>
+ *
+ *        The SDE produces disparity map from the rectified stereo images. Two different 
+ *        disparity estimation modes are supported. One is a "single-layer SDE mode", 
+ *        which outputs the raw disparity map from SDE without post processing. 
+ *        The other is a "multi-layer SDE refinement mode", which combines the disparity 
+ *        maps produced by SDE at different layers with post processing. 
+ *        Up to 3 layers are supported and these are configurable. <br>
+ *
+ *        Finally, when configured, the output disparity map and the rectified right image
+ *        can be mapped to 3D point cloud by the triangulation process. Each point in 
+ *        the point cloud has 3D position (X, Y, Z) and color information (R, G, B). 
+ *        The overall data flow is descirbed in the figure below: <br>
+ * 
+ *        \image html stereo_demo_block_diagram.svg "Stereo disparity map processing" width = 1000
+ *
+ *
+ * \ingroup  group_ticore_apps
+ *
+ */
+
+
 using namespace std;
 using namespace ti_core_common;
 
 #include <utils/perf_stats/include/app_perf_stats.h>
 
+/**
+ * \brief Output file name to save performance stats
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_PERF_OUT_FILE        "app_sde"
 
+/**
+ * \brief Maximum file name length
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_MAX_LINE_LEN         (1024U)
-#define SDEAPP_NUM_BUFF_DESC        (1U)
 
+/**
+ * \brief Event id that notify application exits by user
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_USER_EVT_EXIT        (1U)
 
+/**
+ * \brief Maximum input image width
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_MAX_IMAGE_WIDTH      (2048)
-#define SDEAPP_MAX_IMAGE_HEIGHT     (1024)
-#define SDEAPP_DEFAULT_IMAGE_WIDTH  (1280)
-#define SDEAPP_DEFAULT_IMAGE_HEIGHT (720)
 
-#define SDEAPP_MAX_PIPELINE_DEPTH   (8)
+/**
+ * \brief Maximum input image height
+ * \ingroup group_ticore_sde
+ */
+#define SDEAPP_MAX_IMAGE_HEIGHT     (1024)
+
+/**
+ * \brief Number of graph parameters
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_NUM_GRAPH_PARAMS     (5U)
+
+/**
+ * \brief Graph completion event id
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_GRAPH_COMPLETE_EVENT (0U)
 
+/**
+ * \brief Appliation state id - Invalid
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_STATE_INVALID        (0U)
+
+/**
+ * \brief Appliation state id - Initialized
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_STATE_INIT           (1U)
+
+/**
+ * \brief Appliation state id - Shutdown
+ * \ingroup group_ticore_sde
+ */
 #define SDEAPP_STATE_SHUTDOWN       (2U)
 
-typedef struct
+/**
+ * \brief Graph parameters 
+ * \ingroup group_ticore_sde
+ */
+struct SDEAPP_graphParams
 {
-    /* Graph parameter 0: left input image */
+    /** Graph parameter 0: left input image */
     vx_image                vxInputLeftImage;
 
-    /* Graph parameter 1: right input image */
+    /** Graph parameter 1: right input image */
     vx_image                vxInputRightImage;
 
-    /* Graph parameter 2: rectified right (base) image */
+    /** Graph parameter 2: rectified right (base) image */
     vx_image                vxRightRectImage;
 
-    /* Graph parameter 3: 16-bit raw SDE output */
+    /** Graph parameter 3: 16-bit raw SDE output */
     vx_image                vxSde16BitOutput;
 
-    /* Graph parameter 3: output disparity in multi-layer SDE */
+    /** Graph parameter 3: output disparity in multi-layer SDE */
     vx_image                vxMergeDisparityL0;
 
-    /* Graph parameter 3: median filtered output disparity in multi-layer SDE */
+    /** Graph parameter 3: median filtered output disparity in multi-layer SDE */
     vx_image                vxMedianFilteredDisparity;
 
-    /* Graph parameter 4: output point cloud */
+    /** Graph parameter 4: output point cloud */
     vx_user_data_object     vxOutputTriangPC;
 
-    /* Timestamp - Not a Graph param */
+    /** Timestamp - Not a Graph param */
     vx_uint64             * timestamp;
 
-} SDEAPP_graphParams;
+};
 
 using SDEAPP_graphParamQ = std::queue<SDEAPP_graphParams*>;
 
 
+/**
+ * \brief Application context parameters 
+ * \ingroup group_ticore_sde
+ */
 struct SDEAPP_Context
 {
     /** Application state */
@@ -155,31 +235,31 @@ struct SDEAPP_Context
     vx_graph                               vxGraph;
 
     /** Input left image object */
-    vx_image                               vxInputLeftImage[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxInputLeftImage[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Input right image object */
-    vx_image                               vxInputRightImage[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxInputRightImage[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Input rectified left image object */
     vx_image                               vxLeftRectImage;
 
     /** Input rectified right image object */
-    vx_image                               vxRightRectImage[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxRightRectImage[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Raw disparity map object */
-    vx_image                               vxSde16BitOutput[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxSde16BitOutput[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Merged disparity map object at base layer */
-    vx_image                               vxMergeDisparityL0[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxMergeDisparityL0[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Median filtered disparity map object at base layer */
-    vx_image                               vxMedianFilteredDisparity[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_image                               vxMedianFilteredDisparity[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Ouput point cloud object */
-    vx_user_data_object                    vxOutputTriangPC[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_user_data_object                    vxOutputTriangPC[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Input timestamp */
-    vx_uint64                              timestamp[SDEAPP_MAX_PIPELINE_DEPTH];
+    vx_uint64                              timestamp[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Object that right image is passed to  after processing graph */
     vx_image                               vxDispRightImage;
@@ -223,18 +303,16 @@ struct SDEAPP_Context
     /** SDE configuration parameters */
     tivx_dmpac_sde_params_t                sde_params;
 
-    /** camera parameters:  
-     * horizontal distortion center
-     */
+    /** Camera parameters: horizontal distortion center */
     float                                  distCenterX;
 
-    /** vetical distortion center */
+    /** Camera parameters: vetical distortion center */
     float                                  distCenterY;
 
-    /** camera focal length */
+    /** Camera parameters: focal length */
     float                                  focalLength;
 
-    /** baseline between left and right cameras */
+    /** Stereo parameters: baseline between left and right cameras */
     float                                  baseline;
 
     /** Flag to create point cloud */
@@ -246,7 +324,7 @@ struct SDEAPP_Context
     /** Sub-sampling ratio */
     uint8_t                                pcSubsampleRatio;
 
-    /** disparity confidence threshold */ 
+    /** Disparity confidence threshold */ 
     uint8_t                                dispConfidence;
 
     /** 3D point cloud configuration:
@@ -254,23 +332,34 @@ struct SDEAPP_Context
      */
     float                                  lowPtX;
 
-    /** Max X position for a point to be rendered */
+
+    /** 3D point cloud configuration:
+     * Max X position for a point to be rendered
+     */
     float                                  highPtX;
 
-    /** Min Y position for a point to be rendered */
+    /** 3D point cloud configuration:
+     * Min Y position for a point to be rendered 
+     */
     float                                  lowPtY;
 
-    /** Max Y position for a point to be rendered */
+    /** 3D point cloud configuration:
+     * Max Y position for a point to be rendered 
+     */
     float                                  highPtY;
 
-    /** Min Z position for a point to be rendered */
+    /** 3D point cloud configuration:
+     * Min Z position for a point to be rendered 
+     */
     float                                  lowPtZ;
 
-    /** Max Z position for a point to be rendered */
+    /** 3D point cloud configuration:
+     * Max Z position for a point to be rendered 
+     */
     float                                  highPtZ;
 
     /** graph parameter tracking */
-    SDEAPP_graphParams                     paramDesc[SDEAPP_MAX_PIPELINE_DEPTH];
+    SDEAPP_graphParams                     paramDesc[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** A queue for holding free descriptors. */
     SDEAPP_graphParamQ                     freeQ;
@@ -370,10 +459,13 @@ struct SDEAPP_Context
 
 
 /**
- * \brief Set LDC, SDE and Point Cloud create parameters
+ * \brief Set create parameters for LDC, SDE and Point Cloud generation
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_sde
  */
 void      SDEAPP_setAllParams(SDEAPP_Context *appCntxt);
 
@@ -386,6 +478,7 @@ void      SDEAPP_setAllParams(SDEAPP_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_init(SDEAPP_Context *appCntxt);
 
@@ -394,6 +487,9 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_sde
  */
 void      SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt);
 
@@ -402,6 +498,9 @@ void      SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_sde
  */
 void      SDEAPP_intSigHandler(SDEAPP_Context *appCntxt);
 
@@ -411,6 +510,9 @@ void      SDEAPP_intSigHandler(SDEAPP_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_sde
  */
 void      SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt);
 
@@ -422,7 +524,7 @@ void      SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt);
  * 
  * \param [in] width image width
  
- * \param [in] width image height
+ * \param [in] height image height
  * 
  * \param [in] f camera focal length
  
@@ -432,6 +534,7 @@ void      SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_init_camInfo(SDEAPP_Context *appCntxt, 
                               uint32_t width,
@@ -453,6 +556,7 @@ vx_status SDEAPP_init_camInfo(SDEAPP_Context *appCntxt,
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
                      const vx_uint8 * inputLeftImage,
@@ -466,6 +570,7 @@ vx_status SDEAPP_run(SDEAPP_Context *appCntxt,
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt);
 
@@ -477,6 +582,7 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt);
 
@@ -488,6 +594,7 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */ 
 vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt);
 
@@ -501,6 +608,7 @@ vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */ 
 vx_status SDEAPP_setupPipeline(SDEAPP_Context * appCntxt);
 
@@ -512,6 +620,7 @@ vx_status SDEAPP_setupPipeline(SDEAPP_Context * appCntxt);
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */ 
 vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt);
 
@@ -522,6 +631,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt);
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */ 
 vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt);
 
@@ -531,6 +641,9 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt);
  *
  * \param [in] appCntxt APP context
  *
+ * \return
+ * 
+ * \ingroup group_ticore_sde
  */
 void      SDEAPP_printStats(SDEAPP_Context * appCntxt);
 
@@ -538,7 +651,14 @@ void      SDEAPP_printStats(SDEAPP_Context * appCntxt);
  * \brief Function to export the performance statistics to a file.
  *
  * \param [in] appCntxt APP context
+ * 
+ * \param [in] fp file to export
  *
+ * \param [in] exportAll flag to export all statistics
+ *
+ * \return VX_SUCCESS on success 
+ * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_exportStats(SDEAPP_Context * appCntxt, FILE *fp, bool exportAll);
 
@@ -547,6 +667,9 @@ vx_status SDEAPP_exportStats(SDEAPP_Context * appCntxt, FILE *fp, bool exportAll
  *
  * \param [in] appCntxt APP context
  *
+ * \return VX_SUCCESS on success
+ * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_waitGraph(SDEAPP_Context * appCntxt);
 
@@ -559,6 +682,7 @@ vx_status SDEAPP_waitGraph(SDEAPP_Context * appCntxt);
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_getFreeParamRsrc(SDEAPP_Context       *appCntxt,
                                   SDEAPP_graphParams   **gpDesc);
@@ -573,6 +697,7 @@ vx_status SDEAPP_getFreeParamRsrc(SDEAPP_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_process(SDEAPP_Context * appCntxt, SDEAPP_graphParams * gpDesc);
 
@@ -586,6 +711,7 @@ vx_status SDEAPP_process(SDEAPP_Context * appCntxt, SDEAPP_graphParams * gpDesc)
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event);
 
@@ -599,6 +725,7 @@ vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event);
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_releaseParamRsrc(SDEAPP_Context  *appCntxt, uint32_t rsrcIndex);
 
@@ -632,6 +759,8 @@ vx_status SDEAPP_releaseParamRsrc(SDEAPP_Context  *appCntxt, uint32_t rsrcIndex)
  *
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
+ * 
  */
 vx_status SDEAPP_getOutBuff(SDEAPP_Context      *appCntxt,
                             vx_image            *rightRectImage,
@@ -647,6 +776,7 @@ vx_status SDEAPP_getOutBuff(SDEAPP_Context      *appCntxt,
  *
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_releaseOutBuff(SDEAPP_Context * appCntxt);
 

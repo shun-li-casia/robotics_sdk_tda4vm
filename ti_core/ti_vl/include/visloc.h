@@ -90,6 +90,34 @@
 
 #include <Eigen/Dense>
 
+/**
+ * \defgroup group_ticore_visloc CNN based visual localization
+ *
+ * \brief It performs the ego vehicle localization that estimates an ego vehicle's 6-DOF 
+ *        (Degree of Freedom) pose from calibrated camera images using a 3D sparse map 
+ *        created offline. The 3D sparse map consists of a set of key points with (X, Y, Z) 
+ *        positions and 64-dimensional descriptors. To localize the ego vehicle's pose, 
+ *        key points are detected with descriptors from the input camera image and 
+ *        these key points are matched against the key points in the map. The ego vehicle's 
+ *        pose is estimated using the Perspective-n-Point (PnP) approach. The overall data
+ *        flow is descriedb in the figure below: <br>
+ * 
+ *        \image html visloc_demo_block_diagram.svg "CNN based visual localization" width=1000
+ * 
+ *        Key-point descriptor plays critical role in the visual localization. A deep 
+ *        neural network is used to learn hand computed feature descriptor like KAZE in 
+ *        a supervised manner. We refer such descriptor as DKAZE. The DAKZE network was used 
+ *        to create key features and their descriptors for the sparse 3D map and is also 
+ *        used to detect key feature points with descriptors for every input image in 
+ *        the localization process.  For more details about the DKAZE network and the 
+ *        localization process, refer to 
+ *        <a href="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/vision_apps/docs/user_guide/group_apps_dl_demos_app_tidl_vl.html">
+ *        Vision Apps User Guide</a>. <br>
+ * 
+ * \ingroup  group_ticore_apps
+ *
+ */
+
 using namespace ti_core_common;
 using namespace ti::dl;
 using namespace ti::edgeai::common;
@@ -105,66 +133,155 @@ extern "C" {
 }
 #endif
 
+/**
+ * \brief Default input image width
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_DEFAULT_IMAGE_WIDTH        (1280)
+
+/**
+ * \brief Default input image height
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_DEFAULT_IMAGE_HEIGHT       (720)
+
+/**
+ * \brief LDC down sampling factor
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_LDC_DS_FACTOR              (2)
+
+/**
+ * \brief LDC block width
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_LDC_BLOCK_WIDTH            (64)
+
+/**
+ * \brief LDC block height
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_LDC_BLOCK_HEIGHT           (16)
+
+/**
+ * \brief Pixel padding flag in LDC
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_LDC_PIXEL_PAD              (1)
 
+/**
+ * \brief Output file name to save performance stats
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_PERF_OUT_FILE              "app_visloc"
 
+/**
+ * \brief Maximum file name length
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_MAX_LINE_LEN               (1024U)
+
+/**
+ * \brief Number of output tensors from CNN model
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_NUM_MODEL_OUTPUT           (2U)
 
+/**
+ * \brief Maximum output tensor dimension 
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_MAX_OUT_TENSOR_DIMS        (4U)
+
+/**
+ * \brief Number of graph parameters 
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_NUM_GRAPH_PARAMS           (7U)
 
+/**
+ * \brief Appliation state id - Invalid
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_STATE_INVALID              (0U)
+
+/**
+ * \brief Appliation state id - Initialized
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_STATE_INIT                 (1U)
+
+/**
+ * \brief Appliation state id - Shutdown
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_STATE_SHUTDOWN             (2U)
 
+/**
+ * \brief Graph completion event id
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_GRAPH_COMPLETE_EVENT       (0U)
+
+/**
+ * \brief Scaler node completion event id
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_SCALER_NODE_COMPLETE_EVENT (VISLOC_GRAPH_COMPLETE_EVENT + 1)
+
+/**
+ * \brief Event id that notify application exits by user
+ * \ingroup group_ticore_visloc
+ */
 #define VISLOC_USER_EVT_EXIT              (VISLOC_SCALER_NODE_COMPLETE_EVENT + 1)
 
 
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
+
+/**
+ * \brief Graph parameters 
+ * \ingroup group_ticore_visloc
+ */
 struct VISLOC_graphParams
 {
-    /* Graph parameter 0 */
+    /** Graph parameter 0 */
     vx_image                vxInputImage;
 
-    /* Graph parameter 1 */
+    /** Graph parameter 1 */
     vx_image                vxRectifiedImage;
 
-    /* Graph parameter 2 */
+    /** Graph parameter 2 */
     vx_image                vxScalerOut;
 
-    /* Output Tensor from DLR output buffer */
-    /* Graph parameter 3, 4 */
+    /** Graph parameter 3, 4: 
+     * Output Tensor from DLR output buffer
+     */
     vx_tensor               vxOutTensor[2];
 
-    /* Input to DL Inference engine. */
-    VecDlTensorPtr         *inferInputBuff;
-
-    /* Output from the DL Inference engine. */
-    VecDlTensorPtr         *inferOutputBuff;
-
-    /* Graph parameter 5 */
+    /** Graph parameter 5 */
     vx_matrix               vxPoseMatrix;
 
-    /* Graph parameter 6 */
+    /** Graph parameter 6 */
     vx_image                vxOutputImage;
 
-    /* timestamp - Not a Graph param */
+    /** Input to DL Inference engine. */
+    VecDlTensorPtr         *inferInputBuff;
+
+    /** Output from the DL Inference engine. */
+    VecDlTensorPtr         *inferOutputBuff;
+
+    /** timestamp - Not a Graph param */
     vx_uint64              *timestamp;
 };
 
 using VISLOC_Queue =
      MultiThreadQ<VISLOC_graphParams>;
 
+/**
+ * \brief Application context parameters 
+ * \ingroup group_ticore_visloc
+ */
 struct VISLOC_Context
 {
     /** Application state */
@@ -182,7 +299,7 @@ struct VISLOC_Context
     /** Scaler node context object. */
     CM_ScalerNodeCntxt      scalerObj{};
 
-    /* Pre-process configuration. */
+    /** Pre-process configuration. */
     PreprocessImageConfig   preProcCfg;
 
     /** DL Inference configuration. */
@@ -206,7 +323,7 @@ struct VISLOC_Context
     /** output tensor: tensor dims */
     vx_size                 outTensorDims[VISLOC_NUM_MODEL_OUTPUT][VISLOC_MAX_OUT_TENSOR_DIMS];
 
-    /* output tensor size in bytes */
+    /** output tensor size in bytes */
     uint32_t                outTensorSize[VISLOC_NUM_MODEL_OUTPUT];
 
     /** Pose Calculation node context object. */
@@ -227,10 +344,10 @@ struct VISLOC_Context
     /** Rectified image object  */
     vx_image                vxRectifiedImage[GRAPH_MAX_PIPELINE_DEPTH];
 
-    /* Input timestamp */
+    /** Input timestamp */
     vx_uint64               timestamp[GRAPH_MAX_PIPELINE_DEPTH];
 
-    /* Output Tensors that are crated from dlr output buffers. */
+    /** Output Tensors that are crated from dlr output buffers. */
     vx_tensor               vxOutTensor[VISLOC_NUM_MODEL_OUTPUT][GRAPH_MAX_PIPELINE_DEPTH];
 
     /** Input image corresponding to the output image and pose. */
@@ -294,13 +411,13 @@ struct VISLOC_Context
     /** OpenVX pipeline depth */
     uint8_t                 pipelineDepth;
 
-    /* output time stamp */
+    /** output time stamp */
     vx_uint64               outTimestamp;
 
     /** Number of graph params */
     uint8_t                 numGraphParams;
 
-    /* graph parameter tracking */
+    /** graph parameter tracking */
     VISLOC_graphParams      paramDesc[GRAPH_MAX_PIPELINE_DEPTH];
 
     /** A queue for holding free descriptors. */
@@ -384,7 +501,6 @@ struct VISLOC_Context
     /** Performance monitoring. */
     app_perf_point_t        vlPerf;
 
-
     /** Flag to track if the performance counter has been initialized. */
     bool                    startPerfCapt;
 };
@@ -397,6 +513,7 @@ struct VISLOC_Context
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_init(VISLOC_Context *appCntxt);
 
@@ -406,8 +523,9 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
- * \return VX_SUCCESS on success
+ * \return 
  * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_reset(VISLOC_Context * appCntxt);
 
@@ -418,6 +536,7 @@ void      VISLOC_reset(VISLOC_Context * appCntxt);
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_init_VL(VISLOC_Context *appCntxt);
 
@@ -428,6 +547,7 @@ vx_status VISLOC_init_VL(VISLOC_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_deinit_VL(VISLOC_Context *appCntxt);
 
@@ -438,6 +558,7 @@ vx_status VISLOC_deinit_VL(VISLOC_Context *appCntxt);
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */ 
 vx_status VISLOC_setupPipeline(VISLOC_Context * appCntxt);
 
@@ -449,10 +570,11 @@ vx_status VISLOC_setupPipeline(VISLOC_Context * appCntxt);
  * 
  * \param [in] inputImage input image
  * 
- * \param [in] timestamp input images' time stamp
+ * \param [in] timestamp timeStamp of input image to be processed
  * 
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_run(VISLOC_Context       *appCntxt,
                      const unsigned char  *inputImage,
@@ -464,6 +586,9 @@ vx_status VISLOC_run(VISLOC_Context       *appCntxt,
  *
  * \param [in] appCntxt APP context
  *
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_printStats(VISLOC_Context * appCntxt);
 
@@ -471,7 +596,14 @@ void      VISLOC_printStats(VISLOC_Context * appCntxt);
  * \brief Function to export the performance statistics to a file.
  *
  * \param [in] appCntxt APP context
+ * 
+ * \param [in] fp file to export
+ * 
+ * \param [in] exportAll flag to export all statistics
  *
+ * \return VX_SUCCESS on success
+ * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_exportStats(VISLOC_Context * appCntxt, FILE *fp, bool exportAll);
 
@@ -481,6 +613,9 @@ vx_status VISLOC_exportStats(VISLOC_Context * appCntxt, FILE *fp, bool exportAll
  *
  * \param [in] appCntxt APP context
  *
+ * \return VX_SUCCESS on success
+ * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_waitGraph(VISLOC_Context * appCntxt);
 
@@ -494,6 +629,7 @@ vx_status VISLOC_waitGraph(VISLOC_Context * appCntxt);
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_processEvent(VISLOC_Context * appCntxt, vx_event_t * event);
 
@@ -507,12 +643,15 @@ vx_status VISLOC_processEvent(VISLOC_Context * appCntxt, vx_event_t * event);
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \param [in] timestamp timeStamp of input image to be processed
+ *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_process(VISLOC_Context     * appCntxt, 
                          VISLOC_graphParams * gpDesc,
-                         uint64_t                 timestamp);
+                         uint64_t             timestamp);
 
 /**
  * \brief Function to returns references to the {input, output} images at the
@@ -532,17 +671,18 @@ vx_status VISLOC_process(VISLOC_Context     * appCntxt,
  *
  * \param [in]  appCntxt APP context
  *
- * \param [out] inputImg Input image passed to the graph.
+ * \param [out] inputImage Input image passed to the graph.
  *
  * \param [out] output Reference to the output object from the graph
  *              corresponding to the 'inputImage'.
  *
  * \param [out] outputPose Reference to the output pose matrix from the graph.
  * 
- * \param [out] timestamp Timestamp of inputImg
+ * \param [out] timestamp Timestamp of inputImage
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_getOutBuff(VISLOC_Context   * appCntxt,
                             vx_image         * inputImage,
@@ -558,6 +698,7 @@ vx_status VISLOC_getOutBuff(VISLOC_Context   * appCntxt,
  *
  * \return VX_SUCCESS on success
  * 
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_releaseOutBuff(VISLOC_Context * appCntxt);
 
@@ -588,6 +729,7 @@ vx_status VISLOC_preProcess(VISLOC_Context     * appCntxt,
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_createScoreOutTensor(VISLOC_Context     * appCntxt,
                                       VecDlTensorPtr     & outputTensorVec,
@@ -605,6 +747,7 @@ vx_status VISLOC_createScoreOutTensor(VISLOC_Context     * appCntxt,
  * 
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_createDescOutTensor(VISLOC_Context     * appCntxt,
                                      VecDlTensorPtr     & outputTensorVec,
@@ -620,6 +763,7 @@ vx_status VISLOC_createDescOutTensor(VISLOC_Context     * appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_popFreeInputDesc(VISLOC_Context       *appCntxt,
                                   VISLOC_graphParams  **gpDesc);
@@ -634,6 +778,7 @@ vx_status VISLOC_popFreeInputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_popPreprocInputDesc(VISLOC_Context       *appCntxt,
                                      VISLOC_graphParams  **gpDesc);
@@ -648,6 +793,7 @@ vx_status VISLOC_popPreprocInputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_popDlInferInputDesc(VISLOC_Context       *appCntxt,
                                      VISLOC_graphParams  **gpDesc);
@@ -662,6 +808,7 @@ vx_status VISLOC_popDlInferInputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_popVisLocInputDesc(VISLOC_Context       *appCntxt,
                                     VISLOC_graphParams  **gpDesc);
@@ -675,6 +822,7 @@ vx_status VISLOC_popVisLocInputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_getVisLocInputDesc(VISLOC_Context       *appCntxt,
                                     VISLOC_graphParams   **gpDesc);
@@ -689,6 +837,7 @@ vx_status VISLOC_getVisLocInputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_getOutputDesc(VISLOC_Context       *appCntxt,
                                VISLOC_graphParams   *gpDesc);
@@ -704,6 +853,7 @@ vx_status VISLOC_getOutputDesc(VISLOC_Context       *appCntxt,
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_popOutputDesc(VISLOC_Context       *appCntxt,
                                VISLOC_graphParams  **gpDesc);
@@ -715,9 +865,10 @@ vx_status VISLOC_popOutputDesc(VISLOC_Context       *appCntxt,
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_enqueInputDesc(VISLOC_Context      *appCntxt,
-                                VISLOC_graphParams  *desc);
+                                VISLOC_graphParams  *gpDesc);
 
 /**
  * \brief Function to add the buffer to the pre-processing input queue. 
@@ -726,9 +877,12 @@ void      VISLOC_enqueInputDesc(VISLOC_Context      *appCntxt,
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_enquePreprocInputDesc(VISLOC_Context      *appCntxt,
-                                       VISLOC_graphParams  *desc);
+                                       VISLOC_graphParams  *gpDesc);
 
 
 /**
@@ -738,9 +892,12 @@ void      VISLOC_enquePreprocInputDesc(VISLOC_Context      *appCntxt,
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_enqueDlInferInputDesc(VISLOC_Context      *appCntxt,
-                                       VISLOC_graphParams  *desc);
+                                       VISLOC_graphParams  *gpDesc);
 
 /**
  * \brief Function to add the buffer to the visual localization input queue. 
@@ -749,9 +906,12 @@ void      VISLOC_enqueDlInferInputDesc(VISLOC_Context      *appCntxt,
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_enqueVisLocInputDesc(VISLOC_Context      *appCntxt,
-                                      VISLOC_graphParams  *desc);
+                                      VISLOC_graphParams  *gpDesc);
 
 
 /**
@@ -761,9 +921,12 @@ void      VISLOC_enqueVisLocInputDesc(VISLOC_Context      *appCntxt,
  *
  * \param [in] gpDesc pointer to graph parameters
  *
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void      VISLOC_enqueOutputDesc(VISLOC_Context      *appCntxt,
-                                 VISLOC_graphParams  *desc);
+                                 VISLOC_graphParams  *gpDesc);
 
 
 
@@ -772,6 +935,9 @@ void      VISLOC_enqueOutputDesc(VISLOC_Context      *appCntxt,
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void VISLOC_launchProcThreads(VISLOC_Context *appCntxt);
 
@@ -780,6 +946,9 @@ void VISLOC_launchProcThreads(VISLOC_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void VISLOC_intSigHandler(VISLOC_Context *appCntxt);
 
@@ -788,6 +957,9 @@ void VISLOC_intSigHandler(VISLOC_Context *appCntxt);
  *
  * \param [in] appCntxt APP context
  * 
+ * \return
+ * 
+ * \ingroup group_ticore_visloc
  */
 void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt);
 
@@ -803,6 +975,7 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt);
  *
  * \return VX_SUCCESS on success
  *
+ * \ingroup group_ticore_visloc
  */
 vx_status VISLOC_extractPoseData(double          *outPose,
                                  double          *outQuaternion,
