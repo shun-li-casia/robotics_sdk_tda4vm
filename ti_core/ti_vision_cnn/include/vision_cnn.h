@@ -105,8 +105,6 @@
  *
  */
 
-This ti_vision_cnn node is versatile deep-learning (DL) inference ROS node that is optimized on DL cores and hardware accelerator of TDA4. The ti_vision_cnn node 
-
 using namespace ti_core_common;
 using namespace ti::dl;
 using namespace ti::edgeai::common;
