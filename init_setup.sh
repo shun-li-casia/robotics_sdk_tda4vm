@@ -35,7 +35,11 @@ export WORK_DIR=$HOME/j7ros_home
 export ROS_WS=$WORK_DIR/ros_ws
 
 # Install Robotics SDK repository
-if [[ ! -d "$ROS_WS/src/jacinto_ros_perception" ]]; then
+if [[ -d "$ROS_WS/src/jacinto_ros_perception" ]]; then
+    cd $ROS_WS/src/jacinto_ros_perception
+    git pull
+    cd $WORK_DIR
+else
     mkdir -p $ROS_WS/src
     cd $ROS_WS/src
     git clone https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
@@ -52,7 +56,10 @@ fi
 
 if [[ "$ARCH" == "aarch64" ]]; then
     # Download and install ROSBAG and other files
-    make data_download
+    ls $WORK_DIR | grep "data"
+    if [ "$?" -ne "0" ]; then
+        make data_download
+    fi
 
     # Install Tensorflow for CPP apps build
     ls /opt | grep "tensorflow"

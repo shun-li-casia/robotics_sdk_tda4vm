@@ -16,9 +16,9 @@ This section describes how to set up the Robotics SDK on the TDA4 Processor SDK 
 The Robotics SDK requires [the SD card image](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) from [Processor SDK Linux for Edge AI](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.00.01.10). The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
 
 ### 1.3. Ubuntu PC
-A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. It is assumed that matching ROS distro (either Melodic or ROS 2 Foxy) is installed on the remote Ubuntu PC or in a Docker container.
+A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. We have tested only with native x86_64 Ubuntu PCs, and have **not** tested with any other Ubuntu systems: including Ubuntu virtual machines and Docker Desktop on Mac or Windows.
 
-In case when you want to directly install ROS on the Ubuntu PC:
+It is assumed that matching ROS distro (either ROS 1 Melodic or ROS 2 Foxy) is installed on the remote Ubuntu PC, either in the host Ubuntu filesystem natively or in a Docker container. In case when you want to install ROS natively on the host Ubuntu filesystem:
 * For ROS Melodic installation steps, please refer to [this ROS wiki page](http://wiki.ros.org/melodic/Installation/Ubuntu).
 * For ROS 2 Foxy installation steps, please refer to [this ROS 2 documentation](https://docs.ros.org/en/foxy/Installation.html).
 

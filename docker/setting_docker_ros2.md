@@ -123,13 +123,13 @@ Object Detection CNN (Mono camera) | ros2 launch ti_vision_cnn mono_objdet_cnn_l
 
 It is recommended to launch demos in two terminals on the TDA4 target, and launch `ros2 bag play` in a separate terminal as shown is the following table.
 
-Demo                | ROSBAG launch command on TDA4 (Terminal 1) | Demo launch command on TDA4 (Terminal 2) | Launch command on Remote Visualization PC
---------------------|--------------------------------------------|------------------------------------------|------------------------------------------
-Stereo Vision       | ros2 launch ti_sde rosbag_remap_launch.py | ros2 launch ti_sde sde_launch.py | ros2 launch ti_viz_nodes rviz_sde_launch.py
-Stereo Vision with point-cloud | same as above  | ros2 launch ti_sde sde_pcl_launch.py             | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
-Semantic Segmentation CNN      | same as above  | ros2 launch ti_vision_cnn semseg_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
-Object Detection CNN           | same as above  | ros2 launch ti_vision_cnn objdet_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
-3D Obstacle Detection          | same as above  | ros2 launch ti_estop estop_launch.py             | ros2 launch ti_viz_nodes rviz_estop_launch.py
+Demo                           | ROSBAG launch command on TDA4 (Terminal 1) | Demo launch command on TDA4 (Terminal 2) | Launch command on Remote Visualization PC
+-------------------------------|--------------------------------------------|------------------------------------------|------------------------------------------
+Stereo Vision                  | ros2 launch ti_sde rosbag_launch.py  | ros2 launch ti_sde sde_launch.py     | ros2 launch ti_viz_nodes rviz_sde_launch.py
+Stereo Vision with point-cloud | ros2 launch ti_sde rosbag_launch.py  | ros2 launch ti_sde sde_pcl_launch.py | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
+Semantic Segmentation CNN | ros2 launch ti_sde rosbag_remap_launch.py | ros2 launch ti_vision_cnn semseg_cnn_launch.py | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
+Object Detection CNN      | ros2 launch ti_sde rosbag_remap_launch.py | ros2 launch ti_vision_cnn objdet_cnn_launch.py | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
+3D Obstacle Detection     | ros2 launch ti_sde rosbag_launch.py  | ros2 launch ti_estop estop_launch.py                | ros2 launch ti_viz_nodes rviz_estop_launch.py
 
 You can use TMUX inside the ROS Docker container to split the current terminal window into multiple panes. Below are some of useful basic keys in using TMUX. Full list of keys can be found, e.g., in [this link](https://tmuxcheatsheet.com/).
 * `tmux`: start a tmux session
