@@ -83,18 +83,18 @@ ZedCameraNode::ZedCameraNode(const std::string&         name,
     Node(name, options)
 {
     // parse ROS parameters
-    this->get_parameter_or("camera_mode", camera_mode_, std::string("HD"));
-    this->get_parameter_or("frame_rate", frame_rate_, 15.0);
-    this->get_parameter_or("frame_id_left", frame_id_left_, std::string("left_camera"));
-    this->get_parameter_or("frame_id_right", frame_id_right_, std::string("right_camera"));
-    this->get_parameter_or("device_name", device_name_, std::string("/dev/video1"));
-    this->get_parameter_or("encoding", encoding_, std::string("yuv422"));
-    this->get_parameter_or("image_topic_left",  image_topic_left_,  std::string("camera/left/image_raw"));
-    this->get_parameter_or("image_topic_right", image_topic_right_, std::string("camera/right/image_raw"));
-    this->get_parameter_or("camera_info_topic_left",  camera_info_topic_left_,  std::string("camera/left/camera_info"));
-    this->get_parameter_or("camera_info_topic_right", camera_info_topic_right_, std::string("camera/right/camera_info"));
-    this->get_parameter_or("camera_info_left_yaml", camera_info_left_yaml_, std::string(""));
-    this->get_parameter_or("camera_info_right_yaml", camera_info_right_yaml_, std::string(""));
+    get_parameter_or("camera_mode", camera_mode_, std::string("HD"));
+    get_parameter_or("frame_rate", frame_rate_, 15.0);
+    get_parameter_or("frame_id_left", frame_id_left_, std::string("left_camera"));
+    get_parameter_or("frame_id_right", frame_id_right_, std::string("right_camera"));
+    get_parameter_or("device_name", device_name_, std::string("/dev/video1"));
+    get_parameter_or("encoding", encoding_, std::string("yuv422"));
+    get_parameter_or("image_topic_left",  image_topic_left_,  std::string("camera/left/image_raw"));
+    get_parameter_or("image_topic_right", image_topic_right_, std::string("camera/right/image_raw"));
+    get_parameter_or("camera_info_topic_left",  camera_info_topic_left_,  std::string("camera/left/camera_info"));
+    get_parameter_or("camera_info_topic_right", camera_info_topic_right_, std::string("camera/right/camera_info"));
+    get_parameter_or("camera_info_left_yaml", camera_info_left_yaml_, std::string(""));
+    get_parameter_or("camera_info_right_yaml", camera_info_right_yaml_, std::string(""));
 
     // validate frame rate and update if necessary
     validateFrameRate(camera_mode_, frame_rate_);
@@ -252,3 +252,4 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 }
+

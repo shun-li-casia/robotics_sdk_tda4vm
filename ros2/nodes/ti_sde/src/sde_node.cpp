@@ -112,10 +112,10 @@ void SDEAppNode::process()
     bool        status;
 
     // Query the topicname to subscribe to
-    status = this->get_parameter("left_input_topic", leftTopicName);
+    status = get_parameter("left_input_topic", leftTopicName);
     if (status == true)
     {
-        status = this->get_parameter("right_input_topic", rightTopicName);
+        status = get_parameter("right_input_topic", rightTopicName);
     }
 
     if (status == false)
@@ -161,8 +161,6 @@ void SDEAppNode::inputProcessThread()
         exit(-1);
     }
 
-    m_imgTrans = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
     m_imgWidth  = m_cntxt->width;
     m_imgHeight = m_cntxt->height;
 
@@ -179,7 +177,7 @@ void SDEAppNode::subscriberCamInfoThread()
     std::string camInfoTopicName;
     bool        status;
 
-    status = this->get_parameter("camera_info_topic", camInfoTopicName);
+    status = get_parameter("camera_info_topic", camInfoTopicName);
     if (status == false)
     {
         RCLCPP_INFO(this->get_logger(), "Config parameter 'camera_info_topic' not found.");
@@ -207,14 +205,14 @@ void SDEAppNode::publisherThread()
     int8_t      i;
 
     // Query the topic name to publish the output image.
-    status = this->get_parameter("disparity_topic", rawDispTopic);
+    status = get_parameter("disparity_topic", rawDispTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'disparity_topic' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("point_cloud_topic", pcTopic);
+    status = get_parameter("point_cloud_topic", pcTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'point_cloud_topic' not found.");
@@ -407,11 +405,6 @@ void SDEAppNode::graphCompleteEvtHdlr()
 
 SDEAppNode::~SDEAppNode()
 {
-    if (m_imgTrans)
-    {
-        delete m_imgTrans;
-    }
-
     if (m_sync)
     {
         delete m_sync;
@@ -420,6 +413,21 @@ SDEAppNode::~SDEAppNode()
     if (m_cntxt)
     {
         delete m_cntxt;
+    }
+
+    if (m_sub)
+    {
+        delete m_sub;
+    }
+
+    if (m_leftImageSub)
+    {
+        delete m_leftImageSub;
+    }
+
+    if (m_rightImageSub)
+    {
+        delete m_rightImageSub;
     }
 
     if (initCtrlSem)
@@ -446,7 +454,7 @@ void SDEAppNode::readParams()
 
 
     /* Get left LUT file path information. */
-    status = this->get_parameter("left_lut_file_path", str);
+    status = get_parameter("left_lut_file_path", str);
     if (status == false)
     {
         RCLCPP_INFO(this->get_logger(), "Config parameter 'left_lut_file_path' not found.");
@@ -456,7 +464,7 @@ void SDEAppNode::readParams()
     snprintf(m_cntxt->left_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get right LUT file path information. */
-    status = this->get_parameter("right_lut_file_path", str);
+    status = get_parameter("right_lut_file_path", str);
     if (status == false)
     {
         RCLCPP_INFO(this->get_logger(), "Config parameter 'right_lut_file_path' not found.");
@@ -466,136 +474,140 @@ void SDEAppNode::readParams()
     snprintf(m_cntxt->right_LUT_file_name, SDEAPP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get input image format information */
-    this->get_parameter_or("input_format", tmp, (int32_t)CM_IMG_FORMAT_UYVY);
+    get_parameter_or("input_format", tmp, (int32_t)CM_IMG_FORMAT_UYVY);
     m_cntxt->inputFormat = (uint8_t)tmp;
 
     /* Get stereo algorithm type information */
-    this->get_parameter_or("sde_algo_type", tmp, 0);
+    get_parameter_or("sde_algo_type", tmp, 0);
     m_cntxt->sdeAlgoType = (uint8_t)tmp;
 
     /* Get the number of layers information when sde_algo_typ = 1*/
-    this->get_parameter_or("num_layers", tmp, 2);
+    get_parameter_or("num_layers", tmp, 2);
     m_cntxt->numLayers = (uint8_t)tmp;
 
     /* Get the median filtering flag information when sde_algo_typ = 1*/
-    this->get_parameter_or("pp_median_filter_enable", tmp, 0);
+    get_parameter_or("pp_median_filter_enable", tmp, 0);
     m_cntxt->ppMedianFilterEnable = (uint8_t)tmp;
 
     /* SDE Parameters */ 
     /* Get the SDE minimum disparity information */
-    this->get_parameter_or("disparity_min", tmp, 0);
+    get_parameter_or("disparity_min", tmp, 0);
     m_cntxt->sde_params.disparity_min = (uint16_t)tmp;
 
     /* Get the SDE maximum disparity information */
-    this->get_parameter_or("disparity_max", tmp, 1);
+    get_parameter_or("disparity_max", tmp, 1);
     m_cntxt->sde_params.disparity_max = (uint16_t)tmp;
 
     /* Get the SDE left-right consistency check threshold information */
-    this->get_parameter_or("threshold_left_right", tmp, 3);
+    get_parameter_or("threshold_left_right", tmp, 3);
     m_cntxt->sde_params.threshold_left_right = (uint16_t)tmp;
 
     /* Get the SDE texture based filtering enable flag information */
-    this->get_parameter_or("texture_filter_enable", tmp, 0);
+    get_parameter_or("texture_filter_enable", tmp, 0);
     m_cntxt->sde_params.texture_filter_enable = (uint16_t)tmp;
 
     /* Get the SDE texture filtering threshold information */
-    this->get_parameter_or("threshold_texture", tmp, 0);
+    get_parameter_or("threshold_texture", tmp, 0);
     m_cntxt->sde_params.threshold_texture = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p1 information */
-    this->get_parameter_or("aggregation_penalty_p1", tmp, 32);
+    get_parameter_or("aggregation_penalty_p1", tmp, 32);
     m_cntxt->sde_params.aggregation_penalty_p1 = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p2 information */
-    this->get_parameter_or("aggregation_penalty_p2", tmp, 197);
+    get_parameter_or("aggregation_penalty_p2", tmp, 197);
     m_cntxt->sde_params.aggregation_penalty_p2 = (uint16_t)tmp;
 
     /* Get the SDE median filter enable flag information */
-    this->get_parameter_or("median_filter_enable", tmp, 1);
+    get_parameter_or("median_filter_enable", tmp, 1);
     m_cntxt->sde_params.median_filter_enable = (uint16_t)tmp;
 
     /* Get the SDE reduced range search enable flag information */
-    this->get_parameter_or("reduced_range_search_enable", tmp, 0);
+    get_parameter_or("reduced_range_search_enable", tmp, 0);
     m_cntxt->sde_params.reduced_range_search_enable = (uint16_t)tmp;
 
     /* Get the stereo camera baseline information */
-    this->get_parameter_or("stereo_baseline", ftmp, 0.12f);
+    get_parameter_or("stereo_baseline", ftmp, 0.12f);
     m_cntxt->baseline = (float)ftmp;
 
     /* Get PC creation flag information */
-    this->get_parameter_or("enable_pc", tmp, 1);
+    get_parameter_or("enable_pc", tmp, 1);
     m_cntxt->enablePC = (uint8_t)tmp;
 
     /*Sub-sampling ratio of point cloud */
-    this->get_parameter_or("pc_subsample_ratio", tmp, 1);
+    get_parameter_or("pc_subsample_ratio", tmp, 1);
     m_cntxt->pcSubsampleRatio = (uint8_t)tmp;
 
     /* Get use of PC configuration flag information*/
-    this->get_parameter_or("use_pc_config", tmp, 1);
+    get_parameter_or("use_pc_config", tmp, 1);
     m_cntxt->usePCConfig = (uint8_t)tmp;
 
     /* Get the disparity confidence threshold information */
-    this->get_parameter_or("sde_confidence_threshold", tmp, 0);
+    get_parameter_or("sde_confidence_threshold", tmp, 0);
     m_cntxt->dispConfidence = (uint8_t)tmp;
 
     /* Low X pos limit for which 3D point is rendered  */
-    this->get_parameter_or("point_low_x", ftmp, -20.0f);
+    get_parameter_or("point_low_x", ftmp, -20.0f);
     m_cntxt->lowPtX = (float)ftmp;
 
     /* High X pos limit for which 3D point is rendered  */
-    this->get_parameter_or("point_high_x", ftmp, 20.0f);
+    get_parameter_or("point_high_x", ftmp, 20.0f);
     m_cntxt->highPtX = (float)ftmp;
 
     /* Low Y pos (depth) limit for which 3D point is rendered  */
-    this->get_parameter_or("point_low_y", ftmp, 0.0f);
+    get_parameter_or("point_low_y", ftmp, 0.0f);
     m_cntxt->lowPtY = (float)ftmp;
 
     /* High Y pos (depth) limit for which 3D point is rendered  */
-    this->get_parameter_or("point_high_y", ftmp, 20.0f);
+    get_parameter_or("point_high_y", ftmp, 20.0f);
     m_cntxt->highPtY = (float)ftmp;
 
     /* Low Z pos limit for which 3D point is rendered  */
-    this->get_parameter_or("point_low_Z", ftmp, -2.0f);
+    get_parameter_or("point_low_Z", ftmp, -2.0f);
     m_cntxt->lowPtZ = (float)ftmp;
 
     /* High Z pos limit for which 3D point is rendered  */
-    this->get_parameter_or("point_high_Z", ftmp, 5.0f);
+    get_parameter_or("point_high_Z", ftmp, 5.0f);
     m_cntxt->highPtZ = (float)ftmp;
 
     /* OpenVX Graph Operation Parameters */
     /* Get interactive mode flag information. */
-    this->get_parameter_or("is_interactive", tmp, 0);
+    get_parameter_or("is_interactive", tmp, 0);
     m_cntxt->is_interactive = (uint8_t)tmp;
 
     /* Get graph export flag information. */
-    this->get_parameter_or("exportGraph", tmp, 0);
+    get_parameter_or("exportGraph", tmp, 0);
     m_cntxt->exportGraph = (uint8_t)tmp;
 
+    /* Get perf export flag information. */
+    get_parameter_or("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
+
     /* Get real-time logging enable information. */
-    this->get_parameter_or("rtLogEnable", tmp, 0);
+    get_parameter_or("rtLogEnable", tmp, 0);
     m_cntxt->rtLogEnable = (uint8_t)tmp;
 
     /* Get pipeline depth information. */
-    this->get_parameter_or("pipeline_depth", tmp, GRAPH_MAX_PIPELINE_DEPTH);
+    get_parameter_or("pipeline_depth", tmp, GRAPH_MAX_PIPELINE_DEPTH);
     m_cntxt->pipelineDepth = (uint8_t)tmp;
 
     /* Get the disparity merge core information. */
-    this->get_parameter("disp_merge_deploy_core", str);
+    get_parameter("disp_merge_deploy_core", str);
     m_cntxt->mlSdeCreateParams.dispMergeNodeCore =
         CM_getCoreName((const char *)str.c_str());
     
     /* Get the hole filling core information. */
-    this->get_parameter("hole_filling_deploy_core", str);
+    get_parameter("hole_filling_deploy_core", str);
     m_cntxt->mlSdeCreateParams.holeFillingNodeCore =
         CM_getCoreName((const char *)str.c_str());
 
     /* Get the point cloud generation core information. */
-    this->get_parameter("color_conv_deploy_core", str);
+    get_parameter("color_conv_deploy_core", str);
     m_cntxt->sdeTriangCreateParams.ccNodeCore =
         CM_getCoreName((const char *)str.c_str());
 
     /* Get the occupancy grid generation core information. */
-    this->get_parameter("triang_deploy_core", str);
+    get_parameter("triang_deploy_core", str);
     m_cntxt->sdeTriangCreateParams.triangNodeCore =
         CM_getCoreName((const char *)str.c_str());
 

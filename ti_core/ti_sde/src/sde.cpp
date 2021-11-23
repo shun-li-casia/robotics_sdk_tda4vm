@@ -358,6 +358,9 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
         appCntxt->exitInputDataProcess = false;
         appCntxt->outputCtrlSem = new Semaphore(0);
         appCntxt->state = SDEAPP_STATE_INIT;
+
+        SDEAPP_reset(appCntxt);
+        appPerfStatsResetAll();
     }
 
     return vxStatus;
@@ -576,22 +579,25 @@ static void SDEAPP_exitProcThreads(SDEAPP_Context *appCntxt)
 
 static void SDEAPP_dumpStats(SDEAPP_Context *appCntxt)
 {
-    const char *name = SDEAPP_PERF_OUT_FILE;
-    FILE       *fp;
-
-    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-    if (fp != NULL)
+    if (appCntxt->exportPerfStats == 1)
     {
-        SDEAPP_exportStats(appCntxt, fp, true);
+        const char *name = SDEAPP_PERF_OUT_FILE;
+        FILE       *fp;
 
-        CM_printProctime(fp);
-        appPerfStatsExportCloseFile(fp);
-    }
-    else
-    {
-        PTK_printf("Could not open [%s] for exporting "
-                   "performance data\n", name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+        if (fp != NULL)
+        {
+            SDEAPP_exportStats(appCntxt, fp, true);
+
+            CM_printProctime(fp);
+            appPerfStatsExportCloseFile(fp);
+        }
+        else
+        {
+            PTK_printf("Could not open [%s] for exporting "
+                       "performance data\n", name);
+        }
     }
 }
 
@@ -785,6 +791,4 @@ void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
         SDEAPP_cleanupHdlr(appCntxt);
         PTK_printf("\nDEMO FINISHED!\n");
     }
-
-    exit(0);
 }

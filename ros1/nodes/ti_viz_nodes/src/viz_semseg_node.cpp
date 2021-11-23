@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <ros/ros.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
-
 
 using namespace sensor_msgs;
 using namespace message_filters;
@@ -33,25 +30,23 @@ namespace ros_app_viz
          *
          */
 
-        VizSemSeg() : m_it(m_nh)
+        VizSemSeg(ros::NodeHandle *nh, ros::NodeHandle *private_nh)
         {
-            ros::NodeHandle private_nh("~");
-
             std::string rectImgTopic;
             std::string ssTensorTopic;
             std::string ssMapImgTopic;
 
             // input topics
-            private_nh.param("rectified_image_topic",    rectImgTopic,  std::string(""));
-            private_nh.param("vision_cnn_tensor_topic",  ssTensorTopic, std::string(""));
+            private_nh->param("rectified_image_topic",    rectImgTopic,  std::string(""));
+            private_nh->param("vision_cnn_tensor_topic",  ssTensorTopic, std::string(""));
 
             // output topics
-            private_nh.param("vision_cnn_image_topic",   ssMapImgTopic, std::string(""));
+            private_nh->param("vision_cnn_image_topic",   ssMapImgTopic, std::string(""));
 
-            m_ssMapImgPub = m_it.advertise(ssMapImgTopic, 1);
+            m_ssMapImgPub = nh->advertise<Image>(ssMapImgTopic, 1);
 
-            message_filters::Subscriber<Image> ssTensorSub(m_nh, ssTensorTopic, 1);
-            message_filters::Subscriber<Image> rectImgSub(m_nh, rectImgTopic, 1);
+            message_filters::Subscriber<Image> ssTensorSub(*nh, ssTensorTopic, 1);
+            message_filters::Subscriber<Image> rectImgSub(*nh, rectImgTopic, 1);
 
             TimeSynchronizer<Image, Image> sync(ssTensorSub, rectImgSub, 10);
             sync.registerCallback(boost::bind(&VizSemSeg::callback_vizSemSeg, this, _1, _2));
@@ -116,10 +111,7 @@ namespace ros_app_viz
         }
 
     private:
-        ros::NodeHandle                 m_nh;
-        image_transport::ImageTransport m_it;
-
-        image_transport::Publisher      m_ssMapImgPub;
+        ros::Publisher m_ssMapImgPub;
     };
 }
 
@@ -131,7 +123,9 @@ int main(int argc, char **argv)
     try
     {
         ros::init(argc, argv, "app_viz_semseg");
-        ros_app_viz::VizSemSeg semSegViz;
+        ros::NodeHandle nh;
+        ros::NodeHandle private_nh("~");
+        ros_app_viz::VizSemSeg semSegViz(&nh, &private_nh);
 
         return EXIT_SUCCESS;
     }

@@ -391,6 +391,10 @@ void VisionCnnNode::readParams()
     m_privNodeHdl.param("exportGraph", tmp, 0);
     m_cntxt->exportGraph = (uint8_t)tmp;
 
+    /* Get perf export flag information. */
+    m_privNodeHdl.param("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
+
     /* Get real-time logging enable information. */
     m_privNodeHdl.param("rtLogEnable", tmp, 0);
     m_cntxt->rtLogEnable = (uint8_t)tmp;

@@ -437,6 +437,12 @@ struct SDEAPP_Context
      */
     uint8_t                                exportGraph;
 
+    /** Flag to indicate if the performance data should be exported
+     * 0 - disable
+     * 1 - enable
+     */
+    uint8_t                                exportPerfStats;
+
     /** Real-time logging enable.
      * 0 - disable
      * 1 - enable
@@ -481,6 +487,17 @@ void      SDEAPP_setAllParams(SDEAPP_Context *appCntxt);
  * \ingroup group_ticore_sde
  */
 vx_status SDEAPP_init(SDEAPP_Context *appCntxt);
+
+/**
+ * \brief Reset app's parameters
+ *
+ * \param [in] appCntxt APP context
+ * 
+ * \return VX_SUCCESS on success
+ * 
+ * \ingroup group_ticore_sde
+ */
+void      SDEAPP_reset(SDEAPP_Context * appCntxt);
 
 /**
  * \brief Launch input data thread and event handler thread. 

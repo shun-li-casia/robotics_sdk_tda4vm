@@ -83,14 +83,14 @@ MonoCamNode::MonoCamNode(const std::string&         name,
     Node(name, options)
 {
     // parse ROS parameters
-    this->get_parameter_or("camera_mode", camera_mode_, std::string("HD"));
-    this->get_parameter_or("frame_rate", frame_rate_, 15.0);
-    this->get_parameter_or("frame_id", frame_id_, std::string("camera"));
-    this->get_parameter_or("device_name", device_name_, std::string("/dev/video1"));
-    this->get_parameter_or("encoding", encoding_, std::string("yuv422"));
-    this->get_parameter_or("image_topic",  image_topic_,  std::string("camera/image_raw"));
-    this->get_parameter_or("camera_info_topic",  camera_info_topic_,  std::string("camera/camera_info"));
-    this->get_parameter_or("camera_info_yaml", camera_info_yaml_, std::string(""));
+    get_parameter_or("camera_mode", camera_mode_, std::string("HD"));
+    get_parameter_or("frame_rate", frame_rate_, 15.0);
+    get_parameter_or("frame_id", frame_id_, std::string("camera"));
+    get_parameter_or("device_name", device_name_, std::string("/dev/video1"));
+    get_parameter_or("encoding", encoding_, std::string("yuv422"));
+    get_parameter_or("image_topic",  image_topic_,  std::string("camera/image_raw"));
+    get_parameter_or("camera_info_topic",  camera_info_topic_,  std::string("camera/camera_info"));
+    get_parameter_or("camera_info_yaml", camera_info_yaml_, std::string(""));
 
     // validate frame rate and update if necessary
     validateFrameRate(camera_mode_, frame_rate_);

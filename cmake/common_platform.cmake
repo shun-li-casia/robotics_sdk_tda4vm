@@ -9,19 +9,13 @@ SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib" ".so")
 
 # Get the path of this file
-get_filename_component(SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-
+get_filename_component(SELF_DIR        "${CMAKE_CURRENT_LIST_FILE}" PATH)
 get_filename_component(TI_ROS_ROOT_DIR "${SELF_DIR}/.." ABSOLUTE)
 
 # From the self path, derive and set the ti_core directory
-get_filename_component(TI_CORE_ROOT_DIR "${TI_ROS_ROOT_DIR}/ti_core" ABSOLUTE)
-#message("TI_CORE_ROOT_DIR                  = " ${TI_CORE_ROOT_DIR})
-
+get_filename_component(TI_CORE_ROOT_DIR   "${TI_ROS_ROOT_DIR}/ti_core" ABSOLUTE)
 get_filename_component(TI_EDGEAI_ROOT_DIR "/opt/edge_ai_apps/apps_cpp" ABSOLUTE)
-#message("TI_EDGEAI_ROOT_DIR = " ${TI_EDGEAI_ROOT_DIR})
-
-get_filename_component(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/.. ABSOLUTE)
-#message("INSTALL_DIR = " ${INSTALL_DIR})
+get_filename_component(INSTALL_DIR        ${CMAKE_INSTALL_PREFIX}/.. ABSOLUTE)
 
 # PSDKRA base folder location
 set(PSDK_DIR $ENV{PSDK_BASE_PATH})
@@ -32,13 +26,14 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if ((${CMAKE_BUILD_TYPE} STREQUAL Debug) OR (${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo))
+if ((${CMAKE_BUILD_TYPE} STREQUAL Debug) OR
+    (${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo))
     set(PROFILE debug)
 else()
     set(PROFILE release)
 endif()
 
-message(STATUS "PROFILE                            = ${PROFILE}")
+message(STATUS "PROFILE = ${PROFILE}")
 unset(CMAKE_BUILD_TYPE CACHE)
 
 set(TI_EXTERNAL_INCLUDE_DIRS
@@ -68,28 +63,42 @@ else()
     set(TIDL_PACKAGE_ROOT tidl_j7/ti_dl)
 endif()
 
-#message("MMALIB_PACKAGE_ROOT               = " ${MMALIB_PACKAGE_ROOT})
-#message("TIDL_PACKAGE_ROOT                 = " ${TIDL_PACKAGE_ROOT})
-
 set(CGT7X_ROOT          ti-cgt-c7000_1.4.2.LTS)
 set(PDK_PACKAGE_ROOT    pdk/packages/ti)
 set(TIADALG_PATH        tiadalg)
 
-# tivision_apps library: build agaist static or shared library
-# tiovx_apps shared lib currently available only on J7
-## TI OpenVX
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    set(TARGET_PLATFORM      PC)
-    set(TARGET_CPU           x86_64)
-    set(BUILD_EMULATION_MODE yes)
-    set(TIVISION_APPS_TYPE   static)
+    set(BUILD_CORE_NODES          OFF)
+    set(BUILD_VISUALIZATION_NODES ON CACHE BOOL "Build Visualization nodes")
+    set(TARGET_PLATFORM           PC)
+    set(TARGET_CPU                x86_64)
+    set(BUILD_EMULATION_MODE      yes)
+    set(TIVISION_APPS_TYPE        static)
 elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    set(TARGET_PLATFORM      J7)
-    set(TARGET_CPU           A72)
-    set(BUILD_EMULATION_MODE no)
-    set(TIVISION_APPS_TYPE   shared)
+    set(BUILD_CORE_NODES          ON CACHE BOOL "Build core nodes")
+    set(BUILD_VISUALIZATION_NODES OFF CACHE BOOL "Do not build Visualization nodes")
+    set(TARGET_PLATFORM           J7)
+    set(TARGET_CPU                A72)
+    set(BUILD_EMULATION_MODE      no)
+    set(TIVISION_APPS_TYPE        shared)
 else()
     message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+
+if (${BUILD_CORE_NODES})
+    set(TI_EXTERNAL_LIBS
+        ti_core
+        ti_dl_inferer
+        edgeai_utils
+        ncurses
+        dlr
+        tensorflow-lite
+        onnxruntime
+        dl
+        yaml-cpp
+       )
+else()
+    set(TI_EXTERNAL_LIBS "")
 endif()
 
 set(TARGET_OS LINUX)
@@ -168,28 +177,6 @@ include_directories(
     /usr/include/opencv4
 )
 
-# # TIOVX, VISION_APPS, PTK_DEMOS: define lib variables
-# if(${TARGET_PLATFORM} STREQUAL "PC")
-#     include(${CMAKE_CURRENT_LIST_DIR}/platform_${TARGET_PLATFORM}.cmake)
-# endif()
-
-# ti_core not available for x86_64 platform
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    set(TI_EXTERNAL_LIBS
-        ti_core
-        ti_dl_inferer
-        edgeai_utils
-        ncurses
-        dlr
-        tensorflow-lite
-        onnxruntime
-        dl
-        yaml-cpp
-       )
-else()
-    set(TI_EXTERNAL_LIBS "")
-endif()
-
 set(COMMON_LINK_LIBS
     ${TI_EXTERNAL_LIBS}
     )
@@ -212,11 +199,18 @@ endif()
 
 link_directories(${TARGET_LINK_DIRECTORIES})
 
-#message("CMAKE_SYSTEM_PROCESSOR = " ${CMAKE_SYSTEM_PROCESSOR})
-#message("PROJECT_SOURCE_DIR =" ${PROJECT_SOURCE_DIR})
-#message("CMAKE_SOURCE_DIR =" ${CMAKE_SOURCE_DIR})
-#message("CMAKE_CURRENT_SOURCE_DIR =" ${CMAKE_CURRENT_SOURCE_DIR})
-#message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX})
-#message("CMAKE_CURRENT_BINARY_DIR = " ${CMAKE_CURRENT_BINARY_DIR})
-#message("INSTALL_DIR = " ${INSTALL_DIR})
+function(print_vars)
+    message("CMAKE_SYSTEM_PROCESSOR   =" ${CMAKE_SYSTEM_PROCESSOR})
+    message("PROJECT_SOURCE_DIR       =" ${PROJECT_SOURCE_DIR})
+    message("CMAKE_SOURCE_DIR         =" ${CMAKE_SOURCE_DIR})
+    message("CMAKE_CURRENT_SOURCE_DIR =" ${CMAKE_CURRENT_SOURCE_DIR})
+    message("CMAKE_INSTALL_PREFIX     =" ${CMAKE_INSTALL_PREFIX})
+    message("CMAKE_CURRENT_BINARY_DIR =" ${CMAKE_CURRENT_BINARY_DIR})
+    message("INSTALL_DIR              =" ${INSTALL_DIR})
+    message("MMALIB_PACKAGE_ROOT      =" ${MMALIB_PACKAGE_ROOT})
+    message("TIDL_PACKAGE_ROOT        =" ${TIDL_PACKAGE_ROOT})
+    message("TI_CORE_ROOT_DIR         =" ${TI_CORE_ROOT_DIR})
+    message("TI_EDGEAI_ROOT_DIR       =" ${TI_EDGEAI_ROOT_DIR})
+
+endfunction(print_vars)
 

@@ -4,8 +4,7 @@ project(ti_core)
 
 find_package(Eigen3 3.1.0 REQUIRED)
 
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-
+if(${BUILD_CORE_NODES})
     include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ti_core_common.cmake)
 
     set(COMMON_SRCS

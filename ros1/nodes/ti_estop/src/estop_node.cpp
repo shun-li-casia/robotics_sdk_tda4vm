@@ -584,6 +584,21 @@ EStopNode::~EStopNode()
         delete m_sync;
     }
 
+    if (m_sub)
+    {
+        delete m_sub;
+    }
+
+    if (m_leftImageSub)
+    {
+        delete m_leftImageSub;
+    }
+
+    if (m_rightImageSub)
+    {
+        delete m_rightImageSub;
+    }
+
     if (m_cntxt)
     {
         delete m_cntxt;
@@ -810,6 +825,10 @@ void EStopNode::readParams()
     /* Get graph export flag information. */
     m_privNodeHdl.param("exportGraph", tmp, 0);
     m_cntxt->exportGraph = (uint8_t)tmp;
+
+    /* Get perf export flag information. */
+    m_privNodeHdl.param("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
 
     /* Get real-time logging enable information. */
     m_privNodeHdl.param("rtLogEnable", tmp, 0);

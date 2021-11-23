@@ -517,22 +517,25 @@ static void VISION_CNN_exitProcThreads(VISION_CNN_Context *appCntxt)
 
 static void VISION_CNN_dumpStats(VISION_CNN_Context *appCntxt)
 {
-    const char *name = VISION_CNN_PERF_OUT_FILE;
-    FILE       *fp;
-
-    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-    if (fp != NULL)
+    if (appCntxt->exportPerfStats == 1)
     {
-        VISION_CNN_exportStats(appCntxt, fp, true);
+        const char *name = VISION_CNN_PERF_OUT_FILE;
+        FILE       *fp;
 
-        CM_printProctime(fp);
-        appPerfStatsExportCloseFile(fp);
-    }
-    else
-    {
-        PTK_printf("Could not open [%s] for exporting "
-                   "performance data\n", name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+        if (fp != NULL)
+        {
+            VISION_CNN_exportStats(appCntxt, fp, true);
+
+            CM_printProctime(fp);
+            appPerfStatsExportCloseFile(fp);
+        }
+        else
+        {
+            PTK_printf("Could not open [%s] for exporting "
+                       "performance data\n", name);
+        }
     }
 }
 
@@ -923,6 +926,4 @@ void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
         VISION_CNN_cleanupHdlr(appCntxt);
         PTK_printf("\nDEMO FINISHED!\n");
     }
-
-    exit(0);
 }

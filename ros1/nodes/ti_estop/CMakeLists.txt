@@ -3,7 +3,7 @@ project(ti_estop)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/ros1_common.cmake)
 
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+if(${BUILD_CORE_NODES})
     # AMR E-Stop example
     set(APP_ESTOP_SRCS
         src/estop_main.cpp

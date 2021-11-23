@@ -3,7 +3,7 @@ project(ti_vl)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/ros1_common.cmake)
 
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+if(${BUILD_CORE_NODES})
     find_package(Eigen3 3.1.0 REQUIRED)
 
     include_directories(${EIGEN3_INCLUDE_DIR})

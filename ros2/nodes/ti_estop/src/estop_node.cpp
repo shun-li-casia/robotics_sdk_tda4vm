@@ -105,10 +105,10 @@ void EStopNode::setupInputImgSubscribers()
     bool        status;
 
     // Query the topicname to subscribe to
-    status = this->get_parameter("left_input_topic_name", leftTopicName);
+    status = get_parameter("left_input_topic_name", leftTopicName);
     if (status == true)
     {
-        status = this->get_parameter("right_input_topic_name", rightTopicName);
+        status = get_parameter("right_input_topic_name", rightTopicName);
     }
 
     if (status == false)
@@ -150,7 +150,7 @@ void EStopNode::inputProcessThread()
         exit(-1);
     }
 
-    m_imgTrans = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
+    m_imgTrans = new ImgTrans(this->create_sub_node("image_transport"));
 
 
     // Cache the input image and tensor sizes
@@ -170,7 +170,7 @@ void EStopNode::subscriberCamInfoThread()
     std::string camInfoTopicName;
     bool        status;
 
-    status = this->get_parameter("camera_info_topic", camInfoTopicName);
+    status = get_parameter("camera_info_topic", camInfoTopicName);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'camera_info_topic' not found.");
@@ -202,42 +202,42 @@ void EStopNode::publisherThread()
     bool        latch = true;
 
     // Query the topic name to publish the output tensor.
-    status = this->get_parameter("semseg_cnn_tensor_topic", ssTensorTopic);
+    status = get_parameter("semseg_cnn_tensor_topic", ssTensorTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'semseg_cnn_tensor_topic' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("rectified_image_topic", rectImgTopic);
+    status = get_parameter("rectified_image_topic", rectImgTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'rectified_image_topic' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("bounding_box_topic", bbTopic);
+    status = get_parameter("bounding_box_topic", bbTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'bounding_box_topic' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("raw_disparity_topic_name", rawDispTopic);
+    status = get_parameter("raw_disparity_topic_name", rawDispTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'raw_disparity_topic_name' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("ogmap_topic_name", ogMapTopic);
+    status = get_parameter("ogmap_topic_name", ogMapTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'ogmap_topic_name' not found.");
         exit(-1);
     }
 
-    status = this->get_parameter("estop_topic_name", eStopTopic);
+    status = get_parameter("estop_topic_name", eStopTopic);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'estop_topic_name' not found.");
@@ -568,6 +568,21 @@ EStopNode::~EStopNode()
         delete m_sync;
     }
 
+    if (m_sub)
+    {
+        delete m_sub;
+    }
+
+    if (m_leftImageSub)
+    {
+        delete m_leftImageSub;
+    }
+
+    if (m_rightImageSub)
+    {
+        delete m_rightImageSub;
+    }
+
     if (m_cntxt)
     {
         delete m_cntxt;
@@ -591,7 +606,7 @@ void EStopNode::readParams()
     m_cntxt->sde_params.confidence_score_map[7] = 127;
 
     /* Get left LUT file path information. */
-    status = this->get_parameter("left_lut_file_path", str);
+    status = get_parameter("left_lut_file_path", str);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'left_lut_file_path' not found.");
@@ -601,7 +616,7 @@ void EStopNode::readParams()
     snprintf(m_cntxt->left_LUT_file_name, ESTOP_APP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get right LUT file path information. */
-    status = this->get_parameter("right_lut_file_path", str);
+    status = get_parameter("right_lut_file_path", str);
     if (status == false)
     {
         RCLCPP_ERROR(this->get_logger(), "Config parameter 'right_lut_file_path' not found.");
@@ -611,7 +626,7 @@ void EStopNode::readParams()
     snprintf(m_cntxt->right_LUT_file_name, ESTOP_APP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get TIDL network path information. */
-    status = this->get_parameter("dl_model_path", str);
+    status = get_parameter("dl_model_path", str);
 
     if (status == false)
     {
@@ -622,205 +637,209 @@ void EStopNode::readParams()
     snprintf(m_cntxt->dlModelPath, ESTOP_APP_MAX_LINE_LEN-1, "%s", str.c_str());
 
     /* Get input image format information */
-    this->get_parameter_or("input_format", tmp, (int32_t)CM_IMG_FORMAT_UYVY);
+    get_parameter_or("input_format", tmp, (int32_t)CM_IMG_FORMAT_UYVY);
     m_cntxt->inputFormat = (uint8_t)tmp;
 
     /* Get number of semseg classes information. */
-    this->get_parameter_or("num_classes", tmp, 20);
+    get_parameter_or("num_classes", tmp, 20);
     m_cntxt->numClasses = (uint16_t)tmp;
 
     /* Get stereo algorithm type information */
-    this->get_parameter_or("sde_algo_type", tmp, 0);
+    get_parameter_or("sde_algo_type", tmp, 0);
     m_cntxt->sdeAlgoType = (uint8_t)tmp;
 
     /* Get the number of layers information when sde_algo_typ = 1*/
-    this->get_parameter_or("num_layers", tmp, 2);
+    get_parameter_or("num_layers", tmp, 2);
     m_cntxt->numLayers = (uint8_t)tmp;
 
     /* Get the median filtering flag information when sde_algo_typ = 1*/
-    this->get_parameter_or("pp_median_filter_enable", tmp, 0);
+    get_parameter_or("pp_median_filter_enable", tmp, 0);
     m_cntxt->ppMedianFilterEnable = (uint8_t)tmp;
 
     /* SDE Parameters */ 
     /* Get the SDE minimum disparity information */
-    this->get_parameter_or("disparity_min", tmp, 0);
+    get_parameter_or("disparity_min", tmp, 0);
     m_cntxt->sde_params.disparity_min = (uint16_t)tmp;
 
     /* Get the SDE maximum disparity information */
-    this->get_parameter_or("disparity_max", tmp, 1);
+    get_parameter_or("disparity_max", tmp, 1);
     m_cntxt->sde_params.disparity_max = (uint16_t)tmp;
 
     /* Get the disparity confidence threshold information */
-    this->get_parameter_or("sde_confidence_threshold", tmp, 0);
+    get_parameter_or("sde_confidence_threshold", tmp, 0);
     m_cntxt->confidence_threshold = (uint8_t)tmp;
 
     /* Get the SDE left-right consistency check threshold information */
-    this->get_parameter_or("threshold_left_right", tmp, 3);
+    get_parameter_or("threshold_left_right", tmp, 3);
     m_cntxt->sde_params.threshold_left_right = (uint16_t)tmp;
 
     /* Get the SDE texture based filtering enable flag information */
-    this->get_parameter_or("texture_filter_enable", tmp, 0);
+    get_parameter_or("texture_filter_enable", tmp, 0);
     m_cntxt->sde_params.texture_filter_enable = (uint16_t)tmp;
 
     /* Get the SDE texture filtering threshold information */
-    this->get_parameter_or("threshold_texture", tmp, 0);
+    get_parameter_or("threshold_texture", tmp, 0);
     m_cntxt->sde_params.threshold_texture = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p1 information */
-    this->get_parameter_or("aggregation_penalty_p1", tmp, 32);
+    get_parameter_or("aggregation_penalty_p1", tmp, 32);
     m_cntxt->sde_params.aggregation_penalty_p1 = (uint16_t)tmp;
 
     /* Get the SDE aggregation penalty p2 information */
-    this->get_parameter_or("aggregation_penalty_p2", tmp, 197);
+    get_parameter_or("aggregation_penalty_p2", tmp, 197);
     m_cntxt->sde_params.aggregation_penalty_p2 = (uint16_t)tmp;
 
     /* Get the SDE median filter enable flag information */
-    this->get_parameter_or("median_filter_enable", tmp, 1);
+    get_parameter_or("median_filter_enable", tmp, 1);
     m_cntxt->sde_params.median_filter_enable = (uint16_t)tmp;
 
     /* Get the SDE reduced range search enable flag information */
-    this->get_parameter_or("reduced_range_search_enable", tmp, 0);
+    get_parameter_or("reduced_range_search_enable", tmp, 0);
     m_cntxt->sde_params.reduced_range_search_enable = (uint16_t)tmp;
 
     /* Get the camera roll information */
-    this->get_parameter_or("camera_roll", ftmp, 0.0f);
+    get_parameter_or("camera_roll", ftmp, 0.0f);
     m_cntxt->camRoll = (float)ftmp;
 
     /* Get the camera pitch information */
-    this->get_parameter_or("camera_pitch", ftmp, 0.0f);
+    get_parameter_or("camera_pitch", ftmp, 0.0f);
     m_cntxt->camPitch = (float)ftmp;
 
     /* Get the camera yaw information */
-    this->get_parameter_or("camera_yaw", ftmp, 0.0f);
+    get_parameter_or("camera_yaw", ftmp, 0.0f);
     m_cntxt->camYaw = (float)ftmp;
 
     /* Get the camera height information */
-    this->get_parameter_or("camera_height", ftmp, 650.0f);
+    get_parameter_or("camera_height", ftmp, 650.0f);
     m_cntxt->camHeight = (float)ftmp;
 
     /* Get the stereo camera baseline information */
-    this->get_parameter_or("stereo_baseline", ftmp, 120.0f);
+    get_parameter_or("stereo_baseline", ftmp, 120.0f);
     m_cntxt->baseline = (float)ftmp;
 
     /* OG Map Parameters */
     /* Get the horizontal grid size information */
-    this->get_parameter_or("grid_x_size", tmp, 200);
+    get_parameter_or("grid_x_size", tmp, 200);
     m_cntxt->xGridSize = (int32_t)tmp;
 
     /* Get the vertical grid size information */
-    this->get_parameter_or("grid_y_size", tmp, 200);
+    get_parameter_or("grid_y_size", tmp, 200);
     m_cntxt->yGridSize = (int32_t)tmp;
 
     /* Get the minimum X range information covered by OG map */
-    this->get_parameter_or("min_x_range", tmp, -20000);
+    get_parameter_or("min_x_range", tmp, -20000);
     m_cntxt->xMinRange = (int32_t)tmp;
 
     /* Get the maximum X range information covered by OG map */
-    this->get_parameter_or("max_x_range", tmp, 20000);
+    get_parameter_or("max_x_range", tmp, 20000);
     m_cntxt->xMaxRange = (int32_t)tmp;
 
     /* Get the minimum Y range information covered by OG map */
-    this->get_parameter_or("min_y_range", tmp, -20000);
+    get_parameter_or("min_y_range", tmp, -20000);
     m_cntxt->yMinRange = (int32_t)tmp;
 
     /* Get the maximum Y range information covered by OG map */
-    this->get_parameter_or("max_y_range", tmp, 20000);
+    get_parameter_or("max_y_range", tmp, 20000);
     m_cntxt->yMaxRange = (int32_t)tmp;
 
     /* Get the pixel count threshold information for grid occupied/non-occupied decision*/
-    this->get_parameter_or("min_pixel_count_grid", tmp, 5);
+    get_parameter_or("min_pixel_count_grid", tmp, 5);
     m_cntxt->thCnt = (int16_t)tmp;
 
     /* Get the pixel count threshold information for object occupied/non-occupied decision*/
-    this->get_parameter_or("min_pixel_count_object", tmp, 15);
+    get_parameter_or("min_pixel_count_object", tmp, 15);
     m_cntxt->thObjCnt = (int16_t)tmp;
 
     /* Get the maximum number of detected objects information */
-    this->get_parameter_or("max_object_to_detect", tmp, 50);
+    get_parameter_or("max_object_to_detect", tmp, 50);
     m_cntxt->maxNumObject = (int16_t)tmp;
 
     /* Get the CCA neighboring grid number information */
-    this->get_parameter_or("num_neighbor_grid", tmp, 24);
+    get_parameter_or("num_neighbor_grid", tmp, 24);
     m_cntxt->cNeighNum = (int16_t)tmp;
 
     /* Get the spatial object merge enable flag information */
-    this->get_parameter_or("enable_spatial_obj_merge", tmp, 1);
+    get_parameter_or("enable_spatial_obj_merge", tmp, 1);
     m_cntxt->enableSpatialObjMerge = (uint8_t)tmp;
 
     /* Get the temporal object merge enable flag information */
-    this->get_parameter_or("enable_temporal_obj_merge", tmp, 1);
+    get_parameter_or("enable_temporal_obj_merge", tmp, 1);
     m_cntxt->enableTemporalObjMerge = (uint8_t)tmp;
 
     /* Get the temporal object smoothing enable flag information */
-    this->get_parameter_or("enable_temporal_obj_smoothing", tmp, 0);
+    get_parameter_or("enable_temporal_obj_smoothing", tmp, 0);
     m_cntxt->enableTemporalObjSmoothing = (uint8_t)tmp;
 
     /* Get the distance metric mode information */
-    this->get_parameter_or("object_distance_mode", tmp, 0);
+    get_parameter_or("object_distance_mode", tmp, 0);
     m_cntxt->objectDistanceMode = (uint8_t)tmp;
 
     /* E-Stop Configs */
     /* Min distance of estop range in mm */
-    this->get_parameter_or("min_estop_distance", tmp, 0);
+    get_parameter_or("min_estop_distance", tmp, 0);
     m_minEStopDistance = (int32_t)tmp;
 
     /* Max distance of estop range in mm */
-    this->get_parameter_or("max_estop_distance", tmp, 2000);
+    get_parameter_or("max_estop_distance", tmp, 2000);
     m_maxEStopDistance = (int32_t)tmp;
 
     /* Width of estop range at min_estop_distance in mm */
-    this->get_parameter_or("min_estop_width", tmp, 1500);
+    get_parameter_or("min_estop_width", tmp, 1500);
     m_minEStopWidth = (int32_t)tmp;
 
     /* Width of estop range at max_estop_distance */
-    this->get_parameter_or("max_estop_width", tmp, 1500);
+    get_parameter_or("max_estop_width", tmp, 1500);
     m_maxEStopWidth = (int32_t)tmp;
 
     /* Minimum number of consecutive frames without any obstacle 
        in EStop range to set m_eStop = 0 */
-    this->get_parameter_or("min_free_frame_run", tmp, 3);
+    get_parameter_or("min_free_frame_run", tmp, 3);
     m_minFreeRun = (int8_t)tmp;
 
     /* Minimum number of consecutive frames with any obstacle 
        in EStop range to set m_eStop = 1 */
-    this->get_parameter_or("min_obs_frame_run", tmp, 1);
+    get_parameter_or("min_obs_frame_run", tmp, 1);
     m_minObsRun = (int8_t)tmp;
 
     /* OpenVX Graph Operation Parameters */
     /* Get interactive mode flag information. */
-    this->get_parameter_or("is_interactive", tmp, 0);
+    get_parameter_or("is_interactive", tmp, 0);
     m_cntxt->is_interactive = (uint8_t)tmp;
 
     /* Get graph export flag information. */
-    this->get_parameter_or("exportGraph", tmp, 0);
+    get_parameter_or("exportGraph", tmp, 0);
     m_cntxt->exportGraph = (uint8_t)tmp;
 
+    /* Get perf export flag information. */
+    get_parameter_or("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
+
     /* Get real-time logging enable information. */
-    this->get_parameter_or("rtLogEnable", tmp, 0);
+    get_parameter_or("rtLogEnable", tmp, 0);
     m_cntxt->rtLogEnable = (uint8_t)tmp;
 
     /* set the ti_logger level */
-    this->get_parameter_or("log_level", tmp, static_cast<int32_t>(ERROR));
+    get_parameter_or("log_level", tmp, static_cast<int32_t>(ERROR));
     logSetLevel((LogLevel) tmp);
 
     /* Get pipeline depth information. */
-    this->get_parameter_or("pipeline_depth", tmp, PTK_GRAPH_MAX_PIPELINE_DEPTH);
+    get_parameter_or("pipeline_depth", tmp, PTK_GRAPH_MAX_PIPELINE_DEPTH);
     m_cntxt->pipelineDepth = (uint8_t)tmp;
 
     /* Get the disparity merge core information. */
-    this->get_parameter("disp_merge_deploy_core", str);
+    get_parameter("disp_merge_deploy_core", str);
     m_cntxt->mlSdeCreateParams.dispMergeNodeCore = CM_getCoreName((const char *)str.c_str());
     
     /* Get the hole filling core information. */
-    this->get_parameter("hole_filling_deploy_core", str);
+    get_parameter("hole_filling_deploy_core", str);
     m_cntxt->mlSdeCreateParams.holeFillingNodeCore = CM_getCoreName((const char *)str.c_str());
 
     /* Get the point cloud generation core information. */
-    this->get_parameter("pc_deploy_core", str);
+    get_parameter("pc_deploy_core", str);
     m_cntxt->ssDetectCreateParams.pcNodeCore = CM_getCoreName((const char *)str.c_str());
 
     /* Get the occupancy grid generation core information. */
-    this->get_parameter("og_deploy_core", str);
+    get_parameter("og_deploy_core", str);
     m_cntxt->ssDetectCreateParams.ogNodeCore = CM_getCoreName((const char *)str.c_str());
 
     /* Check paramerters' values */

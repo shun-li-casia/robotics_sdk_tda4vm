@@ -489,6 +489,12 @@ struct VISLOC_Context
      */
     uint8_t                 exportGraph;
 
+    /** Flag to indicate if the performance data should be exported
+     * 0 - disable
+     * 1 - enable
+     */
+    uint8_t                 exportPerfStats;
+
     /** Real-time logging enable.
      * 0 - disable
      * 1 - enable

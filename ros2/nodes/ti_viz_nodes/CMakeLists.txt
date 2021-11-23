@@ -3,8 +3,7 @@ project(ti_viz_nodes)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/ros2_common.cmake)
 
-# Visualization nodes only built on PC
-if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+if (${BUILD_VISUALIZATION_NODES})
     # viz_disparity
     set(VIZ_DISP_SRCS src/viz_disparity_node.cpp)
     build_node(viz_disparity VIZ_DISP_SRCS)

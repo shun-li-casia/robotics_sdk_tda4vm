@@ -541,6 +541,10 @@ void VisLocNode::readParams()
     m_privNodeHdl.param("exportGraph", tmp, 0);
     m_cntxt->exportGraph = (uint8_t)tmp;
 
+    /* Get perf export flag information. */
+    m_privNodeHdl.param("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
+
     /* Get real-time logging enable information. */
     m_privNodeHdl.param("rtLogEnable", tmp, 0);
     m_cntxt->rtLogEnable = (uint8_t)tmp;
@@ -562,8 +566,6 @@ vx_status VisLocNode::init()
     ptkConfig.printf   = printf;
     ptkConfig.time     = NULL;
 
-    m_outQuaternion = new double[4];
-
     PTK_init(&ptkConfig);
 
     m_cntxt = new VISLOC_Context();
@@ -571,7 +573,7 @@ vx_status VisLocNode::init()
     if (m_cntxt == nullptr)
     {
         ROS_ERROR("VISLOC_Context() failed.");
-        exit(-1);
+        vxStatus = VX_FAILURE;
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)

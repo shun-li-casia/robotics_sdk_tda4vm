@@ -93,17 +93,21 @@ point_low_z:                       -2.0
 # High Z limit in meter (depth)
 point_high_z:                       5.0
 
-
 # interactive mode
 #  0 - disable
 #  1 - enable
 is_interactive:                     0
 
-
 # Flag to indicate if the graph should be exported
 #  0 - disable
 #  1 - enable
 exportGraph:                        0
+
+# Flag to indicate if the performance data should be exported
+# to a file
+#  0 - disable
+#  1 - enable
+exportPerfStats:                    0
 
 # Real-time logging enable.
 #  0 - disable
@@ -112,7 +116,6 @@ rtLogEnable:                        0
 
 # <1 - 8>, pipeline depth
 pipeline_depth:                     4
-
 
 # Core deployment
 # merge node in multi-layer SDE

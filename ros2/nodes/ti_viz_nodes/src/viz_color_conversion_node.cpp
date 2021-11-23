@@ -1,13 +1,9 @@
 #include <signal.h>
-
 #include <rclcpp/rclcpp.hpp>
 #include <rcutils/logging.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
-#include <common_msgs/msg/disparity.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 using namespace sensor_msgs::msg;
@@ -18,14 +14,12 @@ using namespace message_filters;
 static void sigHandler(int32_t sig)
 {
     (void) sig;
-    std::exit(EXIT_SUCCESS);
+    rclcpp::shutdown();
 }
 
 namespace ti_ros2
 {
-    using ImgTrans = image_transport::ImageTransport;
     using ImgSub   = message_filters::Subscriber<Image>;
-    using ImgPub   = image_transport::Publisher;
     using SubCon   = message_filters::Connection;
 
     /**
@@ -41,29 +35,27 @@ namespace ti_ros2
              * @param[in]  frame_rate  The frame rate
              */
 
-            Yuv2Rgb(const std::string&          name,
-                    const rclcpp::NodeOptions&  options):
+            Yuv2Rgb(const std::string         &name,
+                    const rclcpp::NodeOptions &options):
                 Node(name, options), logger(rclcpp::get_logger("Yuv2Rgb"))
             {
-                it = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
                 // get ROS params
-                this->get_parameter_or("width", width, 1280);
+                get_parameter_or("width", width, 1280);
 
-                this->get_parameter_or("height", height, 720);
+                get_parameter_or("height", height, 720);
 
-                this->get_parameter_or("input_yuv_topic",
+                get_parameter_or("input_yuv_topic",
                                        input_yuv_topic_,
                                        std::string("camera/right/image_raw"));
 
-                this->get_parameter_or("output_rgb_topic",
+                get_parameter_or("output_rgb_topic",
                                        output_rgb_topic_,
                                        std::string("camera/right/image_raw_rgb"));
 
-                this->get_parameter_or("yuv_format",
+                get_parameter_or("yuv_format",
                                        yuv_format_,  std::string("YUV420"));
 
-                this->get_parameter_or("yuv420_luma_only",
+                get_parameter_or("yuv420_luma_only",
                                        yuv420_luma_only_,  false);
 
                 if ((yuv_format_.compare("YUV420") != 0) &&
@@ -76,7 +68,7 @@ namespace ti_ros2
                 // allocation for output RGB images
                 outRgbIm = (uint8_t *)malloc(width * height * 3);
 
-                out_pub  = it->advertise(output_rgb_topic_, 1);
+                out_pub  = this->create_publisher<Image>(output_rgb_topic_, 10);
                 in_sub   = new ImgSub(this, input_yuv_topic_);
                 conObj   = in_sub->registerCallback(&Yuv2Rgb::callback_yuv2rgb, this);
 
@@ -149,7 +141,7 @@ namespace ti_ros2
                 out_msg.data            = vec_rgb;
                 out_msg.header.stamp    = yuv_image.header.stamp;
                 out_msg.header.frame_id = "map";
-                out_pub.publish(out_msg);
+                out_pub->publish(out_msg);
             }
 
             /*
@@ -298,9 +290,8 @@ namespace ti_ros2
 
         private:
             ImgSub         *in_sub;
-            ImgPub          out_pub;
             SubCon          conObj;
-            ImgTrans       *it;
+            rclcpp::Publisher<Image>::SharedPtr out_pub;
             Image           out_msg;
             uint8_t        *outRgbIm;
             std::string     input_yuv_topic_;
@@ -313,7 +304,6 @@ namespace ti_ros2
     };
 }
 
-// static std::shared_ptr<ti_ros2::Yuv2Rgb>  colorConv = nullptr;
 static ti_ros2::Yuv2Rgb *colorConv = nullptr;
 
 /**
@@ -331,12 +321,12 @@ int main(int argc, char **argv)
 
         rclcpp::init(argc, argv, initOptions);
 
-        nodeOptions.allow_undeclared_parameters(true);
-        nodeOptions.automatically_declare_parameters_from_overrides(true);
-
         signal(SIGINT, sigHandler);
 
-        // colorConv = std::make_shared<ti_ros2::Yuv2Rgb>("viz_color_conv_yuv2rgb", nodeOptions);
+        nodeOptions.allow_undeclared_parameters(true);
+        nodeOptions.automatically_declare_parameters_from_overrides(true);
+        nodeOptions.use_intra_process_comms(false);
+
         colorConv = new ti_ros2::Yuv2Rgb("viz_color_conv_yuv2rgb", nodeOptions);
 
         return EXIT_SUCCESS;
@@ -349,5 +339,4 @@ int main(int argc, char **argv)
     }
 
 }
-
 

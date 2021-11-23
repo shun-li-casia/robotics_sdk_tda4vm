@@ -1,12 +1,8 @@
 #include <signal.h>
-
 #include <rclcpp/rclcpp.hpp>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
-#include <common_msgs/msg/disparity.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 using namespace sensor_msgs::msg;
@@ -25,14 +21,11 @@ static const uint8_t color_map[20][3] =
 static void sigHandler(int32_t sig)
 {
     (void) sig;
-    std::exit(EXIT_SUCCESS);
+    rclcpp::shutdown();
 }
 
 namespace ti_ros2
 {
-    using ImgTrans = image_transport::ImageTransport;
-    using ImgPub   = image_transport::Publisher;
-
     /**
      * @brief  VizSemSeg ROS warpper class
      */
@@ -40,24 +33,22 @@ namespace ti_ros2
     class VizSemSeg: public rclcpp::Node
     {
         public:
-            VizSemSeg(const std::string&            name,
-                      const rclcpp::NodeOptions&    options):
+            VizSemSeg(const std::string         &name,
+                      const rclcpp::NodeOptions &options):
                 Node(name, options)
             {
                 std::string rectImgTopic;
                 std::string ssTensorTopic;
                 std::string ssMapImgTopic;
 
-                m_it = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
                 // input topics
-                this->get_parameter_or("rectified_image_topic",   rectImgTopic,  std::string(""));
-                this->get_parameter_or("vision_cnn_tensor_topic", ssTensorTopic, std::string(""));
+                get_parameter_or("rectified_image_topic",   rectImgTopic,  std::string(""));
+                get_parameter_or("vision_cnn_tensor_topic", ssTensorTopic, std::string(""));
 
                 // output topics
-                this->get_parameter_or("vision_cnn_image_topic", ssMapImgTopic, std::string(""));
+                get_parameter_or("vision_cnn_image_topic", ssMapImgTopic, std::string(""));
 
-                m_ssMapImgPub = m_it->advertise(ssMapImgTopic, 1);
+                m_ssMapImgPub = this->create_publisher<Image>(ssMapImgTopic, 10);
 
                 message_filters::Subscriber<Image> ssTensorSub(this, ssTensorTopic);
                 message_filters::Subscriber<Image> rectImgSub(this, rectImgTopic);
@@ -120,20 +111,20 @@ namespace ti_ros2
                     }
                 }
 
-		auto imgPtr = cv_ssPtr->toImageMsg();
-		auto hdr = &imgPtr->header;
+		        auto imgPtr = cv_ssPtr->toImageMsg();
+		        auto hdr = &imgPtr->header;
 
-		hdr->frame_id = "map";
+		        hdr->frame_id = "map";
 
-                m_ssMapImgPub.publish(imgPtr);
+                m_ssMapImgPub->publish(*imgPtr);
             }
 
         private:
-            ImgTrans   *m_it;
-            ImgPub      m_ssMapImgPub;
+            rclcpp::Publisher<Image>::SharedPtr m_ssMapImgPub;
     };
 }
 
+// static std::shared_ptr<ti_ros2::VizSemSeg>  semSegViz = nullptr;
 static ti_ros2::VizSemSeg  *semSegViz = nullptr;
 
 /**
@@ -151,11 +142,40 @@ int main(int argc, char **argv)
 
         rclcpp::init(argc, argv, initOptions);
 
-        nodeOptions.allow_undeclared_parameters(true);
-        nodeOptions.automatically_declare_parameters_from_overrides(true);
-
         signal(SIGINT, sigHandler);
 
+        /* Allow any parameter name to be set on the node without first being
+         * declared. Otherwise, setting an undeclared parameter will raise an
+         * exception.
+         *
+         * This option being true does not affect parameter_overrides, as the
+         * first set action will implicitly declare the parameter and therefore
+         * consider any parameter overrides.
+         */
+        nodeOptions.allow_undeclared_parameters(true);
+
+        /* Automatically iterate through the node's parameter overrides and
+         * implicitly declare any that have not already been declared.
+         * Otherwise, parameters passed to the node's parameter_overrides,
+         * and/or the global arguments (e.g. parameter overrides from a YAML
+         * file), which are not explicitly declared will not appear on the node
+         * at all, even if allow_undeclared_parameters is true. Already
+         * declared parameters will not be re-declared, and parameters declared
+         * in this way will use the default constructed ParameterDescriptor.
+         */
+        nodeOptions.automatically_declare_parameters_from_overrides(true);
+
+        /* Messages on topics which are published and subscribed to within this
+         * context will go through a special intra-process communication code
+         * code path which can avoid serialization and deserialization,
+         * unnecessary copies, and achieve lower latencies in some cases.
+         *
+         * Defaults to false for now, as there are still some cases where it is
+         * not desirable.
+         */
+        nodeOptions.use_intra_process_comms(false);
+
+        // semSegViz = std::make_shared<ti_ros2::VizSemSeg>("viz_semseg", nodeOptions);
         semSegViz = new ti_ros2::VizSemSeg("viz_semseg", nodeOptions);
 
         return EXIT_SUCCESS;

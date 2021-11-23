@@ -1,16 +1,11 @@
 #include <signal.h>
-
 #include <rclcpp/rclcpp.hpp>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <cv_bridge/cv_bridge.h>
-
 #include <common_msgs/msg/object_pos3_d.hpp>
 #include <common_msgs/msg/detection3_d.hpp>
-
 #include <geometry_msgs/msg/polygon_stamped.hpp>
 #include <geometry_msgs/msg/point32.h>
 
@@ -29,14 +24,11 @@ static const uint8_t color_map[3] = {128, 64, 128};
 static void sigHandler(int32_t sig)
 {
     (void) sig;
-    std::exit(EXIT_SUCCESS);
+    rclcpp::shutdown();
 }
 
 namespace ti_ros2
 {
-    using ImgTrans = image_transport::ImageTransport;
-    using ImgPub   = image_transport::Publisher;
-
     /**
      * @brief  SDE ROS warpper class
      */
@@ -44,8 +36,8 @@ namespace ti_ros2
     class VizEStop: public rclcpp::Node
     {
         public:
-            VizEStop(const std::string&         name,
-                     const rclcpp::NodeOptions& options):
+            VizEStop(const std::string         &name,
+                     const rclcpp::NodeOptions &options):
                 Node(name, options)
             {
                 std::string rectImgTopic;
@@ -53,24 +45,22 @@ namespace ti_ros2
                 std::string ssTensorTopic;
                 std::string bbImgTopic;
 
-                m_it = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
                 // input and tensor sizes
-                this->get_parameter_or("width",         m_width,        1280);
-                this->get_parameter_or("height",        m_height,       720);
-                this->get_parameter_or("tensor_width",  m_tensorWidth,  768);
-                this->get_parameter_or("tensor_height", m_tensorHeight, 432);
-                this->get_parameter_or("show_ground",   m_showGround,   0);
+                get_parameter_or("width",         m_width,        1280);
+                get_parameter_or("height",        m_height,       720);
+                get_parameter_or("tensor_width",  m_tensorWidth,  768);
+                get_parameter_or("tensor_height", m_tensorHeight, 432);
+                get_parameter_or("show_ground",   m_showGround,   0);
 
                 // input topics
-                this->get_parameter_or("rectified_image_topic",   rectImgTopic,  std::string(""));
-                this->get_parameter_or("bounding_box_topic",      bbTopic,       std::string(""));
-                this->get_parameter_or("semseg_cnn_tensor_topic", ssTensorTopic, std::string(""));
+                get_parameter_or("rectified_image_topic",   rectImgTopic,  std::string(""));
+                get_parameter_or("bounding_box_topic",      bbTopic,       std::string(""));
+                get_parameter_or("semseg_cnn_tensor_topic", ssTensorTopic, std::string(""));
 
                 // output topics
-                this->get_parameter_or("bounding_box_image_topic", bbImgTopic, std::string(""));
+                get_parameter_or("bounding_box_image_topic", bbImgTopic, std::string(""));
 
-                m_bbImgPub = m_it->advertise(bbImgTopic, 1);
+                m_bbImgPub = this->create_publisher<Image>(bbImgTopic, 10);
 
                 m_safetyPub = this->create_publisher<PolygonStamped>("/estop/safety_bubble", 1);
 
@@ -102,7 +92,7 @@ namespace ti_ros2
 
                 safetyBubble.header.frame_id = "map";
 
-                for (int i = 0; i < numPoints; ++i) 
+                for (int i = 0; i < numPoints; ++i)
                 {
                       double angle = i * (360.0/(double) numPoints)*M_PI/180.0;
 
@@ -212,9 +202,8 @@ namespace ti_ros2
                     cv::line(cv_bbPtr->image, cv::Point(objPos.pf3x, objPos.pf3y), cv::Point(objPos.pr3x, objPos.pr3y), lineColor, 2);
                     cv::line(cv_bbPtr->image, cv::Point(objPos.pf4x, objPos.pf4y), cv::Point(objPos.pr4x, objPos.pr4y), lineColor, 2);
 
-                    
                     sprintf(strDistance, "%.1fm", float(objPos.front_depth / 1000));
-                    
+
                     text = cv::getTextSize(strDistance, fontface, scale, thickness, &baseline);
                     pos  = cv::Point((objPos.pf1x+objPos.pf2x)/2 - 25, (objPos.pf1y+objPos.pf4y)/2);
                     cv::rectangle(cv_bbPtr->image, pos + cv::Point(0, baseline), pos + cv::Point(text.width, -text.height), CV_RGB(0,0,0), cv::FILLED);
@@ -256,13 +245,12 @@ namespace ti_ros2
 
                 hdr->frame_id = "map";
 
-                m_bbImgPub.publish(imgPtr);
+                m_bbImgPub->publish(*imgPtr);
             }
 
 
         private:
-            ImgTrans                                       *m_it;
-            ImgPub                                          m_bbImgPub;
+            rclcpp::Publisher<Image>::SharedPtr             m_bbImgPub;
             rclcpp::Publisher<PolygonStamped>::SharedPtr    m_safetyPub;
             int32_t                                         m_width;
             int32_t                                         m_height;
@@ -289,10 +277,11 @@ int main(int argc, char **argv)
 
         rclcpp::init(argc, argv, initOptions);
 
+        signal(SIGINT, sigHandler);
+
         nodeOptions.allow_undeclared_parameters(true);
         nodeOptions.automatically_declare_parameters_from_overrides(true);
-
-        signal(SIGINT, sigHandler);
+        nodeOptions.use_intra_process_comms(false);
 
         estopViz = new ti_ros2::VizEStop("app_viz_estop", nodeOptions);
 
@@ -305,5 +294,4 @@ int main(int argc, char **argv)
     }
 
 }
-
 

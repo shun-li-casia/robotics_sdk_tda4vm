@@ -81,7 +81,7 @@ VisionCnnNode::VisionCnnNode(const rclcpp::NodeOptions &options,
         exit(-1);
     }
 
-    m_imgTrans = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
+    m_imgTrans = new ImgTrans(this->create_sub_node("image_transport"));
 
     // Cache the input and output image sizes
     m_inputImgWidth  = m_cntxt->inputImageWidth;
@@ -397,6 +397,10 @@ void VisionCnnNode::readParams()
     /* Get graph export flag information. */
     get_parameter_or("exportGraph", tmp, 0);
     m_cntxt->exportGraph = static_cast<uint8_t>(tmp);
+
+    /* Get perf export flag information. */
+    get_parameter_or("exportPerfStats", tmp, 0);
+    m_cntxt->exportPerfStats = (uint8_t)tmp;
 
     /* Get real-time logging enable information. */
     get_parameter_or("rtLogEnable", tmp, 0);

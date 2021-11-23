@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <ros/ros.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -39,32 +37,30 @@ namespace ros_app_viz
          * @param[in]  frame_rate  The frame rate
          */
 
-        VizDisparity() : it(nh)
+        VizDisparity(ros::NodeHandle *nh, ros::NodeHandle *private_nh)
         {
-            ros::NodeHandle private_nh("~");
-
             std::string rawDisparityTopic;
             std::string ccDisparityTopic;
             std::string ccConfidenceTopic;
 
             // input size
-            private_nh.param("width", width, 1280);
-            private_nh.param("height", height, 720);
+            private_nh->param("width", width, 1280);
+            private_nh->param("height", height, 720);
 
             // input topic
-            private_nh.param("disparity_topic",     rawDisparityTopic,  std::string(""));
+            private_nh->param("disparity_topic",     rawDisparityTopic,  std::string(""));
 
             // output topics
-            private_nh.param("cc_disparity_topic",  ccDisparityTopic,   std::string(""));
-            private_nh.param("cc_confidence_topic", ccConfidenceTopic,  std::string(""));
+            private_nh->param("cc_disparity_topic",  ccDisparityTopic,   std::string(""));
+            private_nh->param("cc_confidence_topic", ccConfidenceTopic,  std::string(""));
 
             // allocation for CC disparity
             ccDisparity  = (uint8_t *)malloc(width * height * 3);
             ccConfidence = (uint8_t *)malloc(width * height * 3);
 
-            disp_sub     = nh.subscribe(rawDisparityTopic, 1, &VizDisparity::callback_vizDiarpity, this);
-            ccDisp_pub   = it.advertise(ccDisparityTopic, 1);
-            ccConf_pub   = it.advertise(ccConfidenceTopic, 1);
+            disp_sub     = nh->subscribe(rawDisparityTopic, 1, &VizDisparity::callback_vizDiarpity, this);
+            ccDisp_pub   = nh->advertise<Image>(ccDisparityTopic, 1);
+            ccConf_pub   = nh->advertise<Image>(ccConfidenceTopic, 1);
 
             ros::spin();
         }
@@ -181,16 +177,11 @@ namespace ros_app_viz
         }
 
     private:
-        ros::NodeHandle                 nh;
         ros::Subscriber                 disp_sub;
-        image_transport::ImageTransport it;
-
-        image_transport::Publisher      ccDisp_pub;
+        ros::Publisher                  ccDisp_pub;
         sensor_msgs::Image              ccDisp_msg;
-
-        image_transport::Publisher      ccConf_pub;
+        ros::Publisher                  ccConf_pub;
         sensor_msgs::Image              ccConf_msg;
-
         int32_t                         width;
         int32_t                         height;
         uint8_t                       * ccDisparity;
@@ -206,7 +197,9 @@ int main(int argc, char **argv)
     try
     {
         ros::init(argc, argv, "app_viz_disparity");
-        ros_app_viz::VizDisparity dispViz;
+        ros::NodeHandle nh;
+        ros::NodeHandle private_nh("~");
+        ros_app_viz::VizDisparity dispViz(&nh, &private_nh);
 
         return EXIT_SUCCESS;
     }

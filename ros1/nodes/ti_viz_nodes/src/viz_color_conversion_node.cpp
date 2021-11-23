@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <ros/ros.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -28,17 +26,15 @@ namespace ros_app_yuv2rgb
          * @param[in]  frame_rate  The frame rate
          */
 
-        Yuv2Rgb() : it(nh)
+        Yuv2Rgb(ros::NodeHandle *nh, ros::NodeHandle *private_nh)
         {
-            ros::NodeHandle private_nh("~");
-
             // get ROS params
-            private_nh.param("width", width, 1280);
-            private_nh.param("height", height, 720);
-            private_nh.param("input_yuv_topic", input_yuv_topic_, std::string("camera/right/image_raw"));
-            private_nh.param("output_rgb_topic", output_rgb_topic_, std::string("camera/right/image_raw_rgb"));
-            private_nh.param("yuv_format", yuv_format_,  std::string("YUV420"));
-            private_nh.param("yuv420_luma_only", yuv420_luma_only_, false);
+            private_nh->param("width", width, 1280);
+            private_nh->param("height", height, 720);
+            private_nh->param("input_yuv_topic", input_yuv_topic_, std::string("camera/right/image_raw"));
+            private_nh->param("output_rgb_topic", output_rgb_topic_, std::string("camera/right/image_raw_rgb"));
+            private_nh->param("yuv_format", yuv_format_,  std::string("YUV420"));
+            private_nh->param("yuv420_luma_only", yuv420_luma_only_, false);
 
             if (yuv_format_.compare("YUV420") != 0 && yuv_format_.compare("YUV422") != 0)
             {
@@ -49,8 +45,8 @@ namespace ros_app_yuv2rgb
             // allocation for output RGB images
             outRgbIm = (uint8_t *) malloc(width * height * 3);
 
-            out_pub  = it.advertise(output_rgb_topic_, 1);
-            in_sub   = nh.subscribe(input_yuv_topic_, 1, &Yuv2Rgb::callback_yuv2rgb, this);
+            out_pub  = nh->advertise<Image>(output_rgb_topic_, 10);
+            in_sub   = nh->subscribe(input_yuv_topic_, 1, &Yuv2Rgb::callback_yuv2rgb, this);
 
             ros::spin();
         }
@@ -265,10 +261,8 @@ namespace ros_app_yuv2rgb
 
 
     private:
-        ros::NodeHandle                 nh;
         ros::Subscriber                 in_sub;
-        image_transport::ImageTransport it;
-        image_transport::Publisher      out_pub;
+        ros::Publisher                  out_pub;
         sensor_msgs::Image              out_msg;
         uint8_t                       * outRgbIm;
         std::string                     input_yuv_topic_;
@@ -288,7 +282,9 @@ int main(int argc, char **argv)
     try
     {
         ros::init(argc, argv, "ros_app_yuv2rgb");
-        ros_app_yuv2rgb::Yuv2Rgb colorConv;
+        ros::NodeHandle nh;
+        ros::NodeHandle private_nh("~");
+        ros_app_yuv2rgb::Yuv2Rgb colorConv(&nh, &private_nh);
 
         return EXIT_SUCCESS;
     }

@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <ros/ros.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -165,25 +163,23 @@ namespace ros_app_viz
          *
          */
 
-        VizObjDet() : m_it(m_nh)
+        VizObjDet(ros::NodeHandle *nh, ros::NodeHandle *private_nh)
         {
-            ros::NodeHandle private_nh("~");
-
             std::string rectImgTopic;
             std::string tensorTopic;
             std::string odMapImgTopic;
 
             // input topics
-            private_nh.param("rectified_image_topic",    rectImgTopic, std::string(""));
-            private_nh.param("vision_cnn_tensor_topic",  tensorTopic,  std::string(""));
+            private_nh->param("rectified_image_topic",    rectImgTopic, std::string(""));
+            private_nh->param("vision_cnn_tensor_topic",  tensorTopic,  std::string(""));
 
             // output topics
-            private_nh.param("vision_cnn_image_topic",   odMapImgTopic, std::string(""));
+            private_nh->param("vision_cnn_image_topic",   odMapImgTopic, std::string(""));
 
-            m_odMapImgPub = m_it.advertise(odMapImgTopic, 1);
+            m_odMapImgPub = nh->advertise<Image>(odMapImgTopic, 1);
 
-            message_filters::Subscriber<Detection2D> tensorSub(m_nh, tensorTopic, 1);
-            message_filters::Subscriber<Image>       rectImgSub(m_nh, rectImgTopic, 1);
+            message_filters::Subscriber<Detection2D> tensorSub(*nh, tensorTopic, 1);
+            message_filters::Subscriber<Image>       rectImgSub(*nh, rectImgTopic, 1);
 
             TimeSynchronizer<Detection2D, Image> sync(tensorSub, rectImgSub, 10);
             sync.registerCallback(boost::bind(&VizObjDet::callback_vizObjDet, this, _1, _2));
@@ -222,9 +218,7 @@ namespace ros_app_viz
         }
 
     private:
-        ros::NodeHandle                 m_nh;
-        image_transport::ImageTransport m_it;
-        image_transport::Publisher      m_odMapImgPub;
+        ros::Publisher m_odMapImgPub;
     };
 }
 
@@ -236,7 +230,9 @@ int main(int argc, char **argv)
     try
     {
         ros::init(argc, argv, "app_viz_objdet");
-        ros_app_viz::VizObjDet objDetViz;
+        ros::NodeHandle nh;
+        ros::NodeHandle private_nh("~");
+        ros_app_viz::VizObjDet objDetViz(&nh, &private_nh);
 
         return EXIT_SUCCESS;
     }

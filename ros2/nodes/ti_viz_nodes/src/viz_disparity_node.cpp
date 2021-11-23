@@ -1,10 +1,7 @@
 #include <signal.h>
-
 #include <rclcpp/rclcpp.hpp>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <common_msgs/msg/disparity.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -25,13 +22,11 @@ const unsigned char SDE_falseColorLUT_RGB[3][260] = {
 static void sigHandler(int32_t sig)
 {
     (void) sig;
-    std::exit(EXIT_SUCCESS);
+    rclcpp::shutdown();
 }
 
 namespace ti_ros2
 {
-    using ImgTrans = image_transport::ImageTransport;
-    using ImgPub   = image_transport::Publisher;
     using ImgSub   = message_filters::Subscriber<Disparity>;
     using SubCon   = message_filters::Connection;
 
@@ -49,26 +44,24 @@ namespace ti_ros2
              * @param[in]  frame_rate  The frame rate
              */
 
-            VizDisparity(const std::string&         name,
-                         const rclcpp::NodeOptions& options):
+            VizDisparity(const std::string         &name,
+                         const rclcpp::NodeOptions &options):
                 Node(name, options)
             {
                 std::string rawDisparityTopic;
                 std::string ccDisparityTopic;
                 std::string ccConfidenceTopic;
 
-                it = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
                 // input size
-                this->get_parameter_or("width", width, 1280);
-                this->get_parameter_or("height", height, 720);
+                get_parameter_or("width", width, 1280);
+                get_parameter_or("height", height, 720);
 
                 // input topic
-                this->get_parameter_or("disparity_topic",     rawDisparityTopic,  std::string(""));
+                get_parameter_or("disparity_topic",     rawDisparityTopic,  std::string(""));
 
                 // output topics
-                this->get_parameter_or("cc_disparity_topic",  ccDisparityTopic,   std::string(""));
-                this->get_parameter_or("cc_confidence_topic", ccConfidenceTopic,  std::string(""));
+                get_parameter_or("cc_disparity_topic",  ccDisparityTopic,   std::string(""));
+                get_parameter_or("cc_confidence_topic", ccConfidenceTopic,  std::string(""));
 
                 // allocation for CC disparity
                 ccDisparity  = (uint8_t *)malloc(width * height * 3);
@@ -76,8 +69,8 @@ namespace ti_ros2
 
                 disp_sub   = new ImgSub(this, rawDisparityTopic);
                 conObj     = disp_sub->registerCallback(&VizDisparity::callback_vizDiarpity, this);
-                ccDisp_pub = it->advertise(ccDisparityTopic, 1);
-                ccConf_pub = it->advertise(ccConfidenceTopic, 1);
+                ccDisp_pub = this->create_publisher<Image>(ccDisparityTopic, 10);
+                ccConf_pub = this->create_publisher<Image>(ccConfidenceTopic, 10);
 
                 rclcpp::spin(static_cast<rclcpp::Node::SharedPtr>(this));
             }
@@ -119,7 +112,7 @@ namespace ti_ros2
                 ccDisp_msg.header.stamp = dispMsg.header.stamp;
 		        ccDisp_msg.header.frame_id = "map";
 
-                ccDisp_pub.publish(ccDisp_msg);
+                ccDisp_pub->publish(ccDisp_msg);
 
                 // Publish ccConfidence image
                 std::vector<uint8_t> vec_c(ccConfidence, ccConfidence + width*height*3);
@@ -131,7 +124,7 @@ namespace ti_ros2
                 ccConf_msg.header.stamp = dispMsg.header.stamp;
 		        ccConf_msg.header.frame_id = "map";
 
-                ccConf_pub.publish(ccConf_msg);
+                ccConf_pub->publish(ccConf_msg);
             }
 
             void visualizeSdeDisparity(uint16_t * rawDisparity,
@@ -205,11 +198,10 @@ namespace ti_ros2
             } // visualizeSdeDisparity()
 
         private:
-            ImgTrans   *it;
             ImgSub     *disp_sub;
             SubCon      conObj;
-            ImgPub      ccDisp_pub;
-            ImgPub      ccConf_pub;
+            rclcpp::Publisher<Image>::SharedPtr ccDisp_pub;
+            rclcpp::Publisher<Image>::SharedPtr ccConf_pub;
             Image       ccDisp_msg;
             Image       ccConf_msg;
             int32_t     width;
@@ -236,10 +228,11 @@ int main(int argc, char **argv)
 
         rclcpp::init(argc, argv, initOptions);
 
+        signal(SIGINT, sigHandler);
+
         nodeOptions.allow_undeclared_parameters(true);
         nodeOptions.automatically_declare_parameters_from_overrides(true);
-
-        signal(SIGINT, sigHandler);
+        nodeOptions.use_intra_process_comms(false);
 
         dispViz = new ti_ros2::VizDisparity("viz_disparity", nodeOptions);
 

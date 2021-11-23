@@ -1,10 +1,7 @@
 #include <signal.h>
-
 #include <rclcpp/rclcpp.hpp>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -33,7 +30,7 @@ static const uint8_t color_map[20][3] =
 static void sigHandler(int32_t sig)
 {
     (void) sig;
-    std::exit(EXIT_SUCCESS);
+    rclcpp::shutdown();
 }
 
 static const std::string classnames_coco[] =
@@ -163,8 +160,6 @@ static cv::Mat overlayBoundingBox(cv::Mat    &img,
 
 namespace ti_ros2
 {
-    using ImgTrans = image_transport::ImageTransport;
-
     /**
      * @brief  VizObjDet ROS warpper class
      */
@@ -177,24 +172,22 @@ namespace ti_ros2
              *
              */
 
-            VizObjDet(const std::string&            name,
-                      const rclcpp::NodeOptions&    options):
+            VizObjDet(const std::string         &name,
+                      const rclcpp::NodeOptions &options):
                 Node(name, options)
             {
                 std::string rectImgTopic;
                 std::string tensorTopic;
                 std::string odMapImgTopic;
 
-                m_it = new ImgTrans(static_cast<rclcpp::Node::SharedPtr>(this));
-
                 // input topics
-                this->get_parameter_or("rectified_image_topic",   rectImgTopic, std::string(""));
-                this->get_parameter_or("vision_cnn_tensor_topic", tensorTopic,  std::string(""));
+                get_parameter_or("rectified_image_topic",   rectImgTopic, std::string(""));
+                get_parameter_or("vision_cnn_tensor_topic", tensorTopic,  std::string(""));
 
                 // output topics
-                this->get_parameter_or("vision_cnn_image_topic", odMapImgTopic, std::string(""));
+                get_parameter_or("vision_cnn_image_topic", odMapImgTopic, std::string(""));
 
-                m_odMapImgPub = m_it->advertise(odMapImgTopic, 1);
+                m_odMapImgPub = this->create_publisher<Image>(odMapImgTopic, 10);
 
                 message_filters::Subscriber<Detection2D> tensorSub(this, tensorTopic);
                 message_filters::Subscriber<Image> rectImgSub(this, rectImgTopic);
@@ -236,12 +229,11 @@ namespace ti_ros2
 
 		        hdr->frame_id = "map";
 
-                m_odMapImgPub.publish(imgPtr);
+                m_odMapImgPub->publish(*imgPtr);
             }
 
         private:
-            ImgTrans                       *m_it;
-            image_transport::Publisher      m_odMapImgPub;
+            rclcpp::Publisher<Image>::SharedPtr m_odMapImgPub;
     };
 }
 
@@ -262,10 +254,11 @@ int main(int argc, char **argv)
 
         rclcpp::init(argc, argv, initOptions);
 
+        signal(SIGINT, sigHandler);
+
         nodeOptions.allow_undeclared_parameters(true);
         nodeOptions.automatically_declare_parameters_from_overrides(true);
-
-        signal(SIGINT, sigHandler);
+        nodeOptions.use_intra_process_comms(false);
 
         objDetViz = new ti_ros2::VizObjDet("viz_objdet", nodeOptions);
 

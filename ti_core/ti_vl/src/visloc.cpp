@@ -459,22 +459,25 @@ static void VISLOC_exitProcThreads(VISLOC_Context *appCntxt)
 
 static void VISLOC_dumpStats(VISLOC_Context *appCntxt)
 {
-    const char *name = VISLOC_PERF_OUT_FILE;
-    FILE       *fp;
-
-    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-    if (fp != NULL)
+    if (appCntxt->exportPerfStats == 1)
     {
-        VISLOC_exportStats(appCntxt, fp, true);
+        const char *name = VISLOC_PERF_OUT_FILE;
+        FILE       *fp;
 
-        CM_printProctime(fp);
-        appPerfStatsExportCloseFile(fp);
-    }
-    else
-    {
-        LOG_ERROR("Could not open [%s] for exporting "
-                   "performance data\n", name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+        if (fp != NULL)
+        {
+            VISLOC_exportStats(appCntxt, fp, true);
+
+            CM_printProctime(fp);
+            appPerfStatsExportCloseFile(fp);
+        }
+        else
+        {
+            LOG_ERROR("Could not open [%s] for exporting "
+                       "performance data\n", name);
+        }
     }
 }
 
@@ -908,8 +911,6 @@ void VISLOC_intSigHandler(VISLOC_Context *appCntxt)
         VISLOC_cleanupHdlr(appCntxt);
         PTK_printf("\nDEMO FINISHED!\n");
     }
-
-    exit(0);
 }
 
 vx_status VISLOC_extractPoseData(double          *outPose,

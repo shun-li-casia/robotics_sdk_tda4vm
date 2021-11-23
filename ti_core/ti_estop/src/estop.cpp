@@ -843,22 +843,25 @@ static void ESTOP_APP_exitProcThreads(ESTOP_APP_Context *appCntxt)
 
 static void ESTOP_APP_dumpStats(ESTOP_APP_Context *appCntxt)
 {
-    const char *name = ESTOP_APP_PERF_OUT_FILE;
-    FILE       *fp;
-
-    fp = appPerfStatsExportOpenFile(".", (char *)name);
-
-    if (fp != NULL)
+    if (appCntxt->exportPerfStats == 1)
     {
-        ESTOP_APP_exportStats(appCntxt, fp, true);
+        const char *name = ESTOP_APP_PERF_OUT_FILE;
+        FILE       *fp;
 
-        CM_printProctime(fp);
-        appPerfStatsExportCloseFile(fp);
-    }
-    else
-    {
-        LOG_ERROR("Could not open [%s] for exporting "
-                   "performance data\n", name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name);
+
+        if (fp != NULL)
+        {
+            ESTOP_APP_exportStats(appCntxt, fp, true);
+
+            CM_printProctime(fp);
+            appPerfStatsExportCloseFile(fp);
+        }
+        else
+        {
+            LOG_ERROR("Could not open [%s] for exporting "
+                       "performance data\n", name);
+        }
     }
 }
 
@@ -1286,6 +1289,4 @@ void ESTOP_APP_intSigHandler(ESTOP_APP_Context *appCntxt)
         ESTOP_APP_cleanupHdlr(appCntxt);
         PTK_printf("\nDEMO FINISHED!\n");
     }
-
-    exit(0);
 }

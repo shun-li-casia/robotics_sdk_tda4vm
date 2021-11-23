@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <ros/ros.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -36,36 +34,34 @@ namespace ros_app_viz
          * @param[in]  frame_rate  The frame rate
          */
 
-        VizEStop() : m_it(m_nh)
+        VizEStop(ros::NodeHandle *nh, ros::NodeHandle *private_nh)
         {
-            ros::NodeHandle private_nh("~");
-
             std::string rectImgTopic;
             std::string bbTopic;
             std::string ssTensorTopic;
             std::string bbImgTopic;
 
             // input and tensor sizes
-            private_nh.param("width",            m_width,        1280);
-            private_nh.param("height",           m_height,       720);
-            private_nh.param("tensor_width",     m_tensorWidth,  768);
-            private_nh.param("tensor_height",    m_tensorHeight, 432);
-            private_nh.param("show_ground",      m_showGround,   0);
+            private_nh->param("width",            m_width,        1280);
+            private_nh->param("height",           m_height,       720);
+            private_nh->param("tensor_width",     m_tensorWidth,  768);
+            private_nh->param("tensor_height",    m_tensorHeight, 432);
+            private_nh->param("show_ground",      m_showGround,   0);
 
             // input topics
-            private_nh.param("rectified_image_topic",    rectImgTopic,  std::string(""));
-            private_nh.param("bounding_box_topic",       bbTopic,       std::string(""));
-            private_nh.param("semseg_cnn_tensor_topic",  ssTensorTopic, std::string(""));
+            private_nh->param("rectified_image_topic",    rectImgTopic,  std::string(""));
+            private_nh->param("bounding_box_topic",       bbTopic,       std::string(""));
+            private_nh->param("semseg_cnn_tensor_topic",  ssTensorTopic, std::string(""));
 
             // output topics
-            private_nh.param("bounding_box_image_topic", bbImgTopic,    std::string(""));
+            private_nh->param("bounding_box_image_topic", bbImgTopic,    std::string(""));
 
-            m_bbImgPub    = m_it.advertise(bbImgTopic, 1);
-            m_safetyPub   = m_nh.advertise<geometry_msgs::PolygonStamped>("/estop/safety_bubble", 1);
+            m_bbImgPub    = nh->advertise<Image>(bbImgTopic, 1);
+            m_safetyPub   = nh->advertise<geometry_msgs::PolygonStamped>("/estop/safety_bubble", 1);
 
-            message_filters::Subscriber<Detection3D> bbSub(m_nh,  bbTopic, 1);
-            message_filters::Subscriber<Image> rectImgSub(m_nh, rectImgTopic, 1);
-            message_filters::Subscriber<Image> ssTensorSub(m_nh, ssTensorTopic, 1);
+            message_filters::Subscriber<Detection3D> bbSub(*nh,  bbTopic, 1);
+            message_filters::Subscriber<Image> rectImgSub(*nh, rectImgTopic, 1);
+            message_filters::Subscriber<Image> ssTensorSub(*nh, ssTensorTopic, 1);
 
             TimeSynchronizer<Detection3D, Image, Image> sync(bbSub, rectImgSub, ssTensorSub, 10);
             sync.registerCallback(boost::bind(&VizEStop::callback_vizEStop, this, _1, _2, _3));
@@ -92,7 +88,7 @@ namespace ros_app_viz
 
             safetyBubble.header.frame_id = "map";
 
-            for (int i = 0; i < numPoints; ++i) 
+            for (int i = 0; i < numPoints; ++i)
             {
                   double angle = i * ( 360.0 / (double) numPoints) * M_PI / 180.0;
 
@@ -201,9 +197,8 @@ namespace ros_app_viz
                 cv::line(cv_bbPtr->image, cv::Point(objPos.pf3x, objPos.pf3y), cv::Point(objPos.pr3x, objPos.pr3y), lineColor, 2);
                 cv::line(cv_bbPtr->image, cv::Point(objPos.pf4x, objPos.pf4y), cv::Point(objPos.pr4x, objPos.pr4y), lineColor, 2);
 
-                
                 sprintf(strDistance, "%.1fm", float(objPos.front_depth / 1000));
-                
+
                 text = cv::getTextSize(strDistance, fontface, scale, thickness, &baseline);
                 pos  = cv::Point((objPos.pf1x+objPos.pf2x)/2 - 25, (objPos.pf1y+objPos.pf4y)/2);
                 cv::rectangle(cv_bbPtr->image, pos + cv::Point(0, baseline), pos + cv::Point(text.width, -text.height), CV_RGB(0,0,0), CV_FILLED);
@@ -250,12 +245,7 @@ namespace ros_app_viz
         int32_t                         m_tensorWidth;
         int32_t                         m_tensorHeight;
         int32_t                         m_showGround;
-
-        ros::NodeHandle                 m_nh;
-        image_transport::ImageTransport m_it;
-
-        image_transport::Publisher      m_bbImgPub;
-
+        ros::Publisher                  m_bbImgPub;
         ros::Publisher                  m_safetyPub;
     };
 }
@@ -268,7 +258,9 @@ int main(int argc, char **argv)
     try
     {
         ros::init(argc, argv, "app_viz_estop");
-        ros_app_viz::VizEStop estopViz;
+        ros::NodeHandle nh;
+        ros::NodeHandle private_nh("~");
+        ros_app_viz::VizEStop estopViz(&nh, &private_nh);
 
         return EXIT_SUCCESS;
     }

@@ -86,7 +86,6 @@ class SDEAppNode: public rclcpp::Node
     using CamInfoSub = message_filters::Subscriber<CameraInfo>;
     using TimeSync   = TimeSynchronizer<Image, Image>;
     using ImgPub     = image_transport::Publisher;
-    using ImgTrans   = image_transport::ImageTransport;
     using SubCon     = message_filters::Connection;
 
     public:
@@ -131,7 +130,6 @@ class SDEAppNode: public rclcpp::Node
         SDEAPP_Context         *m_cntxt{};
         TimeSync               *m_sync{};
         CamInfoSub             *m_sub{};
-        ImgTrans               *m_imgTrans{};
         ImgSub                 *m_leftImageSub{};
         ImgSub                 *m_rightImageSub{};
         SubCon                  m_conObj;
