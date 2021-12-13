@@ -77,7 +77,7 @@ sudo resize2fs /dev/sdX2
 You can download `init_setup.sh` and run the the script:
 ```
 root@j7-evm:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
-root@j7-evm:~$ source ./init_setup.sh
+root@j7-evm:~$ source ./init_setup.sh v0.5.0
 ```
 This script takes care of:
 * Setting up the folders for evaluating the Robotics SDK under `$HOME/j7ros_home`
@@ -89,7 +89,7 @@ This script takes care of:
 In a similar way, you can use the same script to set up on the remote Ubuntu PC for visualization:
 ```
 user@pc:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
-user@pc:~$ source ./init_setup.sh
+user@pc:~$ source ./init_setup.sh v0.5.0
 ```
 
 **NOTE**: In a proxy network, in case the `wget` command above does not work, you can try again with adding `--proxy off` argument:
