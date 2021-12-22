@@ -9,11 +9,11 @@ from launch_ros.actions import Node
 
 # Launch for for USB mono camera capture node.
 # Requirement: run camera calibration and LDC look-up-table generation tool
-# which are located under <mono_cature>/scripts for generating camera_info
+# which are located under <mono_capture>/scripts for generating camera_info
 # .yaml file and undistortion/rectification look-up table files for
 # LDC hardware accelerator
 
-def finslize_node(context, *args, **kwargs):
+def finalize_node(context, *args, **kwargs):
     model_str   = LaunchConfiguration("model_str").perform(context)
     camera_mode = LaunchConfiguration("camera_mode").perform(context)
     camera_info_yaml  = model_str + "_" + camera_mode + "_camera_info.yaml"
@@ -23,14 +23,16 @@ def finslize_node(context, *args, **kwargs):
     camera_info_topic = topic_ns + "/camera_info"
 
     params = [
-        {"camera_mode":            LaunchConfiguration("camera_mode")},
-        {"frame_rate":             LaunchConfiguration("frame_rate")},
-        {"frame_id":               "camera_frame"},
-        {"device_name":            LaunchConfiguration("device_name")},
-        {"encoding":               LaunchConfiguration("encoding")},
-        {"image_topic":            image_topic},
-        {"camera_info_topic":      camera_info_topic},
-        {"camera_info_yaml":       camera_info_yaml}
+        {
+            "camera_mode":            LaunchConfiguration("camera_mode"),
+            "frame_rate":             LaunchConfiguration("frame_rate"),
+            "frame_id":               "camera_frame",
+            "device_name":            LaunchConfiguration("device_name"),
+            "encoding":               LaunchConfiguration("encoding"),
+            "image_topic":            image_topic,
+            "camera_info_topic":      camera_info_topic,
+            "camera_info_yaml":       camera_info_yaml,
+        }
     ]
 
     node = Node(package = "mono_capture",
@@ -55,7 +57,7 @@ def generate_launch_description():
     # device_name: arg that can be set from the command line or a default will be used
     device_name = DeclareLaunchArgument(
         name="device_name",
-        default_value=TextSubstitution(text="/dev/video1"),
+        default_value=TextSubstitution(text="/dev/video2"),
         description="""to find your device name, use ls /dev/video*
                        and look for the name begin with video"""
     )
@@ -94,7 +96,7 @@ def generate_launch_description():
     ld.add_action(frame_rate)
     ld.add_action(encoding)
     ld.add_action(topic_ns)
-    ld.add_action(OpaqueFunction(function=finslize_node))
+    ld.add_action(OpaqueFunction(function=finalize_node))
 
     return ld
 

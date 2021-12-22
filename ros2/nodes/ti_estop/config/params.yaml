@@ -1,10 +1,10 @@
 estop:
     ros__parameters:
         # left image LDC LUT definition
-        left_lut_file_path:                 /root/j7ros_home/ros_ws/src/jacinto_ros_perception/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_left.bin
+        left_lut_file_path:                 /opt/robotics_sdk/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_left.bin
 
         # right image LDC LUT definition
-        right_lut_file_path:                /root/j7ros_home/ros_ws/src/jacinto_ros_perception/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin
+        right_lut_file_path:                /opt/robotics_sdk/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin
 
         # location of network
         dl_model_path:                      /root/j7ros_home/data/tidl_semseg_model/tvmdlr_deeplabv3lite_mobilenetv2_tv_768x432_qat-p2_onnx

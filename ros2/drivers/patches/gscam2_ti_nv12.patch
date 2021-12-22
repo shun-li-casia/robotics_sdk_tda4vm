@@ -1,0 +1,445 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 63ad29c..edbebfa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.5)
+ 
+ project(gscam2)
+ 
++if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
++    set(BUILD_CORE_NODES          OFF)
++elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
++    set(BUILD_CORE_NODES          ON CACHE BOOL "Build core nodes")
++else()
++    message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
++endif()
++
++if(${BUILD_CORE_NODES})
++
+ # Default to C99
+ if (NOT CMAKE_C_STANDARD)
+   set(CMAKE_C_STANDARD 99)
+@@ -144,7 +154,10 @@ ament_package()
+ # Install
+ #=============
+ 
+-install(DIRECTORY include/${PROJECT_NAME} DESTINATION include)
++install(
++  DIRECTORY include/${PROJECT_NAME}
++  DESTINATION include
++)
+ 
+ install(
+   TARGETS gscam_node
+@@ -167,4 +180,9 @@ install(
+   DESTINATION lib/${PROJECT_NAME}
+ )
+ 
+-install(DIRECTORY cfg launch DESTINATION share/${PROJECT_NAME})
+\ No newline at end of file
++install(
++  DIRECTORY cfg config launch
++  DESTINATION share/${PROJECT_NAME}
++)
++
++endif ()
+\ No newline at end of file
+diff --git a/README_TI.md b/README_TI.md
+new file mode 100644
+index 0000000..d4bf9d3
+--- /dev/null
++++ b/README_TI.md
+@@ -0,0 +1,44 @@
++GStreamer-based Camera Node for ROS 2
++=====================================
++This GStreamer based camera ROS node is from [https://github.com/clydemcqueen/gscam2](https://github.com/clydemcqueen/gscam2). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
++
++* Added GStreamer piplelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode.
++* Added an example `camara_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use TI TDA4 LDC hardware accelerator).
++* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode), and OV5640 (in YUYV mode).
++* Dependency: following modules are already built and installed in the the Robotics SDK ROS Docker images.
++    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
++    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
++
++## Usage
++
++1. Camera Calibration and Rectification Map Generation: See corresponding parts of [mono_capture/README.md](../../../ros1/drivers/mono_capture/README.md).
++
++
++2. Build the ROS node:
++    ```
++    cd $ROS_WS
++    colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential
++    source install/setup.bash
++    ```
++
++3. Launch the "gscam2" ROS node:
++Before launching the "gscam2", please make sure to update `device` in the launch file to point to correct camera device (`/dev/videoX`).
++    For capturing in MJPG (motion JPEG) mode,
++    ```
++    ros2 launch gscam2 v4l_mjpg_launch.py
++    ```
++    For capturing in YUYV mode,
++    ```
++    ros2 launch gscam2 v4l_yuv_launch.py
++    ros2 launch gscam2 v4l_ov5640_launch.py # for OV5640 CSI camera
++    ```
++
++**Note**: The measured framerate for the output topic can be less than the framerate set in the launch file, depending on the light condition of the scenes. This is a normal behavior inherited from `v4l2src` and the ISP settings of, e.g., USB webcam.
++
++## Visualization on Remote Ubuntu PC
++By default, the output topic `raw_image` is published in NV12 color format to make more efficient when the node is integrated with the vision vision CNN processing chain (including `ti_vision_cnn` ROS node) on TDA4. We provide a launch file for visualization on the remote Ubuntu (included in `ti_viz_nodes` ROS package).
++
++In the PC ROS2 Docker container,
++```
++ros2 launch ti_viz_nodes gscam_nv12_launch.py
++```
+diff --git a/config/C920_HD_camera_info.yaml b/config/C920_HD_camera_info.yaml
+new file mode 100644
+index 0000000..3ce26c2
+--- /dev/null
++++ b/config/C920_HD_camera_info.yaml
+@@ -0,0 +1,31 @@
++%YAML:1.0
++---
++image_width: 1280
++image_height: 720
++camera_name: camera
++camera_matrix: !!opencv-matrix
++   rows: 3
++   cols: 3
++   dt: d
++   data: [ 9.3797299601201667e+02, 0., 6.4110167315102080e+02, 0.,
++       9.3981016471195335e+02, 3.8512990806142415e+02, 0., 0., 1. ]
++distortion_model: plumb_bob
++distortion_coefficients: !!opencv-matrix
++   rows: 1
++   cols: 5
++   dt: d
++   data: [ 7.3934261699576093e-02, -4.1542678753901879e-01,
++       1.4128959036683215e-03, 9.4384360282255390e-04,
++       5.9913436641201279e-01 ]
++rectification_matrix: !!opencv-matrix
++   rows: 3
++   cols: 3
++   dt: d
++   data: [ 1., 0., 0., 0., 1., 0., 0., 0., 1. ]
++projection_matrix: !!opencv-matrix
++   rows: 3
++   cols: 4
++   dt: d
++   data: [ 9.3797299601201667e+02, 0., 6.4110167315102080e+02, 0., 0.,
++       9.3981016471195335e+02, 3.8512990806142415e+02, 0., 0., 0., 1.,
++       0. ]
+diff --git a/launch/v4l_mjpg_launch.py b/launch/v4l_mjpg_launch.py
+new file mode 100644
+index 0000000..764c3cf
+--- /dev/null
++++ b/launch/v4l_mjpg_launch.py
+@@ -0,0 +1,60 @@
++"""
++Launch a Node with parameters and remappings.
++"""
++import os
++from ament_index_python.packages import get_package_share_directory
++from launch import LaunchDescription
++from launch_ros.actions import Node
++
++# Camera device
++device = '/dev/video2'
++
++# Framerate
++framerate = 30
++
++# Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++image_encoding = 'yuv420'
++
++# GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
++# 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++gscam_config = 'v4l2src device=' + device + ' io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxcolorconvert'
++
++# Camera namespace
++camera_name = 'camera'
++
++# Camera calibration file
++config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++print(camera_config)
++
++def generate_launch_description():
++
++    node = Node(
++        package    = 'gscam2',
++        executable = 'gscam_main',
++        output     = 'screen',
++        name       = 'gscam_publisher',
++        namespace  = camera_name,
++        parameters = [
++            {
++                'gscam_config':       gscam_config,
++                'camera_name':        camera_name,
++                'camera_info_url':    camera_config,
++                'image_encoding':     image_encoding,
++                'appsink_width':      1280,
++                'appsink_height':     720,
++                'appsink_framerate':  framerate,
++                'sync_sink':          False,
++                'preroll':            False,
++                'use_gst_timestamps': False,
++                'frame_id':           'camera_frame',
++            },
++        ],
++        # Remap outputs to the correct namespace
++        remappings=[
++            ('/image_raw', '/' + camera_name + '/image_raw'),
++            ('/camera_info', '/' + camera_name + '/camera_info'),
++        ],
++    )
++
++    return LaunchDescription([node])
+diff --git a/launch/v4l_ov5640_launch.py b/launch/v4l_ov5640_launch.py
+new file mode 100644
+index 0000000..07b61f6
+--- /dev/null
++++ b/launch/v4l_ov5640_launch.py
+@@ -0,0 +1,60 @@
++"""
++Launch a Node with parameters and remappings.
++"""
++import os
++from ament_index_python.packages import get_package_share_directory
++from launch import LaunchDescription
++from launch_ros.actions import Node
++
++# Camera device
++device = '/dev/video2'
++
++# Framerate
++framerate = 30
++
++# Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++image_encoding = 'yuv420'
++
++# GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
++# 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++
++# Camera namespace
++camera_name = 'camera'
++
++# Camera calibration file
++config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++print(camera_config)
++
++def generate_launch_description():
++
++    node = Node(
++        package    = 'gscam2',
++        executable = 'gscam_main',
++        output     = 'screen',
++        name       = 'gscam_publisher',
++        namespace  = camera_name,
++        parameters = [
++            {
++                'gscam_config':       gscam_config,
++                'camera_name':        camera_name,
++                'camera_info_url':    camera_config,
++                'image_encoding':     image_encoding,
++                'appsink_width':      1280,
++                'appsink_height':     720,
++                'appsink_framerate':  framerate,
++                'sync_sink':          False,
++                'preroll':            False,
++                'use_gst_timestamps': False,
++                'frame_id':           'camera_frame',
++            },
++        ],
++        # Remap outputs to the correct namespace
++        remappings=[
++            ('/image_raw', '/' + camera_name + '/image_raw'),
++            ('/camera_info', '/' + camera_name + '/camera_info'),
++        ],
++    )
++
++    return LaunchDescription([node])
+diff --git a/launch/v4l_yuv_launch.py b/launch/v4l_yuv_launch.py
+new file mode 100644
+index 0000000..469de8b
+--- /dev/null
++++ b/launch/v4l_yuv_launch.py
+@@ -0,0 +1,60 @@
++"""
++Launch a Node with parameters and remappings.
++"""
++import os
++from ament_index_python.packages import get_package_share_directory
++from launch import LaunchDescription
++from launch_ros.actions import Node
++
++# Camera device
++device = '/dev/video2'
++
++# Framerate
++framerate = 10
++
++# Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++image_encoding = 'yuv420'
++
++# GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
++# 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++
++# Camera namespace
++camera_name = 'camera'
++
++# Camera calibration file
++config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++print(camera_config)
++
++def generate_launch_description():
++
++    node = Node(
++        package    = 'gscam2',
++        executable = 'gscam_main',
++        output     = 'screen',
++        name       = 'gscam_publisher',
++        namespace  = camera_name,
++        parameters = [
++            {
++                'gscam_config':       gscam_config,
++                'camera_name':        camera_name,
++                'camera_info_url':    camera_config,
++                'image_encoding':     image_encoding,
++                'appsink_width':      1280,
++                'appsink_height':     720,
++                'appsink_framerate':  framerate,
++                'sync_sink':          False,
++                'preroll':            False,
++                'use_gst_timestamps': False,
++                'frame_id':           'camera_frame',
++            },
++        ],
++        # Remap outputs to the correct namespace
++        remappings=[
++            ('/image_raw', '/' + camera_name + '/image_raw'),
++            ('/camera_info', '/' + camera_name + '/camera_info'),
++        ],
++    )
++
++    return LaunchDescription([node])
+diff --git a/src/gscam_node.cpp b/src/gscam_node.cpp
+index 3fef91f..45f69ff 100644
+--- a/src/gscam_node.cpp
++++ b/src/gscam_node.cpp
+@@ -27,6 +27,9 @@ namespace gscam2
+   CXT_MACRO_MEMBER(camera_info_url, std::string, "")        /* Location of camera info file  */ \
+   CXT_MACRO_MEMBER(camera_name, std::string, "")            /* Camera name  */ \
+   CXT_MACRO_MEMBER(frame_id, std::string, "camera_frame")   /* Camera frame id  */ \
++  CXT_MACRO_MEMBER(appsink_width, int, 1280)                /* app_sink: width */ \
++  CXT_MACRO_MEMBER(appsink_height, int, 720)                /* app_sink: height */ \
++  CXT_MACRO_MEMBER(appsink_framerate, int, 30)              /* app_sink: set_framerate */ \
+   /* End of list */
+ 
+ #undef CXT_MACRO_MEMBER
+@@ -63,6 +66,9 @@ namespace gscam2
+     // Discover width and height from the incoming data
+     int width_, height_;
+ 
++    // app_sink format to set, based on image_encoding
++    std::string app_sink_format_;
++
+     // Calibration between ros::Time and gst timestamps
+     GstClockTime time_offset_;
+ 
+@@ -141,16 +147,17 @@ namespace gscam2
+     GstCaps *caps = gst_app_sink_get_caps(GST_APP_SINK(sink_));
+ 
+     // http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-types-definitions.html
+-    if (cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8) {
+-      caps = gst_caps_new_simple("video/x-raw",
+-                                 "format", G_TYPE_STRING, "RGB",
+-                                 nullptr);
+-    } else if (cxt_.image_encoding_ == sensor_msgs::image_encodings::MONO8) {
+-      caps = gst_caps_new_simple("video/x-raw",
+-                                 "format", G_TYPE_STRING, "GRAY8",
+-                                 nullptr);
+-    } else if (cxt_.image_encoding_ == "jpeg") {
+-      caps = gst_caps_new_simple("image/jpeg", nullptr, nullptr);
++    if (cxt_.image_encoding_ == "jpeg") {
++      caps = gst_caps_new_simple("image/jpeg", NULL, NULL);
++    }
++    else {
++      caps = gst_caps_new_simple( "video/x-raw",
++          "format", G_TYPE_STRING, app_sink_format_.c_str(),
++          "framerate", GST_TYPE_FRACTION, cxt_.appsink_framerate_, 1,
++          "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
++          "width", G_TYPE_INT, cxt_.appsink_width_,
++          "height", G_TYPE_INT, cxt_.appsink_height_,
++          NULL);
+     }
+ 
+     gst_app_sink_set_caps(GST_APP_SINK(sink_), caps);
+@@ -324,10 +331,16 @@ namespace gscam2
+       cinfo_pub_->publish(std::move(cinfo));
+     } else {
+       // Complain if the returned buffer is smaller than we expect
+-      const unsigned int expected_frame_size =
+-        cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8
+-        ? width_ * height_ * 3
+-        : width_ * height_;
++      unsigned int expected_frame_size;
++      if (cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8) {
++          expected_frame_size = width_ * height_ * 3;
++      }
++      else if (cxt_.image_encoding_ == "yuv420") {
++          expected_frame_size = width_ * height_ * 1.5;
++      }
++      else {
++          expected_frame_size = width_ * height_;
++      }
+ 
+       if (buf_size < expected_frame_size) {
+         RCLCPP_WARN(node_->get_logger(),
+@@ -349,10 +362,13 @@ namespace gscam2
+ 
+       // Copy the image, so we can free the buffer allocated by gstreamer
+       if (cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8) {
+-        img->step = width_ * 3;
++          img->step = width_ * 3;
++      } else if (cxt_.image_encoding_ == "yuv420") { // NV12
++          img->step = width_ * 1.5;
+       } else {
+-        img->step = width_;
++          img->step = width_;
+       }
++
+       std::copy(
+         buf_data,
+         (buf_data) + (buf_size),
+@@ -400,12 +416,23 @@ namespace gscam2
+     }
+ 
+     if (cxt_.image_encoding_ != sensor_msgs::image_encodings::RGB8 &&
+-        cxt_.image_encoding_ != sensor_msgs::image_encodings::MONO8 &&
++        // cxt_.image_encoding_ != sensor_msgs::image_encodings::MONO8 &&
++        cxt_.image_encoding_ != "yuv420" &&
+         cxt_.image_encoding_ != "jpeg") {
+       RCLCPP_FATAL(node_->get_logger(), "Unsupported image encoding: %s", cxt_.image_encoding_.c_str());
+       return;
+     }
+ 
++    // Mapping between image_encoding_ and app_sink_format_
++    // 'tiovxcolorconvert' supports: RGB, NV12
++    if (cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8) {
++      app_sink_format_ = "RGB";
++    } else if (cxt_.image_encoding_ == "yuv420") {
++      app_sink_format_ = "NV12";
++    } else if (cxt_.image_encoding_ == "jpeg") {
++      app_sink_format_ = "";
++    }
++
+     camera_info_manager_.setCameraName(cxt_.camera_name_);
+ 
+     if (camera_info_manager_.validateURL(cxt_.camera_info_url_)) {

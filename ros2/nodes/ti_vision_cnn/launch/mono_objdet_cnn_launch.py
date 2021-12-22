@@ -17,16 +17,19 @@ def generate_launch_description():
 
     # Include OBJDET launch file
     cnn_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(launch_dir, 'objdet_cnn_launch.py')
-                )
-            )
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_dir, 'objdet_cnn_launch.py')
+        )
+    )
 
     # Include mono_capture launch file
-    mono_launch_file = get_launch_file(pkg='mono_capture', file_name='mono_capture_launch.py')
+    mono_launch_file = get_launch_file(
+        pkg='mono_capture',
+        file_name='mono_capture_launch.py'
+    )
     mono_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(mono_launch_file)
-            )
+        PythonLaunchDescriptionSource(mono_launch_file)
+    )
 
     ld.add_action(cnn_launch)
     ld.add_action(mono_launch)

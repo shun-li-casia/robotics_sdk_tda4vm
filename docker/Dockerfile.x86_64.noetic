@@ -31,13 +31,12 @@
 ARG USE_PROXY
 ARG HTTP_PROXY
 ARG REPO_LOCATION
-ARG GIT_REPO=jacinto_ros_perception
 ARG DEBIAN_FRONTEND=noninteractive
 
 #=========================================================================
 # The environment variable REPO_LOCATION is set from outside as needed,
 # based on network
-FROM ${REPO_LOCATION}ubuntu:18.04 AS base-0
+FROM ${REPO_LOCATION}ubuntu:20.04 AS base-0
 
 #=========================================================================
 FROM base-0 AS base-1
@@ -52,42 +51,39 @@ FROM base-${USE_PROXY} AS ubuntu-stage1
 ARG DEBIAN_FRONTEND
 
 # setup proxy settings
-ARG GIT_REPO
-ARG DOCKER_PATH=${GIT_REPO}/docker
-ADD ${DOCKER_PATH}/setup_proxy.sh /root/
-ADD ${DOCKER_PATH}/proxy /root/proxy
+ADD setup_proxy.sh /root/
+ADD proxy /root/proxy
 RUN /root/setup_proxy.sh
 
-# install dependency for tivision_apps.so: OpenGL, libdevil-dev
-RUN apt-get update && apt-get install -y \
-    libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev && \
+# install gstreamer dependencies
+RUN apt update && apt install -y --no-install-recommends \
+    libgstreamer1.0-0 \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-libav \
+    gstreamer1.0-tools \
+    gir1.2-gst-rtsp-server-1.0 \
+    ninja-build && \
     rm -rf /var/lib/apt/lists/*
 
-# install utils
-RUN apt-get update && apt-get install -y \
-    wget curl git vim tmux net-tools iputils-ping corkscrew usbutils && \
+# install python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install \
+        meson \
+        configparser \
+        argparse && \
     rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
-FROM ubuntu-stage1 AS ubuntu-stage2
+FROM ubuntu-stage1 AS ubuntu-ros
 ARG DEBIAN_FRONTEND
-
-# install software-properties-common to use add-apt-repository
-RUN apt-get update && apt-get install -y \
-    software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
-
-# install gcc-9: add-apt-repository needs env variables http_proxy and https_proxy in a proxy network
-RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    gcc-9 g++-9 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 && \
-    rm -rf /var/lib/apt/lists/*
-
-#=========================================================================
-FROM ubuntu-stage2 AS ubuntu-ros
-ARG DEBIAN_FRONTEND
-# install ROS
+# install ROS Noetic
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -100,86 +96,78 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
     dirmngr \
     gnupg2 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # setup sources.list
-RUN echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros1-latest.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
 
 # setup keys
 # RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 # workaround in case apt-key above does not work, e.g., behind a proxy
 RUN curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | apt-key add -
 
+# setup environment variables
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV ROS_DISTRO=noetic
+
 # install bootstrap tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    python-rosdep \
-    python-rosinstall \
-    python-vcstools \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-vcstools \
     && rm -rf /var/lib/apt/lists/*
-
-# setup environment variables
-ARG PROJECT_HOME=j7ros_home
-ENV LANG            C.UTF-8
-ENV LC_ALL          C.UTF-8
-ENV ROS_DISTRO      melodic
-ENV WORK_DIR        /root/${PROJECT_HOME}
-ENV ROS_WS          $WORK_DIR/ros_ws
-ENV ROS2_DISTRO     $ROS_DISTRO
 
 # bootstrap rosdep
 RUN rosdep init && \
-    rosdep update --rosdistro $ROS_DISTRO
+    rosdep update --rosdistro ${ROS_DISTRO}
 
 # install ros-core packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-melodic-ros-core=1.4.1-0* \
-    ros-melodic-perception=1.4.1-0* \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y \
-    ros-melodic-rviz \
-    ros-melodic-rqt-image-view \
-    ros-melodic-rqt-console \
-    ros-melodic-rqt-graph \
+    ros-noetic-ros-core=1.5.0-1* \
+    ros-noetic-perception=1.5.0-1* \
     && rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
 FROM ubuntu-ros
 ARG DEBIAN_FRONTEND
 
-# install python packages
+# intsall utils and miscellaneous packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python-pip && \
-    python2 -m pip install configparser argparse && \
+    wget \
+    git \
+    vim \
+    tmux \
+    gdb \
+    iputils-ping \
+    usbutils \
+    ncurses-dev \
+    libyaml-cpp-dev \
+    rsync \
+    strace \
+    sysstat \
+    gdb \
+    net-tools \
+    dialog \
+    chrony \
+    nfs-common \
+    corkscrew \
+    v4l-utils && \
     rm -rf /var/lib/apt/lists/*
 
-# intsall libyaml-cpp-dev, ncurses-dev
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libyaml-cpp-dev ncurses-dev && \
-    rm -rf /var/lib/apt/lists/*
-
-## install ROS apps
-COPY . $ROS_WS/src
-
-## install ROS dependency and remove ROS2 apps. ROS1 apps will be volume-mapped at "docker run"
-RUN apt-get update && \
-    rosdep install -r -y --ignore-src --from-paths \
-    $ROS_WS/src/jacinto_ros_perception/ros1/drivers \
-    $ROS_WS/src/jacinto_ros_perception/ros1/nodes/ti_viz_nodes && \
-    rm -rf $ROS_WS/src && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcanberra-gtk-module \
-    libcanberra-gtk3-0 \
-    libcanberra-gtk3-module && \
-    rm -rf /var/lib/apt/lists/*
+# install additional ROS packages beyond ros-noetic-perception
+RUN apt-get update && apt-get install -y \
+    ros-noetic-rviz \
+    ros-noetic-rqt-image-view \
+    ros-noetic-rqt-console \
+    ros-noetic-rqt-graph \
+    && rm -rf /var/lib/apt/lists/*
 
 # add scripts
-ARG  GIT_REPO
-COPY ${GIT_REPO}/docker/entrypoint_x86_64.sh /root/entrypoint.sh
-ADD  ${GIT_REPO}/docker/ros_setup.sh /root/
+COPY entrypoint_x86_64.sh /root/entrypoint.sh
+ADD  ros_setup.sh /root/
 
 # .profile and .bashrc
 WORKDIR /root
@@ -193,6 +181,9 @@ RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
     echo "export PS1=\"${debian_chroot:+($debian_chroot)}\u@pc-docker:\w\$ \"" >> .bashrc
 
 # workdir for ROS apps
+ARG PROJECT_HOME=j7ros_home
+ENV WORK_DIR=/root/${PROJECT_HOME}
+ENV ROS_WS=${WORK_DIR}/ros_ws
 WORKDIR ${ROS_WS}
 
 # setup entrypoint

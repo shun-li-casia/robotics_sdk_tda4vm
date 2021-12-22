@@ -375,6 +375,29 @@ void VisionCnnNode::readParams()
     /* Get input image height information. */
     get_parameter_or("height", m_cntxt->inputImageHeight, VISION_CNN_DEFAULT_IMAGE_HEIGHT);
 
+    /* Get input image format information. */
+    status = get_parameter("image_format", tmp);
+
+    if (status == false)
+    {
+        RCLCPP_INFO(get_logger(), "Config parameter 'image_format' not found.");
+        exit(-1);
+    }
+
+    if (tmp == 0)
+    {
+        m_cntxt->inputImageFormat = VX_DF_IMAGE_UYVY;
+    }
+    else if (tmp == 1)
+    {
+        m_cntxt->inputImageFormat = VX_DF_IMAGE_NV12;
+    }
+    else
+    {
+        RCLCPP_INFO(get_logger(), "Config parameter 'image_format' not supported.");
+        exit(-1);
+    }
+
     /* Get class count information information. */
     status = get_parameter("num_classes", tmp);
 

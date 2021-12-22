@@ -123,6 +123,30 @@ void CM_printProctime(FILE *fp);
  */
 void CM_resetProctime();
 
+/**
+ * \brief Function to launch a performance statistics control thread. The
+ * prupose of the control thread is to reset the statistics periodically.
+ *
+ * \param [in] periodicity Statistics reset periodicity in milli-seconds. The
+ *                         default value is 2 sec.
+ *
+ * \return 0 on success. A negative value otehrwise.
+ *
+ * \ingroup group_ticore_profile
+ *
+ */
+int32_t CM_perfLaunchCtrlThread(chrono::milliseconds  periodicity=2000ms);
+
+/**
+ * \brief Function to terminate the statistics control thread.
+ *
+ * \return 0 on success. A negative value otehrwise.
+ *
+ * \ingroup group_ticore_profile
+ *
+ */
+int32_t CM_perfStopCtrlThread();
+
 } // namespace ti_core_common 
 
 #endif // _CM_PROFILE_H_

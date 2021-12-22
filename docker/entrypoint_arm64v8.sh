@@ -4,11 +4,15 @@ set -e
 # setup proxy as required
 /root/setup_proxy.sh
 
+# Ubuntu version and ROS distro
+UBUNTU_VER=$(lsb_release -r | cut -f2)
+echo "Ubuntu $UBUNTU_VER. ROS-$ROS_DISTRO"
+
 # set up ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 # setup TI Processor SDK environment
-SRC_PATH=$ROS_WS/src/jacinto_ros_perception/docker
+SRC_PATH=/opt/robotics_sdk/docker
 FILE="$SRC_PATH/setup_ti_processor_sdk.sh"
 if [ -f $FILE ]; then
     source $FILE

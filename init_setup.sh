@@ -30,8 +30,10 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+set -e
+
 # Release tag info of the current release
-GIT_TAG="v0.5.0"
+GIT_TAG="REL.08.01.00"
 if [ "$#" -eq 1 ]; then
     GIT_TAG=$1
 fi
@@ -72,6 +74,7 @@ function git_checkout_with_tag {
             git checkout tags/$GIT_TAG -b $GIT_TAG
         else
             echo "\"$GIT_TAG\" does not exist. \"$RECENT_TAG\" is the latest tag on the git repository."
+            GIT_TAG=$RECENT_TAG
         fi
     fi
 }
@@ -106,7 +109,7 @@ if [[ -f "$SDK_DIR/scripts/install_gscam.sh" ]]; then
 fi
 
 # Setup $WORK_DIR
-mkdir -p $ROS_WS/src
+mkdir -p $ROS_WS
 cd $WORK_DIR
 ln -sf $SDK_DIR/docker/Makefile $WORK_DIR/Makefile
 if [[ "$ARCH" == "aarch64" ]]; then
@@ -119,26 +122,22 @@ fi
 # On the TDA target
 if [[ "$ARCH" == "aarch64" ]]; then
     # Download and install ROSBAG and other files
-    ls $WORK_DIR | grep "data"
-    if [ "$?" -ne "0" ]; then
+    if [[ ! -d "${WORK_DIR}/data" ]]; then
         make data_download
     fi
 
     # Install Tensorflow for CPP apps build
-    ls /opt | grep "tensorflow"
-    if [ "$?" -ne "0" ]; then
+    if [[ ! -d "/opt/tensorflow" ]]; then
         bash /opt/edge_ai_apps/scripts/install_tensorflow.sh
     fi
 
     # Install dlpack for CPP apps build
-    ls /opt | grep "dlpack"
-    if [ "$?" -ne "0" ]; then
+    if [[ ! -d "/opt/dlpack" ]]; then
         bash /opt/edge_ai_apps/scripts/install_dlpack.sh 0.5
     fi
 
     # Install ONNX RT for CPP apps build
-    ls /opt | grep "onnxruntime"
-    if [ "$?" -ne "0" ]; then
+    if [[ ! -d "/opt/onnxruntime" ]]; then
         bash /opt/edge_ai_apps/scripts/install_onnx_rt.sh
     fi
 
@@ -155,3 +154,8 @@ fi
 sync
 
 echo "Robotics SDK Setup Done!"
+if [[ $GIT_TAG == "REL*" ]]; then
+    DOC_VER=${GIT_TAG:4:11}
+    DOC_VER=${DOC_VER//./_}
+    echo "See https://software-dl.ti.com/jacinto7/esd/robotics-sdk/${DOC_VER}/docs/index.html"
+fi

@@ -368,6 +368,29 @@ void VisionCnnNode::readParams()
     /* Get input image height information. */
     m_privNodeHdl.param("height", m_cntxt->inputImageHeight, VISION_CNN_DEFAULT_IMAGE_HEIGHT);
 
+    /* Get input image format information. */
+    status = m_privNodeHdl.param("image_format", tmp, 0);
+
+    if (status == false)
+    {
+        ROS_INFO("Config parameter 'image_format' not found.");
+        exit(-1);
+    }
+
+    if (tmp == 0)
+    {
+        m_cntxt->inputImageFormat = VX_DF_IMAGE_UYVY;
+    }
+    else if (tmp == 1)
+    {
+        m_cntxt->inputImageFormat = VX_DF_IMAGE_NV12;
+    }
+    else
+    {
+        ROS_INFO("Config parameter 'image_format' not supported.");
+        exit(-1);
+    }
+
     /* Get class count information. */
     status = m_privNodeHdl.getParam("num_classes", tmp);
 

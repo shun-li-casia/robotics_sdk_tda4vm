@@ -206,23 +206,23 @@ namespace ti_ros2
                                     const Image::ConstSharedPtr& imagePtr)
             {
 
-            cv_bridge::CvImagePtr cv_outImgPtr;
-            cv_outImgPtr = cv_bridge::toCvCopy(imagePtr, sensor_msgs::image_encodings::RGB8);
+                cv_bridge::CvImagePtr cv_outImgPtr;
+                cv_outImgPtr = cv_bridge::toCvCopy(imagePtr, sensor_msgs::image_encodings::RGB8);
 
-            int32_t box[4];
-            int32_t class_id;
-            int32_t num_objects = detMsg->num_objects;
+                int32_t box[4];
+                int32_t class_id;
+                int32_t num_objects = detMsg->num_objects;
 
-            for (int32_t i = 0; i < num_objects; i++)
-            {
-                box[0] = detMsg->bounding_boxes[i].xmin;
-                box[1] = detMsg->bounding_boxes[i].ymin;
-                box[2] = detMsg->bounding_boxes[i].xmax;
-                box[3] = detMsg->bounding_boxes[i].ymax;
-                class_id = detMsg->bounding_boxes[i].label_id;
+                for (int32_t i = 0; i < num_objects; i++)
+                {
+                    box[0] = detMsg->bounding_boxes[i].xmin;
+                    box[1] = detMsg->bounding_boxes[i].ymin;
+                    box[2] = detMsg->bounding_boxes[i].xmax;
+                    box[3] = detMsg->bounding_boxes[i].ymax;
+                    class_id = detMsg->bounding_boxes[i].label_id;
 
-                overlayBoundingBox(cv_outImgPtr->image, box, class_id);
-            }
+                    overlayBoundingBox(cv_outImgPtr->image, box, class_id);
+                }
 
 		        auto imgPtr = cv_outImgPtr->toImageMsg();
 		        auto hdr = &imgPtr->header;

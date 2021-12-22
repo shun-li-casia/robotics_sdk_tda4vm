@@ -358,6 +358,9 @@ struct VISION_CNN_Context
     /** Input image height in pixels. */
     int32_t                 inputImageHeight;
 
+    /** Input image format: VX_DF_IMAGE_UYVY or VX_DF_IMAGE_NV12 */
+    vx_df_image             inputImageFormat;
+
     /** LDC sub-sampling factor. Ignored if enableLdcNode is false. */
     uint32_t                ldcSsFactor{VISION_LDC_DS_FACTOR};
 

@@ -95,6 +95,7 @@ StereoCamera::StereoCamera(const std::string device_name,
     setCameraMode(camera_mode);
     setFrameRate(frame_rate);
 
+#if CV_MAJOR_VERSION <= 3
     if (encoding_.compare("yuv422")==0)
     {
         camera_->set(CV_CAP_PROP_CONVERT_RGB, false);
@@ -105,6 +106,18 @@ StereoCamera::StereoCamera(const std::string device_name,
         camera_->set(CV_CAP_PROP_CONVERT_RGB, true);
         ROS_INFO("BGR8");
     }
+#else
+    if (encoding_.compare("yuv422")==0)
+    {
+		camera_->set(cv::CAP_PROP_CONVERT_RGB, false);
+        ROS_INFO("YUV422");
+    }
+    else
+    {
+		camera_->set(cv::CAP_PROP_CONVERT_RGB, true);
+        ROS_INFO("BGR8");
+    }
+#endif
 
     // setting rect_left_ and rect_right_
     int crop_left      = ((float) stereo_width_ / 2.0 - (float) out_width_)/2.0;

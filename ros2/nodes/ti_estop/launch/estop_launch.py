@@ -29,6 +29,7 @@ def generate_launch_description():
                 executable = "estop",
                 name = "estop",
                 output = "screen",
+                emulate_tty = True,
                 parameters = params
             )
 

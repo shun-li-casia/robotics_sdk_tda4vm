@@ -8,11 +8,11 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 # Launch for for ZED capture node.
-# Requirement: run <zed_cature>/script/gen_rect_map.py with factory calibration
+# Requirement: run <zed_capture>/script/gen_rect_map.py with factory calibration
 # params file as input for generating camera_info .yaml files and
 # undistortion/rectification look-up table files for LDC hardware accelerator
 
-def finslize_node(context, *args, **kwargs):
+def finalize_node(context, *args, **kwargs):
     zed_sn_str  = LaunchConfiguration("zed_sn_str").perform(context)
     camera_mode = LaunchConfiguration("camera_mode").perform(context)
     tmp_str     = zed_sn_str + "_" + camera_mode
@@ -27,18 +27,20 @@ def finslize_node(context, *args, **kwargs):
     camera_info_topic_right = topic_ns_right + "/camera_info"
 
     params = [
-        {"frame_id_left":           "left_frame"},
-        {"frame_id_right":          "right_frame"},
-        {"camera_mode":             LaunchConfiguration("camera_mode")},
-        {"frame_rate":              LaunchConfiguration("frame_rate")},
-        {"device_name":             LaunchConfiguration("device_name")},
-        {"encoding":                LaunchConfiguration("encoding")},
-        {"image_topic_left":        image_topic_left},
-        {"image_topic_right":       image_topic_right},
-        {"camera_info_topic_left":  camera_info_topic_left},
-        {"camera_info_topic_right": camera_info_topic_right},
-        {"camera_info_left_yaml":   camera_info_left_yaml},
-        {"camera_info_right_yaml":  camera_info_right_yaml}
+        {
+            "frame_id_left":           "left_frame",
+            "frame_id_right":          "right_frame",
+            "camera_mode":             LaunchConfiguration("camera_mode"),
+            "frame_rate":              LaunchConfiguration("frame_rate"),
+            "device_name":             LaunchConfiguration("device_name"),
+            "encoding":                LaunchConfiguration("encoding"),
+            "image_topic_left":        image_topic_left,
+            "image_topic_right":       image_topic_right,
+            "camera_info_topic_left":  camera_info_topic_left,
+            "camera_info_topic_right": camera_info_topic_right,
+            "camera_info_left_yaml":   camera_info_left_yaml,
+            "camera_info_right_yaml":  camera_info_right_yaml,
+        }
     ]
 
     node = Node(package = "zed_capture",
@@ -63,7 +65,7 @@ def generate_launch_description():
     # device_name: arg that can be set from the command line or a default will be used
     device_name = DeclareLaunchArgument(
         name="device_name",
-        default_value=TextSubstitution(text="/dev/video1"),
+        default_value=TextSubstitution(text="/dev/video2"),
         description='''to find your device name, use ls /dev/video*
                        and look for the name begin with video'''
     )
@@ -112,7 +114,7 @@ def generate_launch_description():
     ld.add_action(encoding)
     ld.add_action(topic_ns_left)
     ld.add_action(topic_ns_right)
-    ld.add_action(OpaqueFunction(function=finslize_node))
+    ld.add_action(OpaqueFunction(function=finalize_node))
 
     return ld
 

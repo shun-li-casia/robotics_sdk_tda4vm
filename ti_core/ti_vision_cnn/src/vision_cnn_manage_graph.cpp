@@ -97,7 +97,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
         appCntxt->vxInputImage[i] = vxCreateImage(appCntxt->vxContext,
                                                   appCntxt->inputImageWidth,
                                                   appCntxt->inputImageHeight,
-                                                  VX_DF_IMAGE_UYVY);
+                                                  appCntxt->inputImageFormat);
 
         if (appCntxt->vxInputImage[i] == NULL)
         {

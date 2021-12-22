@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+## 8.1.0 (2021-12-21)
+
+* Version labeling for the Robotics SDK starts following the version numbers of the Processor SDK Linux releases.
+* ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.1.0 pre-built image.
+* Migrated to ROS Noetic: Most of demo applications run in ROS Noetic as well as in ROS 2 Foxy.
+* Added GStreamer-based camera ROS nodes: Open-source 'gscam' (for ROS 1 Noetic) and 'gscam2' (in ROS 2 Foxy) packages are customized to better integrate with TDA4-optimized processing chains, also leveraging the Edge AI GStreamer plugins optimized on TDA4.
+* Added CSI camera support: OV5640 CSI camera is supported with the GStreamer-based camera ROS nodes.
+* Performance benchmarking report is provided in the documentation.
+* Added GIPO libraries for Python and C++.
+* SDK installation path is moved to /opt/robotics_sdk.
+
 ## 0.5.0 (2021-09-28)
 
 * ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.0.1 pre-built image.

@@ -2,30 +2,29 @@
 MAKEFLAGS += --no-print-directory
 
 # Defaults. These can be changed from command line
-ROS_VER          ?= 2
-TIVA_LIB_VER     ?= 8.0.0
+ROS_VER          ?= 1
+TIVA_LIB_VER     ?= 8.1.0
 
 # GPUS: if 'y', '--gpus all' argument is added in 'docker run' command
 GPUS             ?= n
 
 # Robotics SDK version
-RSDK_VER          = 0.5
+RSDK_VER          = 1.0
 
 # Set the operating variables based on the ROS version specified
-DOCKER_TAG_HOST   = pc-ros2-foxy:$(RSDK_VER)
-DOCKER_TAG_TGT    = j7-ros2-foxy:$(RSDK_VER)
-WORK_DIR          = j7ros_home
-REPO_NAME         = jacinto_ros_perception
-WS_NAME           = ros_ws
-WS_NAME_TGT       = $(WS_NAME)
 ROS_DISTRO        = foxy
+DOCKER_TAG_PC     = pc-ros2-$(ROS_DISTRO):$(RSDK_VER)
+DOCKER_TAG_TGT    = j7-ros2-$(ROS_DISTRO):$(RSDK_VER)
+WORK_DIR          = j7ros_home
+REPO_NAME         = robotics_sdk
+WS_NAME           = ros_ws
 ROS_TAG           = ros2
 EXCLUDE           = ros1
 
 ifeq ($(ROS_VER), 1)
-	ROS_DISTRO      = melodic
-	DOCKER_TAG_TGT  = j7-ros-melodic:$(RSDK_VER)
-	DOCKER_TAG_HOST = pc-ros-melodic:$(RSDK_VER)
+	ROS_DISTRO      = noetic
+	DOCKER_TAG_TGT  = j7-ros-$(ROS_DISTRO):$(RSDK_VER)
+	DOCKER_TAG_PC   = pc-ros-$(ROS_DISTRO):$(RSDK_VER)
 	ROS_TAG         = ros1
 	EXCLUDE         = ros2
 endif
@@ -37,13 +36,16 @@ ifeq ($(shell uname -m), x86_64)
 endif
 
 # ROS1 specific
-ARCH_HOST         = x86_64
 ARCH_TGT          = arm64v8
+ARCH_PC           = x86_64
 DOCKER_FILE_TGT   = Dockerfile.$(ARCH_TGT).$(ROS_DISTRO)
-DOCKER_FILE_HOST  = Dockerfile.$(ARCH_HOST).$(ROS_DISTRO)
+DOCKER_FILE_PC    = Dockerfile.$(ARCH_PC).$(ROS_DISTRO)
 
 WORK_PATH_HOST    = $(HOME)/$(WORK_DIR)
+REPO_PATH         = /opt/$(REPO_NAME)
+ifeq ($(PLATFORM), pc)
 REPO_PATH         = $(WORK_PATH_HOST)/ros_ws/src/$(REPO_NAME)
+endif
 ROS_SRC_DIR       = $(REPO_PATH)
 DATA_DIR          = $(WORK_PATH_HOST)/data
 DOCKER_DIR        = $(ROS_SRC_DIR)/docker
@@ -69,8 +71,8 @@ ENV_FILE_PATH     = $(DOCKER_DIR)/$(ENV_FILE)
 # Tarball filenames
 ROSBAG_FILE       = ros-bag_2020_1109.tar.gz
 DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
-SEMSEG_MODEL_FILE = tidl-semseg-model_8.0.0.11.tar.gz
-VISUAL_LOC_FILE   = visual-localization_8.0.0.10.tar.gz
+SEMSEG_MODEL_FILE = tidl-semseg-model_8.1.0.5.tar.gz
+VISUAL_LOC_FILE   = visual-localization_8.1.0.5.tar.gz
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 
@@ -83,7 +85,7 @@ VISUAL_LOC_URL   = $(URL_BASE)/$(VISUAL_LOC_FILE)
 LIDAR2D_LOC_URL  = $(URL_BASE)/$(LIDAR2D_FILE)
 CALIB_IMGS_URL   = $(URL_BASE)/$(CALIB_IMGS_FILE)
 
-# Semantic segmantation TVM-DLR model artifacts location
+# Semantic segmentation TVM-DLR model artifacts location
 SEMSEG_MODEL     = tvmdlr_deeplabv3lite_mobilenetv2_tv_768x432_qat-p2_onnx
 SEMSEG_ARTIFACTS_DIR = $(DATA_DIR)/tidl_semseg_model/$(SEMSEG_MODEL)/artifacts
 
@@ -103,9 +105,9 @@ ip_show:
 info:
 	$(info PLATFORM         = $(PLATFORM))
 	$(info DOCKER_FILE_TGT  = $(DOCKER_FILE_TGT))
-	$(info DOCKER_FILE_HOST = $(DOCKER_FILE_HOST))
+	$(info DOCKER_FILE_PC   = $(DOCKER_FILE_PC))
 	$(info DOCKER_TAG_TGT   = $(DOCKER_TAG_TGT))
-	$(info DOCKER_TAG_HOST  = $(DOCKER_TAG_HOST))
+	$(info DOCKER_TAG_PC    = $(DOCKER_TAG_PC))
 	$(info WORK_DIR         = $(WORK_DIR))
 	$(info REPO_NAME        = $(REPO_NAME))
 	$(info WORK_PATH_HOST   = $(WORK_PATH_HOST))
@@ -116,6 +118,7 @@ info:
 	$(info SCRIPTS_DIR      = $(SCRIPTS_DIR))
 
 ## Docker
+# generate "docker build" script
 docker_build:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
@@ -130,16 +133,31 @@ docker_build:
 	@echo "    USE_PROXY=0"                                   >> $(TGT_NAME)
 	@echo "    REPO_LOCATION=$(REPO_LOC)"                     >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
+	@echo "echo \"USE_PROXY = \$$USE_PROXY\""                 >> $(TGT_NAME)
+	@echo "echo \"REPO_LOCATION = \$$REPO_LOCATION\""         >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
+ifeq ($(ROS_DISTRO), melodic)
+	@echo "DLRT_DIR=/opt/dl_runtime/dlrt-libs-aarch64-ubuntu18.04" >> $(TGT_NAME)
+else
+	@echo "DLRT_DIR=/usr/lib"                                 >> $(TGT_NAME)
+endif
+else
+	@echo "DLRT_DIR=/usr/lib"                                 >> $(TGT_NAME)
+endif
+	@echo "DST_DIR=$(WORK_PATH_HOST)/docker_src"              >> $(TGT_NAME)
+	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DLRT_DIR \$$DST_DIR" >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
 	@echo "    -t \$$DOCKER_TAG \\"                           >> $(TGT_NAME)
 	@echo "    --build-arg USE_PROXY=\$$USE_PROXY \\"         >> $(TGT_NAME)
 	@echo "    --build-arg REPO_LOCATION=\$$REPO_LOCATION \\" >> $(TGT_NAME)
 	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
-	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./ros_ws/src"  >> $(TGT_NAME)
+	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./docker_src"  >> $(TGT_NAME)
+	@echo "rm -r \$$DST_DIR"	                              >> $(TGT_NAME)
 	@chmod +x $(TGT_NAME)
 	@echo "$(TGT_NAME) is generated"
 
+# generate "docker run" script
 docker_run:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
@@ -164,12 +182,20 @@ ifeq ($(PLATFORM), pc)
 endif
 	@echo "docker run -it --rm \\"                            >> $(TGT_NAME)
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)
-	@echo "    -v /root/$(WORK_DIR)/$(WS_NAME_TGT)/src/${REPO_NAME}/${EXCLUDE} \\" >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
+	@echo "    -v $(REPO_PATH):$(REPO_PATH) \\"               >> $(TGT_NAME)
+	@echo "    -v $(REPO_PATH)/${EXCLUDE} \\"                 >> $(TGT_NAME)
+endif
+ifeq ($(PLATFORM), pc)
+	@echo "    -v /root/$(WORK_DIR)/$(WS_NAME)/src/${REPO_NAME}/${EXCLUDE} \\" >> $(TGT_NAME)
+endif
 ifeq ($(PLATFORM), j7)
 	@echo "    -v $(WORK_PATH_HOST)/.ros:/root/.ros \\"       >> $(TGT_NAME)
+ifeq ($(ROS_DISTRO), melodic)
 	@echo "    -v /usr:/host/usr:ro \\"                       >> $(TGT_NAME)
-	@echo "    -v /opt/edge_ai_apps:/opt/edge_ai_apps \\"     >> $(TGT_NAME)
 	@echo "    -v /opt/dl_runtime:/opt/dl_runtime \\"         >> $(TGT_NAME)
+endif
+	@echo "    -v /opt/edge_ai_apps:/opt/edge_ai_apps \\"     >> $(TGT_NAME)
 	@echo "    -v /opt/dlpack:/opt/dlpack \\"                 >> $(TGT_NAME)
 	@echo "    -v /opt/tensorflow:/opt/tensorflow \\"         >> $(TGT_NAME)
 	@echo "    -v /opt/onnxruntime:/opt/onnxruntime \\"       >> $(TGT_NAME)
@@ -184,12 +210,13 @@ ifeq ($(ROS_VER), 1)
 	@echo "    --env J7_IP_ADDR=\$$J7_IP_ADDR \\"             >> $(TGT_NAME)
 	@echo "    --env PC_IP_ADDR=\$$PC_IP_ADDR \\"             >> $(TGT_NAME)
 endif
+	@echo "    --env SDK_DIR=$(REPO_PATH) \\"                 >> $(TGT_NAME)
 endif
 ifeq ($(PLATFORM), j7)
 	@echo "    --env TIVA_LIB_VER=$(TIVA_LIB_VER) \\"         >> $(TGT_NAME)
 	@echo "    --env J7_IP_ADDR=\$$IP_ADDR \\"                >> $(TGT_NAME)
 	@echo "    --env-file \$$DOCKER_DIR/$(ENV_FILE) \\"       >> $(TGT_NAME)
-	@echo "    --device-cgroup-rule='c 238:* rmw' \\"         >> $(TGT_NAME)
+	@echo "    --device-cgroup-rule='c 235:* rmw' \\"         >> $(TGT_NAME)
 endif
 ifeq ($(PLATFORM), pc)
 ifeq ($(GPUS), y)
@@ -222,12 +249,12 @@ docker_run_j7:
 
 docker_build_pc:
 	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh \
-	                      DOCKER_FILE=$(DOCKER_FILE_HOST) \
-	                      DOCKER_TAG=$(DOCKER_TAG_HOST)
+	                      DOCKER_FILE=$(DOCKER_FILE_PC) \
+	                      DOCKER_TAG=$(DOCKER_TAG_PC)
 
 docker_run_pc:
 	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh \
-	                    DOCKER_TAG=$(DOCKER_TAG_HOST) \
+	                    DOCKER_TAG=$(DOCKER_TAG_PC) \
 
 ## data files
 data_download: dlrt_download semseg_download rosbag_download \
@@ -262,11 +289,13 @@ lidar2d_download: check_data_dir
 	@rm -f $(DATA_DIR)/$(LIDAR2D_FILE)
 
 dlrt_download:
+ifeq ($(ROS_DISTRO), melodic)
 	@rm -rf $(DLRT_DIR)
 	@mkdir -p $(DLRT_DIR)
 	@wget -O $(DLRT_DIR)/$(DLRT_LIBS_FILE) "$(DLRT_LIBS_URL)"
 	@tar xzf $(DLRT_DIR)/$(DLRT_LIBS_FILE) -C $(DLRT_DIR)
 	@rm $(DLRT_DIR)/$(DLRT_LIBS_FILE)
+endif
 
 calib_download: check_data_dir
 	@wget -O $(DATA_DIR)/$(CALIB_IMGS_FILE) "$(CALIB_IMGS_URL)"

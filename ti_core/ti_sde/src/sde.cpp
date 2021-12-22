@@ -64,8 +64,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sde.h"
-
+#include <cm_profile.h>
+#include <sde.h>
 
 static char menu[] = {
     "\n"
@@ -232,19 +232,26 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
     // Free DMPAC SL2
     if (vxStatus == (vx_status) VX_SUCCESS)
     {
+        // Even though CM_vhwaDmpacSl2Free() fails, this demo still works
+        // for 720p image. So we do NOT set vxStatus = VX_FAILURE
         status = CM_vhwaDmpacSl2Free();
         if (status < 0)
         {
-            vxStatus = VX_FAILURE;
+            LOG_ERROR("CM_vhwaDmpacSl2Free() failed.\n");
         }
     }
 
     // Reallocate SDE SL2 for 2M inputs
-    if (vxStatus == (vx_status) VX_SUCCESS)
+    if (vxStatus == (vx_status) VX_SUCCESS && status == 0)
     {
+        // Reallocation of SDE SL2 memory is called only when 
+        // CM_vhwaDmpacSl2Free() succeeds.
+        // If  CM_vhwaDmpacSdeSl2Realloc() fails, we set vxStaus 
+        // to VX_FAILURE to stop 
         status = CM_vhwaDmpacSdeSl2Realloc();
         if (status < 0)
         {
+            LOG_ERROR("CM_vhwaDmpacSdeSl2Realloc() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -614,9 +621,9 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
     SDEAPP_exitProcThreads(appCntxt);
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    SDEAPP_dumpStats(appCntxt);
     appPerfStatsPrintAll();
     SDEAPP_printStats(appCntxt);
-    SDEAPP_dumpStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");    
 
@@ -768,10 +775,16 @@ void SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt)
     appCntxt->evtHdlrThread = std::thread(SDEAPP_evtHdlrThread, appCntxt);
 
     appCntxt->userCtrlThread.detach();
+
+    /* Launch the performance stats reset thread. */
+    CM_perfLaunchCtrlThread();
 }
 
 void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
 {
+    /* Stop the performance stats reset thread. */
+    CM_perfStopCtrlThread();
+
     if (appCntxt->state != SDEAPP_STATE_INVALID)
     {
         /* Wait for the threads to exit. */

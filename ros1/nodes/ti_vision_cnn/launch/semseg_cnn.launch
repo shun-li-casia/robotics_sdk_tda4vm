@@ -1,10 +1,16 @@
 <launch>
 
+    <!-- input image format: 0 - VX_DF_IMAGE_UYVY, 1 - VX_DF_IMAGE_NV12 -->
+    <arg name="image_format" default="0" />
+
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
 
         <!-- Configuration file for the openVX CNN graph -->
         <rosparam file="$(find ti_vision_cnn)/config/semseg_params.yaml" subst_value="true" />
+        <rosparam subst_value="true">
+            image_format: $(arg image_format)
+        </rosparam>
 
         <!-- Input topic name to subscribe -->
         <param name = "input_topic_name" value = "camera/image_raw"/>

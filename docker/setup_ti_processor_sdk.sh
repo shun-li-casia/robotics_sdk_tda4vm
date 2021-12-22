@@ -30,32 +30,18 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# DL runtime libs DIR
-if [ "$ROS_VERSION" == "1" ]; then
-    DLRT_DIR=/opt/dl_runtime/dlrt-libs-aarch64-ubuntu18.04
-else # ROS2
-    DLRT_DIR=/host/usr/lib
+# build & install perf_stats (one-time)
+perf_stats_path=/opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats
+if [ -f "$perf_stats_path" ]; then
+    ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
+else
+    cd /opt/edge_ai_apps/scripts/perf_stats
+    rm -rf build && mkdir build && cd build && cmake .. && make
+    ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 fi
 
-# set up TI Processor SDK environment
-ln -snf /host/usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so.$TIVA_LIB_VER
-ln -snf /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so
-ln -snf /host/usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so.1.0
-ln -snf /usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so
-ln -snf /host/usr/include/processor_sdk /usr/include/processor_sdk
-ln -snf /host/usr/lib/libion.so /usr/lib/libion.so
-ln -snf /host/usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so.0
-
-# link headers and libraries for DLR
-ln -snf /host/usr/lib/python3.8/site-packages/dlr/libdlr.so /usr/lib/libdlr.so
-ln -snf /host/usr/include/dlr.h /usr/include/dlr.h
-
-# link libraries for TFLite
-ln -snf ${DLRT_DIR}/libtensorflow-lite.a /usr/lib/libtensorflow-lite.a
-ln -snf /host/usr/lib/libtidl_tfl_delegate.so /usr/lib/libtidl_tfl_delegate.so
-
-# link libraries and python packages for ONNXRT
-ln -snf ${DLRT_DIR}/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so.1.7.0
-ln -snf /usr/lib/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so
-ln -snf /host/usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so.1.0
-ln -snf /usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so
+if [ "$UBUNTU_VER" == "20.04" ]; then
+    # settings for edgeai-gst-plugins: for export LD_PRELOAD to GLdispatch and set LD_LIBRARY_PATH
+    echo export LD_PRELOAD=$LD_PRELOAD:/usr/lib/aarch64-linux-gnu/libGLdispatch.so.0 >> ~/.bashrc
+    echo export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib:/usr/lib/aarch64-linux-gnu:/usr/lib/edgeai-tiovx-modules:/usr/lib/aarch64-linux-gnu/gstreamer-1.0 >> ~/.bashrc
+fi

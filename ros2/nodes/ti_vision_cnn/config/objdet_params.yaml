@@ -1,7 +1,7 @@
 vision_cnn:
     ros__parameters:
         # LDC LUT definition
-        lut_file_path:          /root/j7ros_home/ros_ws/src/jacinto_ros_perception/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin
+        lut_file_path: /opt/robotics_sdk/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin
 
         # location of network
         # Known Issue: ONR-OD-8080-yolov3 has initial loading time ~20 seconds
@@ -35,6 +35,11 @@ vision_cnn:
 
         # input data height in lines
         height:                 720
+
+        # input image format
+        #  0 - VX_DF_IMAGE_UYVY
+        #  1 - VX_DF_IMAGE_NV12
+        image_format:           0
 
         # Maximum number of Semantic Segmentation classes
         num_classes:            20

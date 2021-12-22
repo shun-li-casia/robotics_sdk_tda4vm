@@ -201,7 +201,11 @@ namespace ros_app_viz
 
                 text = cv::getTextSize(strDistance, fontface, scale, thickness, &baseline);
                 pos  = cv::Point((objPos.pf1x+objPos.pf2x)/2 - 25, (objPos.pf1y+objPos.pf4y)/2);
+#if CV_MAJOR_VERSION <= 3
                 cv::rectangle(cv_bbPtr->image, pos + cv::Point(0, baseline), pos + cv::Point(text.width, -text.height), CV_RGB(0,0,0), CV_FILLED);
+#else
+                cv::rectangle(cv_bbPtr->image, pos + cv::Point(0, baseline), pos + cv::Point(text.width, -text.height), CV_RGB(0,0,0), cv::FILLED);
+#endif
                 cv::putText(cv_bbPtr->image, strDistance, pos, fontface, scale, CV_RGB(255,255,255), thickness);
                 /*
                 cv::putText(cv_bbPtr->image, strDistance, cv::Point((objPos.pf1x+objPos.pf2x)/2 - 25, (objPos.pf1y+objPos.pf4y)/2),

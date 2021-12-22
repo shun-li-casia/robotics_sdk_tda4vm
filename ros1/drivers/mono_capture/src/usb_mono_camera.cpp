@@ -95,6 +95,7 @@ MonoCamera::MonoCamera(const std::string device_name,
     setCameraMode(camera_mode);
     setFrameRate(frame_rate);
 
+#if CV_MAJOR_VERSION <= 3
     if (encoding_.compare("yuv422")==0)
     {
         camera_->set(CV_CAP_PROP_CONVERT_RGB, false);
@@ -105,10 +106,22 @@ MonoCamera::MonoCamera(const std::string device_name,
         camera_->set(CV_CAP_PROP_CONVERT_RGB, true);
         ROS_INFO("BGR8");
     }
-
     // set YUYV mode
     camera_->set(CV_CAP_PROP_FOURCC, CV_FOURCC('Y','U','Y','V'));
-
+#else
+    if (encoding_.compare("yuv422")==0)
+    {
+		camera_->set(cv::CAP_PROP_CONVERT_RGB, false);
+        ROS_INFO("YUV422");
+    }
+    else
+    {
+		camera_->set(cv::CAP_PROP_CONVERT_RGB, true);
+        ROS_INFO("BGR8");
+    }
+    // set YUYV mode
+    camera_->set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y','U','Y','V'));
+#endif
     ROS_INFO("Mono Camera Mode %s, width %.0f, height %.0f",
              camera_mode.c_str(), camera_->get(ID_WIDTH), camera_->get(ID_HEIGHT));
 }

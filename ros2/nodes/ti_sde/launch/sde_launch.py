@@ -25,6 +25,7 @@ def generate_launch_description():
                 executable = "sde",
                 name = "sde",
                 output = "screen",
+                emulate_tty = True,
                 parameters = params)
 
     ld.add_action(node)

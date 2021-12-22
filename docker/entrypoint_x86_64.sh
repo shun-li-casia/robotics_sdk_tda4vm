@@ -4,6 +4,10 @@ set -e
 # setup proxy as required
 /root/setup_proxy.sh
 
+# Ubuntu version
+UBUNTU_VER=$(lsb_release -r | cut -f2)
+echo "Ubuntu $UBUNTU_VER. ROS-$ROS_DISTRO"
+
 # set up ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 

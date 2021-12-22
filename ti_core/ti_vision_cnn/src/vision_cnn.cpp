@@ -65,6 +65,7 @@
 #include <stdlib.h>
 
 #include <utils/app_init/include/app_init.h>
+#include <cm_profile.h>
 #include <vision_cnn.h>
 
 static char menu[] = {
@@ -552,9 +553,9 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
     VISION_CNN_exitProcThreads(appCntxt);
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    VISION_CNN_dumpStats(appCntxt);
     appPerfStatsPrintAll();
     VISION_CNN_printStats(appCntxt);
-    VISION_CNN_dumpStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
@@ -904,10 +905,16 @@ void VISION_CNN_launchProcThreads(VISION_CNN_Context *appCntxt)
     /* launch post-processing thread. */
     appCntxt->postProcThread =
             std::thread(VISION_CNN_postProcThread, appCntxt);
+
+    /* Launch the performance stats reset thread. */
+    CM_perfLaunchCtrlThread();
 }
 
 void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
 {
+    /* Stop the performance stats reset thread. */
+    CM_perfStopCtrlThread();
+
     if (appCntxt->state != VISION_CNN_STATE_INVALID)
     {
         /* Wait for the threads to exit. */

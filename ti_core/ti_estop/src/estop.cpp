@@ -64,8 +64,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "estop.h"
-
+#include <cm_profile.h>
+#include <estop.h>
 
 void ESTOP_APP_setPcParams(ESTOP_APP_Context *appCntxt);
 void ESTOP_APP_setOgParams(ESTOP_APP_Context *appCntxt);
@@ -878,9 +878,9 @@ void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
     ESTOP_APP_exitProcThreads(appCntxt);
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    ESTOP_APP_dumpStats(appCntxt);
     appPerfStatsPrintAll();
     ESTOP_APP_printStats(appCntxt);
-    ESTOP_APP_dumpStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
@@ -1266,10 +1266,16 @@ void ESTOP_APP_launchProcThreads(ESTOP_APP_Context *appCntxt)
     /* launch post-processing thread. */
     appCntxt->postProcThread =
         std::thread(ESTOP_APP_postProcThread, appCntxt);
+
+    /* Launch the performance stats reset thread. */
+    CM_perfLaunchCtrlThread();
 }
 
 void ESTOP_APP_intSigHandler(ESTOP_APP_Context *appCntxt)
 {
+    /* Stop the performance stats reset thread. */
+    CM_perfStopCtrlThread();
+
     if (appCntxt->state != ESTOP_APP_STATE_INVALID)
     {
         /* Wait for the threads to exit. */

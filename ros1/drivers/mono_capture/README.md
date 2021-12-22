@@ -3,11 +3,11 @@ USB Mono Camera ROS Node
 USB mono camera (Webcam) ROS node based on OpenCV VideoCapture API for publishing raw image and its camera_info.
 
 **NOTE**: This ROS node currently is tested only with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode.
-'MJPG' (Motion-JPEG) mode is not yet enabled and tested.
+'MJPG' (Motion-JPEG) mode is not yet enabled and tested. To use the camera in 'MJPG' mode, it is recommended to use 'gscam'/'gscam2' ROS package instead.
 
 ## Usage
 
-1. Camera Calibration: A Python tool for camera calibration is provided: `scripts/camera_calibration.py`. This calibration tool takes a set of checkcerboard images captured with the target USB camera, and generates `camera_info.yaml`. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool, and for examples, please see `scripts/calib_C920.sh`.
+1. Camera Calibration: A Python tool for camera calibration is provided: `scripts/camera_calibration.py`. This calibration tool takes a set of checkerboard images captured with the target USB camera, and generates `camera_info.yaml`. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool, and for examples, please see `scripts/calib_C920.sh`.
     ```
     usage: camera_calibration.py [-h] [-p PATH] [-e EXT] [-r PTS_ROWS] [-c PTS_COLUMNS] [-s SQUARE_SIZE] [-v VISUALIZE] [-f SCALING_FACTOR] [-o OUT_FNAME] [-n CAMERA_NAME]
 
@@ -47,10 +47,10 @@ USB mono camera (Webcam) ROS node based on OpenCV VideoCapture API for publishin
     ```
     cd $ROS_WS
     # ROS1
-    catkin_make
+    catkin_make --source /opt/robotics_sdk/ros1
     source devel/setup.bash
     # ROS2
-    colcon build
+    colcon build --base-paths /opt/robotics_sdk/ros2
     source install/setup.bash
     ```
 

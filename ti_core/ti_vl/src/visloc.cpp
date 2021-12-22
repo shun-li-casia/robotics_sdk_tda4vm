@@ -64,8 +64,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <visloc.h>
 #include <utils/app_init/include/app_init.h>
+#include <cm_profile.h>
+#include <visloc.h>
 
 static char menu[] = {
     "\n"
@@ -494,9 +495,9 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
     VISLOC_exitProcThreads(appCntxt);
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    VISLOC_dumpStats(appCntxt);
     appPerfStatsPrintAll();
     VISLOC_printStats(appCntxt);
-    VISLOC_dumpStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
@@ -889,10 +890,16 @@ void VISLOC_launchProcThreads(VISLOC_Context *appCntxt)
     /* launch visual localization thread. */
     appCntxt->visLocThread =
             std::thread(VISLOC_visLocThread, appCntxt);
+
+    /* Launch the performance stats reset thread. */
+    CM_perfLaunchCtrlThread();
 }
 
 void VISLOC_intSigHandler(VISLOC_Context *appCntxt)
 {
+    /* Stop the performance stats reset thread. */
+    CM_perfStopCtrlThread();
+
     if (appCntxt->state != VISLOC_STATE_INVALID)
     {
         /* Wait for the threads to exit. */

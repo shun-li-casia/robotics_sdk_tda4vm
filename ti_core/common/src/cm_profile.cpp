@@ -59,7 +59,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+#include <mutex>
+#include <thread>
+
+#include <utils/perf_stats/include/app_perf_stats.h>
 #include <cm_profile.h>
+
+namespace ti_core_common 
+{
+#define CM_PROFILE_MAX_NUM_RESETS   3
 
 /**
  * Hold the processing time of different operations
@@ -69,23 +77,26 @@ struct proctime {
     uint64_t samples;
 };
 
-static map<string, struct proctime> _proctime;
+static map<string, struct proctime> gProcTime;
 
-namespace ti_core_common 
-{
+static bool     gPerfCtrlThreadRunning{false};
+static bool     gStopCtrlThread{false};
+static thread   gPerfCtrlThreadId;
+static mutex    gMutex;
+static int32_t  gResetCnt = 0;
 
 void CM_reportProctime(string tag, float value) 
 {
 
-    if (_proctime.find(tag) == _proctime.end()) {
-        _proctime[tag].average = value;
-        _proctime[tag].samples = 1;
-        _proctime.insert({tag, { value, 1}});
+    if (gProcTime.find(tag) == gProcTime.end()) {
+        gProcTime[tag].average = value;
+        gProcTime[tag].samples = 1;
+        gProcTime.insert({tag, { value, 1}});
     } else {
-        _proctime[tag].average =
-                (_proctime[tag].average * _proctime[tag].samples + value) /
-                    (_proctime[tag].samples + 1);
-        _proctime[tag].samples += 1;
+        gProcTime[tag].average =
+                (gProcTime[tag].average * gProcTime[tag].samples + value) /
+                    (gProcTime[tag].samples + 1);
+        gProcTime[tag].samples += 1;
     }
 }
 
@@ -95,7 +106,7 @@ void CM_printProctime(FILE *fp)
     fprintf(fp, "|                   Average processing time                  |\n");
     fprintf(fp, "+------------------------------------------------------------+\n");
 
-    for (auto lat : _proctime) 
+    for (auto lat : gProcTime) 
     {
         string tag = lat.first;
         float avg = lat.second.average;
@@ -111,13 +122,72 @@ void CM_printProctime(FILE *fp)
 
 void CM_resetProctime()
 {
-    for (auto lat : _proctime) 
+    for (auto lat : gProcTime) 
     {
         string tag = lat.first;
 
-        _proctime[tag].average = 0;
-        _proctime[tag].samples = 0;
+        gProcTime[tag].average = 0;
+        gProcTime[tag].samples = 0;
     }
+}
+
+int32_t CM_perfLaunchCtrlThread(chrono::milliseconds  periodicity)
+{
+    unique_lock<mutex>  lock(gMutex);
+    int32_t             status = 0;
+
+    if (periodicity == chrono::milliseconds(0))
+    {
+        printf("Invalid periodicity\n");
+        status = -1;
+    }
+    else if (!gPerfCtrlThreadRunning)
+    {
+        auto body = [periodicity]{
+            printf("Started Performance Statistics Control Thread.\n");
+
+            gPerfCtrlThreadRunning = true;
+
+            while (gStopCtrlThread == false)
+            {
+                appPerfStatsResetAll();
+                this_thread::sleep_for(periodicity);
+
+                if (++gResetCnt >= CM_PROFILE_MAX_NUM_RESETS)
+                {
+                    gResetCnt = 0;
+                    gStopCtrlThread = true;
+                }
+            }
+
+            gPerfCtrlThreadRunning = false;
+            printf("Exiting Performance Statistics Control Thread.\n");
+        };
+
+        gPerfCtrlThreadId = thread(body);
+    }
+
+    return status;
+}
+
+int32_t CM_perfStopCtrlThread()
+{
+    unique_lock<mutex> lock(gMutex);
+
+    if (gPerfCtrlThreadRunning)
+    {
+        gStopCtrlThread = true;
+
+        if (gPerfCtrlThreadId.joinable())
+        {
+            gPerfCtrlThreadId.join();
+        }
+
+        gPerfCtrlThreadRunning = false;
+        gStopCtrlThread = false;
+    }
+
+    return 0;
 }
 
 } // namespace ti_core_common 

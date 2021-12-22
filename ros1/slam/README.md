@@ -19,10 +19,9 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
     ```
     2D Lidar data is saved in $HOME/j7ros_home/data/lidar2d.
 
-2. Clone the Hector SLAM git repository. Run the followings in $HOME/j7ros_home on the J7 host Linux:
+2. Clone the Hector SLAM git repository. Run the followings on the J7 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ export ROS_WS=$HOME/j7ros_home/ros_ws
-    root@j7-evm:~/j7ros_home$ $ROS_WS/src/jacinto_ros_perception/ros1/slam/j7_setup_hector_slam.sh
+    root@j7-evm:~/j7ros_home$ /opt/robotics_sdk/ros1/slam/j7_setup_hector_slam.sh
     ```
     It clones the Hector SLAM git repository and applies the patch to run it on the 2D Lidar data provided.
 
@@ -33,7 +32,7 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
 
 4. Compile the Hector SLAM inside the Docker container:
     ```
-    root@j7-evm:~/j7ros_home/ros_ws$ catkin_make --source src/jacinto_ros_perception/ros1
+    root@j7-evm:~/j7ros_home/ros_ws$ catkin_make --source /opt/robotics_sdk/ros1
     ```
 
 5. Run the hector SLAM
@@ -48,13 +47,13 @@ For setting up the ROS1 environment on the remote PC, please follow [Docker Setu
 1. As done on the J7 host Linux, clone the Hector SLAM git repository:
     ```
     user@pc:~/j7ros_home$ export ROS_WS=$HOME/j7ros_home/ros_ws
-    user@pc:~/j7ros_home$ $ROS_WS/src/jacinto_ros_perception/ros1/slam/j7_setup_hector_slam.sh
+    user@pc:~/j7ros_home$ $ROS_WS/src/robotics_sdk/ros1/slam/j7_setup_hector_slam.sh
     ```
 
 2. Compile the Hector SLAM:
     ```
     user@pc:~/j7ros_home$ cd ros_ws
-    user@pc:~/j7ros_home/ros_ws$ catkin_make --source ./src/jacinto_ros_perception/ros1/slam/hector_slam
+    user@pc:~/j7ros_home/ros_ws$ catkin_make --source ./src/robotics_sdk/ros1/slam/hector_slam
     ```
 
 3. To display map and pose, run:

@@ -31,11 +31,12 @@
 ARG USE_PROXY
 ARG HTTP_PROXY
 ARG REPO_LOCATION=arm64v8
-ARG GIT_REPO=jacinto_ros_perception
 ARG DEBIAN_FRONTEND=noninteractive
 
 #=========================================================================
-FROM ${REPO_LOCATION}/ubuntu:18.04 AS base-0
+# The environment variable REPO_LOCATION is set from outside as needed,
+# based on network
+FROM ${REPO_LOCATION}/ubuntu:20.04 AS base-0
 
 #=========================================================================
 FROM base-0 AS base-1
@@ -50,42 +51,39 @@ FROM base-${USE_PROXY} AS ubuntu-stage1
 ARG DEBIAN_FRONTEND
 
 # setup proxy settings
-ARG GIT_REPO
-ARG DOCKER_PATH=${GIT_REPO}/docker
-ADD ${DOCKER_PATH}/setup_proxy.sh /root/
-ADD ${DOCKER_PATH}/proxy /root/proxy
+ADD setup_proxy.sh /root/
+ADD proxy /root/proxy
 RUN /root/setup_proxy.sh
 
-# install dependency for tivision_apps.so: OpenGL, libdevil-dev
-RUN apt-get update && apt-get install -y \
-    libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev && \
+# install gstreamer dependencies
+RUN apt update && apt install -y --no-install-recommends \
+    libgstreamer1.0-0 \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-libav \
+    gstreamer1.0-tools \
+    gir1.2-gst-rtsp-server-1.0 \
+    ninja-build && \
     rm -rf /var/lib/apt/lists/*
 
-# install utils
-RUN apt-get update && apt-get install -y \
-    wget curl git vim tmux net-tools iputils-ping corkscrew usbutils && \
+# install python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install \
+        meson \
+        configparser \
+        argparse && \
     rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
-FROM ubuntu-stage1 AS ubuntu-stage2
+FROM ubuntu-stage1 AS ubuntu-ros
 ARG DEBIAN_FRONTEND
-
-# install software-properties-common to use add-apt-repository
-RUN apt-get update && apt-get install -y \
-    software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
-
-# install gcc-9: add-apt-repository needs env variables http_proxy and https_proxy in a proxy network
-RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    gcc-9 g++-9 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 && \
-    rm -rf /var/lib/apt/lists/*
-
-#=========================================================================
-FROM ubuntu-stage2 AS ubuntu-ros
-ARG DEBIAN_FRONTEND
-# install ROS
+# install ROS Noetic
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -98,31 +96,29 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
     dirmngr \
     gnupg2 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # setup sources.list
-RUN echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros1-latest.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
 
 # setup keys
 # RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 # workaround in case apt-key above does not work, e.g., behind a proxy
 RUN curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | apt-key add -
 
-# install bootstrap tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    python-rosdep \
-    python-rosinstall \
-    python-vcstools \
-    && rm -rf /var/lib/apt/lists/*
-
 # setup environment variables
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
-ENV ROS_DISTRO=melodic
-ARG PROJECT_HOME=j7ros_home
-ENV WORK_DIR=/root/${PROJECT_HOME}
-ENV ROS_WS=${WORK_DIR}/ros_ws
+ENV ROS_DISTRO=noetic
+
+# install bootstrap tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-vcstools \
+    && rm -rf /var/lib/apt/lists/*
 
 # bootstrap rosdep
 RUN rosdep init && \
@@ -130,32 +126,79 @@ RUN rosdep init && \
 
 # install ros-core packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-melodic-ros-core=1.4.1-0* \
-    ros-melodic-perception=1.4.1-0* \
+    ros-noetic-ros-core=1.5.0-1* \
+    ros-noetic-perception=1.5.0-1* \
     && rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
 FROM ubuntu-ros
 ARG DEBIAN_FRONTEND
 
-# install python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python-pip && \
-    python2 -m pip install configparser argparse && \
+# install dependency for tivision_apps.so
+# TODO: check if these are still required in 20.04
+RUN apt-get update && apt-get install -y \
+    libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# intsall libyaml-cpp-dev, ncurses-dev
+# intsall utils and miscellaneous packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libyaml-cpp-dev ncurses-dev && \
+    wget \
+    git \
+    vim \
+    tmux \
+    gdb \
+    iputils-ping \
+    usbutils \
+    ncurses-dev \
+    libyaml-cpp-dev \
+    rsync \
+    strace \
+    sysstat \
+    gdb \
+    net-tools \
+    dialog \
+    chrony \
+    nfs-common \
+    corkscrew \
+    v4l-utils && \
     rm -rf /var/lib/apt/lists/*
 
-# update USB IDs
-RUN update-usbids -q
+# install vision_apps lib and DL runtime libs
+ARG TIVA_LIB_VER=8.1.0
+COPY lib/*  /usr/lib/
+COPY include/processor_sdk /usr/include/processor_sdk
+COPY include/dlr.h /usr/include/
+RUN ln -s /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so && \
+    ln -s /usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so && \
+    ln -s /usr/lib/libti_rpmsg_char.so.0.3.1 /usr/lib/libti_rpmsg_char.so.0 && \
+    ln -s /usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so && \
+    ln -s /usr/lib/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so && \
+    ln -s /usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so
+
+# install edgeai-tiovx-modules
+WORKDIR /root/src
+RUN git clone --single-branch --branch main https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
+    cd edgeai-tiovx-modules && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make -j1 && \
+    make install && \
+    rm -rf /root/src/edgeai-tiovx-modules
+
+# install edgeai-gst-plugins
+WORKDIR /root/src
+RUN git clone --single-branch --branch fix/pkgconfig-imaging-sdk-update https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
+    cd edgeai-gst-plugins && \
+    meson build --prefix=/usr -Dpkg_config_path=pkgconfig && \
+    ninja -C build && \
+    ninja -C build install && \
+    ldconfig && \
+    rm -rf /root/src/edgeai-gst-plugins
 
 # add scripts
-ARG  GIT_REPO
-COPY ${GIT_REPO}/docker/entrypoint_arm64v8.sh /root/entrypoint.sh
-ADD  ${GIT_REPO}/docker/ros_setup.sh /root/
+COPY entrypoint_arm64v8.sh /root/entrypoint.sh
+ADD  ros_setup.sh /root/
 
 # .profile and .bashrc
 WORKDIR /root
@@ -169,6 +212,9 @@ RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
     echo "export PS1=\"${debian_chroot:+($debian_chroot)}\u@j7-docker:\w\$ \"" >> .bashrc
 
 # workdir for ROS apps
+ARG PROJECT_HOME=j7ros_home
+ENV WORK_DIR=/root/${PROJECT_HOME}
+ENV ROS_WS=${WORK_DIR}/ros_ws
 WORKDIR ${ROS_WS}
 
 # setup entrypoint

@@ -5,11 +5,7 @@
 #   ~/j7ros_home$ make calib_download
 
 J7ROS_DIR=${HOME}/j7ros_home
-if [ "$ROS_VERSION" == "1" ]; then
-    PYTHON=python2
-else
-    PYTHON=python3
-fi
+PYTHON=python3
 if [[ `arch` == "x86_64" ]]; then
     VIZ_FLAG=True
 else

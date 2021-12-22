@@ -17,17 +17,20 @@ def generate_launch_description():
 
     # Include OBJDET launch file
     cnn_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(launch_dir, 'objdet_cnn_launch.py')
-                )
-            )
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_dir, 'objdet_cnn_launch.py')
+        )
+    )
 
     # Include ZED launch file
-    zed_launch_file = get_launch_file(pkg='zed_capture', file_name='zed_capture_launch.py')
+    zed_launch_file = get_launch_file(
+        pkg='zed_capture',
+        file_name='zed_capture_launch.py'
+    )
     zed_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(zed_launch_file),
-            launch_arguments={'topic_ns_right': 'camera'}.items()
-            )
+        PythonLaunchDescriptionSource(zed_launch_file),
+        launch_arguments={'topic_ns_right': 'camera'}.items()
+    )
 
     ld.add_action(cnn_launch)
     ld.add_action(zed_launch)

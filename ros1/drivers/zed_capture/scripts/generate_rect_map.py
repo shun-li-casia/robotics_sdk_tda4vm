@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 #  Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
 #
@@ -31,12 +31,12 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import sys
 import numpy as np
 import cv2
-import rospkg
 import configparser
 import argparse
-
+import rospkg
 
 def parse_calib_file(calib_file_path, camera_mode='HD', width=1280, height=720):
     """ parse ZED camera calibration file
@@ -201,12 +201,16 @@ def main(calib_file, camera_mode):
     """
   	# calibration file path
 	# https://github.com/tobybreckon/zed-opencv-native-python
-    rospack = rospkg.RosPack()
     try:
+        rospack = rospkg.RosPack()
         zed_capture_path = rospack.get_path('zed_capture')
     except:
         print("Please do 'catkin_make' and 'source devel/setup.bash'. Try again...")
+
     config_file_path = os.path.join(zed_capture_path, "config", calib_file)
+    if not os.path.exists(config_file_path):
+        sys.exit(f'{config_file_path} does not exist.')
+
     # parse calibration file
     K1, D1, K2, D2, image_size, R, T = parse_calib_file_wrapper(config_file_path, camera_mode)
     # cv2.stereoRectify

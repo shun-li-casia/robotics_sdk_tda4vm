@@ -63,7 +63,7 @@
 #include <utils/include/ti_logger.h>
 
 using namespace ti::utils;
-namespace ti_core_common 
+namespace ti_core_common
 {
 
 const char *CM_getCoreName(const char *appCoreName)
@@ -79,18 +79,6 @@ const char *CM_getCoreName(const char *appCoreName)
     else if (!strcmp(appCoreName, "TIVX_TARGET_DSP_C7_1"))
     {
         return TIVX_TARGET_DSP_C7_1;
-    }
-    else if (!strcmp(appCoreName, "TIVX_TARGET_EVE2"))
-    {
-        return TIVX_TARGET_EVE2;
-    }
-    else if (!strcmp(appCoreName, "TIVX_TARGET_EVE3"))
-    {
-        return TIVX_TARGET_EVE3;
-    }
-    else if (!strcmp(appCoreName, "TIVX_TARGET_EVE4"))
-    {
-        return TIVX_TARGET_EVE4;
     }
     else if (!strcmp(appCoreName, "TIVX_TARGET_A72_0"))
     {
@@ -115,10 +103,6 @@ const char *CM_getCoreName(const char *appCoreName)
     else if (!strcmp(appCoreName, "TIVX_TARGET_IPU1_1"))
     {
         return TIVX_TARGET_IPU1_1;
-    }
-    else if (!strcmp(appCoreName, "TIVX_TARGET_IPU2"))
-    {
-        return TIVX_TARGET_IPU2;
     }
 
     return NULL;
@@ -917,7 +901,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
             for (i = 0; i < pc->numPoints; i++)
             {
                 rgb = (uint32_t) points[i].meta.w;
-    
+
                 memcpy(&outPcData[i*pointSize    ], &points[i].x, sizeof(float));
                 memcpy(&outPcData[i*pointSize + 4], &points[i].y, sizeof(float));
                 memcpy(&outPcData[i*pointSize + 8], &points[i].z, sizeof(float));
