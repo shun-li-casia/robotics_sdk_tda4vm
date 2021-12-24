@@ -64,8 +64,9 @@
 
 #include <utils/perf_stats/include/app_perf_stats.h>
 #include <cm_profile.h>
+#include <utils/include/edgeai_perfstats.h>
 
-namespace ti_core_common 
+namespace ti_core_common
 {
 #define CM_PROFILE_MAX_NUM_RESETS   3
 
@@ -85,7 +86,7 @@ static thread   gPerfCtrlThreadId;
 static mutex    gMutex;
 static int32_t  gResetCnt = 0;
 
-void CM_reportProctime(string tag, float value) 
+void CM_reportProctime(string tag, float value)
 {
 
     if (gProcTime.find(tag) == gProcTime.end()) {
@@ -106,7 +107,7 @@ void CM_printProctime(FILE *fp)
     fprintf(fp, "|                   Average processing time                  |\n");
     fprintf(fp, "+------------------------------------------------------------+\n");
 
-    for (auto lat : gProcTime) 
+    for (auto lat : gProcTime)
     {
         string tag = lat.first;
         float avg = lat.second.average;
@@ -122,7 +123,7 @@ void CM_printProctime(FILE *fp)
 
 void CM_resetProctime()
 {
-    for (auto lat : gProcTime) 
+    for (auto lat : gProcTime)
     {
         string tag = lat.first;
 
@@ -131,43 +132,17 @@ void CM_resetProctime()
     }
 }
 
-int32_t CM_perfLaunchCtrlThread(chrono::milliseconds  periodicity)
+int32_t CM_perfLaunchCtrlThread(const char *sub_dir)
 {
     unique_lock<mutex>  lock(gMutex);
-    int32_t             status = 0;
 
-    if (periodicity == chrono::milliseconds(0))
+    if (!gPerfCtrlThreadRunning)
     {
-        printf("Invalid periodicity\n");
-        status = -1;
-    }
-    else if (!gPerfCtrlThreadRunning)
-    {
-        auto body = [periodicity]{
-            printf("Started Performance Statistics Control Thread.\n");
-
-            gPerfCtrlThreadRunning = true;
-
-            while (gStopCtrlThread == false)
-            {
-                appPerfStatsResetAll();
-                this_thread::sleep_for(periodicity);
-
-                if (++gResetCnt >= CM_PROFILE_MAX_NUM_RESETS)
-                {
-                    gResetCnt = 0;
-                    gStopCtrlThread = true;
-                }
-            }
-
-            gPerfCtrlThreadRunning = false;
-            printf("Exiting Performance Statistics Control Thread.\n");
-        };
-
-        gPerfCtrlThreadId = thread(body);
+        ti::utils::enableReport(true, sub_dir);
+        gPerfCtrlThreadRunning = true;
     }
 
-    return status;
+    return 0;
 }
 
 int32_t CM_perfStopCtrlThread()
@@ -177,17 +152,13 @@ int32_t CM_perfStopCtrlThread()
     if (gPerfCtrlThreadRunning)
     {
         gStopCtrlThread = true;
-
-        if (gPerfCtrlThreadId.joinable())
-        {
-            gPerfCtrlThreadId.join();
-        }
-
         gPerfCtrlThreadRunning = false;
+        ti::utils::disableReport();
+        ti::utils::waitForPerfThreadExit();
         gStopCtrlThread = false;
     }
 
     return 0;
 }
 
-} // namespace ti_core_common 
+} // namespace ti_core_common

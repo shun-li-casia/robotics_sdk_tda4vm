@@ -158,12 +158,6 @@ extern "C" {
 #define VISION_LDC_PIXEL_PAD            (1)
 
 /**
- * \brief Output file name to save performance stats
- * \ingroup group_ticore_vision_cnn
- */
-#define VISION_CNN_PERF_OUT_FILE        "app_vison_cnn"
-
-/**
  * \brief Maximum file name length
  * \ingroup group_ticore_vision_cnn
  */
@@ -498,6 +492,8 @@ struct VISION_CNN_Context
 
     /** Flag to track if the performance counter has been initialized. */
     bool                    startPerfCapt;
+
+    const char             *logFileName{nullptr};
 };
 
 /**

@@ -204,11 +204,13 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
         {
             appCntxt->postProcCfg.inDataWidth  = ifInfo->shape[ifInfo->dim - 1];
             appCntxt->postProcCfg.inDataHeight = ifInfo->shape[ifInfo->dim - 2];
+            appCntxt->logFileName = "semseg";
         }
         else
         {
             appCntxt->postProcCfg.inDataWidth  = appCntxt->preProcCfg.outDataWidth;
             appCntxt->postProcCfg.inDataHeight = appCntxt->preProcCfg.outDataHeight;
+            appCntxt->logFileName = "objdet";
         }
 
         appCntxt->outImageHeight = appCntxt->postProcCfg.inDataHeight;
@@ -520,10 +522,10 @@ static void VISION_CNN_dumpStats(VISION_CNN_Context *appCntxt)
 {
     if (appCntxt->exportPerfStats == 1)
     {
-        const char *name = VISION_CNN_PERF_OUT_FILE;
+        std::string name = std::string("app_") + appCntxt->logFileName;
         FILE       *fp;
 
-        fp = appPerfStatsExportOpenFile(".", (char *)name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name.c_str());
 
         if (fp != NULL)
         {
@@ -535,7 +537,7 @@ static void VISION_CNN_dumpStats(VISION_CNN_Context *appCntxt)
         else
         {
             PTK_printf("Could not open [%s] for exporting "
-                       "performance data\n", name);
+                       "performance data\n", name.c_str());
         }
     }
 }
@@ -554,17 +556,14 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     VISION_CNN_dumpStats(appCntxt);
-    appPerfStatsPrintAll();
     VISION_CNN_printStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
-        char name[256];
-
-        snprintf(name, 255, "%s.bin", VISION_CNN_PERF_OUT_FILE);
-        tivxLogRtTraceExportToFile(name);
+        std::string name = std::string("app_") + appCntxt->logFileName;
+        tivxLogRtTraceExportToFile((char *)name.c_str());
     }
 
     /* Deinit semantic segmentation nodes */
@@ -907,13 +906,19 @@ void VISION_CNN_launchProcThreads(VISION_CNN_Context *appCntxt)
             std::thread(VISION_CNN_postProcThread, appCntxt);
 
     /* Launch the performance stats reset thread. */
-    CM_perfLaunchCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfLaunchCtrlThread(appCntxt->logFileName);
+    }
 }
 
 void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
 {
     /* Stop the performance stats reset thread. */
-    CM_perfStopCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfStopCtrlThread();
+    }
 
     if (appCntxt->state != VISION_CNN_STATE_INVALID)
     {

@@ -43,9 +43,9 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
 
 ### 2.1. Build SD Card
 
-1. From Ubuntu PC, download [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_01_00_37/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip)[TODO: update URL].
+1. From Ubuntu PC, download [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_01_00_37/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL].
 
-2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup)[TODO: Update the link].
+2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup) [TODO: Update the link].
 
 **NOTE**: The etcher image is created for 16 GB SD cards, if you are using a larger SD card, it is highly recommended to expand the root filesystem to use the full SD card capacity using below steps on the Ubuntu PC.
 
@@ -71,7 +71,7 @@ sudo resize2fs /dev/sdX2
     user@pc:~$ ssh root@<TDA4_IP_address>
     ```
     **Note**: It is recommended to use a *static* IP for the TDA4 EVM to make ROS network setting easy.<br />
-    You can consider using VS Code with "remote development extension pack" for better experience, in a similar way as described in [this section of Edge AI documentation](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#connect-remotely)[TODO: update the URL]
+    You can consider using VS Code with "remote development extension pack" for better experience, in a similar way as described in [this section of Edge AI documentation](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#connect-remotely) [TODO: update the URL]
 
 ### 2.3. Initial Setup to Use the Robotics SDK
 ### 2.3.1 On the TDA4 Target
@@ -89,13 +89,13 @@ This script takes care of:
 ### 2.3.2 On the Remote Ubuntu PC
 In a similar way, you can use the same script to set up on the remote Ubuntu PC for visualization:
 ```
-user@pc:~$ wget https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
+user@pc:~$ wget -O init_setup.sh https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
 user@pc:~$ source ./init_setup.sh REL.08.01.00
 ```
 
 **NOTE**: In a proxy network, in case the `wget` command above does not work, you can try again with adding `--proxy off` argument:
 ```
-user@pc:~$ wget --proxy off https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
+user@pc:~$ wget --proxy off -O init_setup.sh https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
 ```
 
 ### 2.4. Set Up Docker Environment on the TDA4 Target

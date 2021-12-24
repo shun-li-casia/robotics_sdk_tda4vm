@@ -622,7 +622,6 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     SDEAPP_dumpStats(appCntxt);
-    appPerfStatsPrintAll();
     SDEAPP_printStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");    
@@ -777,13 +776,19 @@ void SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt)
     appCntxt->userCtrlThread.detach();
 
     /* Launch the performance stats reset thread. */
-    CM_perfLaunchCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfLaunchCtrlThread("sde");
+    }
 }
 
 void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
 {
     /* Stop the performance stats reset thread. */
-    CM_perfStopCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfStopCtrlThread();
+    }
 
     if (appCntxt->state != SDEAPP_STATE_INVALID)
     {

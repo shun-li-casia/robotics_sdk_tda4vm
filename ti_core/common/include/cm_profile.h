@@ -68,7 +68,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <map>
-#include <chrono>
 
 /**
  * \defgroup group_ticore_profile Processing time profiling
@@ -125,17 +124,16 @@ void CM_resetProctime();
 
 /**
  * \brief Function to launch a performance statistics control thread. The
- * prupose of the control thread is to reset the statistics periodically.
+ * purpose of the control thread is to reset the statistics periodically.
  *
- * \param [in] periodicity Statistics reset periodicity in milli-seconds. The
- *                         default value is 2 sec.
+ * \param [in] sub_dir Optional sub-directory to create performance log files under
  *
- * \return 0 on success. A negative value otehrwise.
+ * \return 0 on success. A negative value otherwise.
  *
  * \ingroup group_ticore_profile
  *
  */
-int32_t CM_perfLaunchCtrlThread(chrono::milliseconds  periodicity=2000ms);
+int32_t CM_perfLaunchCtrlThread(const char *sub_dir = nullptr);
 
 /**
  * \brief Function to terminate the statistics control thread.

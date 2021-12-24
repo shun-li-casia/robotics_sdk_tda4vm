@@ -35,8 +35,9 @@ perf_stats_path=/opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats
 if [ -f "$perf_stats_path" ]; then
     ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 else
+    CWD=`pwd`
     cd /opt/edge_ai_apps/scripts/perf_stats
-    rm -rf build && mkdir build && cd build && cmake .. && make
+    rm -rf build && mkdir build && cd build && cmake .. && make && cd $CWD
     ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 fi
 

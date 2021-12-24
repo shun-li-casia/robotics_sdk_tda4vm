@@ -26,7 +26,7 @@
  * *       No reverse engineering, decompilation, or disassembly of this software is
  * permitted with respect to any software provided in binary form.
  *
- * *       any redistribution and use ar./apps/ptk_demos/app_dof_sfm_fisheye/config/app.cfge licensed by TI for use only with TI Devices.
+ * *       any redistribution and use are licensed by TI for use only with TI Devices.
  *
  * *       Nothing shall obligate TI to provide you with source code for the software
  * licensed and provided to you in appCntxtect code.
@@ -879,7 +879,6 @@ void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     ESTOP_APP_dumpStats(appCntxt);
-    appPerfStatsPrintAll();
     ESTOP_APP_printStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
@@ -1268,13 +1267,19 @@ void ESTOP_APP_launchProcThreads(ESTOP_APP_Context *appCntxt)
         std::thread(ESTOP_APP_postProcThread, appCntxt);
 
     /* Launch the performance stats reset thread. */
-    CM_perfLaunchCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfLaunchCtrlThread("estop");
+    }
 }
 
 void ESTOP_APP_intSigHandler(ESTOP_APP_Context *appCntxt)
 {
     /* Stop the performance stats reset thread. */
-    CM_perfStopCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfStopCtrlThread();
+    }
 
     if (appCntxt->state != ESTOP_APP_STATE_INVALID)
     {

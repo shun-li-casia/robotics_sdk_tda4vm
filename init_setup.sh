@@ -30,8 +30,6 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set -e
-
 # Release tag info of the current release
 GIT_TAG="REL.08.01.00"
 if [ "$#" -eq 1 ]; then
@@ -42,6 +40,12 @@ echo "GIT_TAG = $GIT_TAG"
 # Git repository
 GIT_REPO="https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git"
 BRANCH=master
+
+# git config on the target to avoid warnings
+if [[ "$ARCH" == "aarch64" ]]; then
+    git config --global user.email "user@example.com"
+    git config --global user.name "User"
+fi
 
 # Define env variables
 ARCH=`arch`
@@ -154,7 +158,7 @@ fi
 sync
 
 echo "Robotics SDK Setup Done!"
-if [[ $GIT_TAG == "REL*" ]]; then
+if [[ $GIT_TAG == REL* ]]; then
     DOC_VER=${GIT_TAG:4:11}
     DOC_VER=${DOC_VER//./_}
     echo "See https://software-dl.ti.com/jacinto7/esd/robotics-sdk/${DOC_VER}/docs/index.html"

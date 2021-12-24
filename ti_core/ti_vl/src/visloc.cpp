@@ -88,7 +88,7 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
 {
     const string   &modelPath = appCntxt->dlModelPath;
     const string   &configFile = modelPath + "/param.yaml";
-    YAML::Node      yaml;    
+    YAML::Node      yaml;
     int32_t         status;
     vx_status       vxStatus = VX_SUCCESS;
 
@@ -97,7 +97,7 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
     if (status < 0)
     {
         LOG_ERROR("appInit() failed.\n");
- 
+
         vxStatus = VX_FAILURE;
     }
 
@@ -189,9 +189,9 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
         {
             LOG_ERROR("vxCreateGraph() failed\n");
             vxStatus = VX_FAILURE;
-        } else 
+        } else
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxGraph, 
+            vxSetReferenceName((vx_reference)appCntxt->vxGraph,
                                "Visual Localization Graph");
         }
     }
@@ -210,7 +210,7 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
             LOG_ERROR("VISLOC_init_VL() failed\n");
-        }  
+        }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -228,7 +228,7 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
 
     /* Verify graph */
     if (vxStatus == (vx_status)VX_SUCCESS)
-    {        
+    {
         vxStatus = vxVerifyGraph(appCntxt->vxGraph);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
@@ -302,7 +302,7 @@ vx_status VISLOC_run(VISLOC_Context       *appCntxt,
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
         start = GET_TIME();
-        vxStatus = CM_copyData2Image(inputImage, 
+        vxStatus = CM_copyData2Image(inputImage,
                                      gpDesc->vxInputImage,
                                      0,
                                      0);
@@ -496,7 +496,6 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
 
     PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     VISLOC_dumpStats(appCntxt);
-    appPerfStatsPrintAll();
     VISLOC_printStats(appCntxt);
 
     PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
@@ -679,7 +678,7 @@ static void VISLOC_preProcThread(VISLOC_Context  *appCntxt)
                 appCntxt->dlDataReadySem->notify();
             }
         } // if (vxStatus == (vx_status)VX_SUCCESS)
-        else 
+        else
         {
             LOG_ERROR("VISLOC_popPreprocInputDesc() failed. \n");
         }
@@ -719,7 +718,7 @@ static void VISLOC_dlInferThread(VISLOC_Context  *appCntxt)
             int32_t status;
 
             start = GET_TIME();
-            status = inferer->run(*desc->inferInputBuff, 
+            status = inferer->run(*desc->inferInputBuff,
                                   *desc->inferOutputBuff);
 
             end   = GET_TIME();
@@ -780,7 +779,7 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
         /*
          * Pop VisLocInputDesc
          * If we get VisLocInputDesc() here and pop upon graph completion event,
-         * the same buffer can be overwritten when visLocSem is called again before 
+         * the same buffer can be overwritten when visLocSem is called again before
          * grpah completion.
          */
         vxStatus = VISLOC_popVisLocInputDesc(appCntxt, &desc);
@@ -788,9 +787,9 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
             start = GET_TIME();
-                
+
             vxStatus =
-                VISLOC_createScoreOutTensor(appCntxt, 
+                VISLOC_createScoreOutTensor(appCntxt,
                                             *desc->inferOutputBuff,
                                             desc->vxOutTensor[0]);
 
@@ -810,9 +809,9 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
             start = GET_TIME();
-                
+
             vxStatus =
-                VISLOC_createDescOutTensor(appCntxt, 
+                VISLOC_createDescOutTensor(appCntxt,
                                            *desc->inferOutputBuff,
                                            desc->vxOutTensor[1]);
 
@@ -854,7 +853,7 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
             /*
              * It is fine to enqueue OuputDesc here in advance,
              * since outputCtrlSem is notified when the grpah completed
-             */            
+             */
             VISLOC_enqueOutputDesc(appCntxt, desc);
         } // if (vxStatus == (vx_status)VX_SUCCESS)
 
@@ -892,13 +891,19 @@ void VISLOC_launchProcThreads(VISLOC_Context *appCntxt)
             std::thread(VISLOC_visLocThread, appCntxt);
 
     /* Launch the performance stats reset thread. */
-    CM_perfLaunchCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfLaunchCtrlThread("visloc");
+    }
 }
 
 void VISLOC_intSigHandler(VISLOC_Context *appCntxt)
 {
     /* Stop the performance stats reset thread. */
-    CM_perfStopCtrlThread();
+    if (appCntxt->exportPerfStats == 1)
+    {
+        CM_perfStopCtrlThread();
+    }
 
     if (appCntxt->state != VISLOC_STATE_INVALID)
     {
@@ -944,7 +949,7 @@ vx_status VISLOC_extractPoseData(double          *outPose,
         mat(2,2) = posemat[10];
 
 #if 0
-        Eigen::Vector3d ea = mat.eulerAngles(0, 1, 2); 
+        Eigen::Vector3d ea = mat.eulerAngles(0, 1, 2);
 
         // This gives the same result as q(mat)
         Eigen::Quaterniond q = Eigen::AngleAxisd(ea[2], Eigen::Vector3d::UnitZ())

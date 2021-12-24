@@ -51,7 +51,7 @@ exportGraph:            0
 # to a file
 #  0 - disable
 #  1 - enable
-exportPerfStats:        1
+exportPerfStats:        0
 
 # real-time logging enable.
 #  0 - disable
