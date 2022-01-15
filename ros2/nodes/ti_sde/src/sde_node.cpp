@@ -534,6 +534,9 @@ void SDEAppNode::readParams()
     get_parameter_or("enable_pc", tmp, 1);
     m_cntxt->enablePC = (uint8_t)tmp;
 
+    /* Set logFileName based on enablePC */
+    m_cntxt->logFileName = (m_cntxt->enablePC == 0) ? "sde" : "sdepcl";
+
     /*Sub-sampling ratio of point cloud */
     get_parameter_or("pc_subsample_ratio", tmp, 1);
     m_cntxt->pcSubsampleRatio = (uint8_t)tmp;

@@ -588,10 +588,10 @@ static void SDEAPP_dumpStats(SDEAPP_Context *appCntxt)
 {
     if (appCntxt->exportPerfStats == 1)
     {
-        const char *name = SDEAPP_PERF_OUT_FILE;
+        std::string name = std::string("app_") + appCntxt->logFileName;
         FILE       *fp;
 
-        fp = appPerfStatsExportOpenFile(".", (char *)name);
+        fp = appPerfStatsExportOpenFile(".", (char *)name.c_str());
 
         if (fp != NULL)
         {
@@ -624,14 +624,12 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
     SDEAPP_dumpStats(appCntxt);
     SDEAPP_printStats(appCntxt);
 
-    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");    
+    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
-        char name[256];
-
-        snprintf(name, 255, "%s.bin", SDEAPP_PERF_OUT_FILE);
-        tivxLogRtTraceExportToFile(name);
+        std::string name = std::string("app_") + appCntxt->logFileName + std::string(".bin");
+        tivxLogRtTraceExportToFile((char *)name.c_str());
     }
 
     /* Release the Application context. */
@@ -778,7 +776,7 @@ void SDEAPP_launchProcThreads(SDEAPP_Context *appCntxt)
     /* Launch the performance stats reset thread. */
     if (appCntxt->exportPerfStats == 1)
     {
-        CM_perfLaunchCtrlThread("sde");
+        CM_perfLaunchCtrlThread(appCntxt->logFileName);
     }
 }
 

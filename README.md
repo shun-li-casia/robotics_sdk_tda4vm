@@ -1,8 +1,8 @@
-Robotics SDK: Introduction
-==========================
+Robotics SDK
+============
 ## Git Repository
 
-### Robotics SDK 8.1 RC2
+### Robotics SDK 8.1 RC3
 **WARNING**: This RC is currently only for TI-internal for testing.
 
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
@@ -17,7 +17,7 @@ Robotics SDK: Introduction
 
 ## Overview
 
-The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.1.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.00.01.10) [TODO: update the link]. We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux (see next section). The Robotics SDK allows:
+The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.1.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.00.01.10) [TODO: update the link]. We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
 
 * Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, mapping and localization) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the TDA4 processors.
 * Direct compilation of application software on the target using APIs optimized on the TDA4 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV, Point-Cloud Library (PCL), and many more.
@@ -52,7 +52,7 @@ Figure 2 shows a representative deep-learning and compute-intensive demo applica
 
 ## Setting Up Robotics SDK Docker Container Environment
 
-This section describes how to set up the Robotics SDK on the TDA4 Processor SDK Linux. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
+This section describes how to set up the Robotics SDK on top of the Processor SDK Linux for Edge AI. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
 **Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_01_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
 
@@ -90,19 +90,11 @@ The SDK supports following out-of-box demo applications.
 
 ![](docs/scope_of_release_08_01_00.png)
 
+## Limitations and Known Issues
+See [known_issues.md](docs/known_issues.md)
+
 ## Change Log
 See [CHANGELOG.md](CHANGELOG.md)
-## Limitations and Known Issues
-
-1. RViz visualization is displayed on a remote Ubuntu PC.
-2. Ctrl+C termination of a ROS node or a ROS launch can be sometimes slow and escalated to SIGTERM. This behavior happens more often in the ROS 2 container.
-3. Stereo Vision Demo
-    * Output disparity map may have artifacts that are common to block-based stereo algorithms. e.g., noise in the sky, texture-less area, repeated patterns, etc.
-    * While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
-4. The default semantic segmentation model used in `ti_vision_cnn` and `ti_estop` nodes was trained with Cityscapes dataset first, and  re-trained with a small dataset collected from a particular stereo camera (ZED camera, HD mode) for a limited scenarios with coarse annotation. Therefore, the model can show limited accuracy performance if a different camera model is used and/or when it is applied to different environment scenes.
-5. The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512) has initial loading time of about 20 seconds.
-6. Launching a demo in ROS 2 environment with "ros2 bag play" in a single launch script currently not stable. It is recommended to launch “ros2 bag play” in a separate terminal. The demos in ROS 2 container currently run more stable with live cameras (ZED stereo camera or USB mono camera).
-7. The USB mono camera capture node ('mono_capture') currently is tested with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. To use the USB camera in 'MJPG' (Motion-JPEG) mode, it is recommended to use the GStreamer based camera capture node ('gscam' or 'gscam2') instead.
 
 ## Questions & Feedback
 

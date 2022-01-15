@@ -34,7 +34,6 @@ else()
 endif()
 
 message(STATUS "PROFILE = ${PROFILE}")
-unset(CMAKE_BUILD_TYPE CACHE)
 
 set(TI_EXTERNAL_INCLUDE_DIRS
     ${TI_CORE_ROOT_DIR}/common/include

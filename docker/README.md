@@ -13,7 +13,7 @@ This section describes how to set up the Robotics SDK on the TDA4 Processor SDK 
  J721E    | [TDA4VM](https://www.ti.com/product/TDA4VM) | [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM), [J721EXSOMXEVM](https://www.ti.com/tool/J721EXSOMXEVM)
 
 ### 1.2. Processor SDK Linux for Edge AI
-The Robotics SDK requires [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_01_00_37/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL] from [Processor SDK Linux for Edge AI 8.1.0](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_01_00_37/) [TODO: udpate URL]. The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
+The Robotics SDK requires [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/latest/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL] from [Processor SDK Linux for Edge AI 8.1.0](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/latest/index.html) [TODO: update URL]. The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
 
 ### 1.3. Ubuntu PC
 A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. We have tested only with native x86_64 Ubuntu PCs, and have **not** tested with any other Ubuntu systems: including Ubuntu virtual machines and Docker Desktop on Mac or Windows.
@@ -31,7 +31,10 @@ The Robotics SDK provides camera ROS nodes for [ZED stereo camera](https://www.s
 
 * For configuration of a stereo camera, please see [ros1/drivers/zed_capture/README](../ros1/drivers/zed_capture/README.md).
 * For configuration of a USB mono camera, please see [ros1/drivers/mono_capture/README](../ros1/drivers/mono_capture/README.md).
-* For GStreamer-based camera ROS node, please see [ros1/drivers/gscam/README_TI](../ros1/drivers/gscam/README_TI.md) and [ros2/drivers/gscam2/README_TI](../ros2/drivers/gscam2/README_TI.md)
+* For GStreamer camera ROS node (USB cameras are also supported), please see [ros1/drivers/gscam/README_TI](../ros1/drivers/gscam/README_TI.md) and [ros2/drivers/gscam2/README_TI](../ros2/drivers/gscam2/README_TI.md)
+
+
+**NOTE**: For more stable connection, it is recommended to connect the ZED camera to the USB Type-C port of the TDA4 Board with a USB type-A to type-C adaptor.
 
 ![](docs/tiovx_ros_setup.svg)
 <figcaption>Figure 1. Robotics SDK Setup and Installation Steps</figcaption>
@@ -43,7 +46,7 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
 
 ### 2.1. Build SD Card
 
-1. From Ubuntu PC, download [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_01_00_37/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL].
+1. From Ubuntu PC, download [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/latest/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL].
 
 2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/getting_started.html#software-setup) [TODO: Update the link].
 
@@ -75,7 +78,7 @@ sudo resize2fs /dev/sdX2
 
 ### 2.3. Initial Setup to Use the Robotics SDK
 ### 2.3.1 On the TDA4 Target
-You can download `init_setup.sh` and run the the script:
+You can run the installation script on the TDA4 target as follows:
 ```
 root@j7-evm:~$ cd /opt/robotics_sdk
 root@j7-evm:~$ source ./install_robotics_sdk.sh
@@ -100,7 +103,7 @@ user@pc:~$ wget --proxy off -O init_setup.sh https://git.ti.com/cgit/processor-s
 
 ### 2.4. Set Up Docker Environment on the TDA4 Target
 
-The Robotics SDK runs in a Docker container environment on Processor SDK Linux. In the Robotics SDK Docker environment, ROS and necessary libraries and tools are installed.
+The Robotics SDK runs in a Docker container environment on the Processor SDK Linux for Edge AI. In the Robotics SDK Docker environment, ROS and necessary libraries and tools are installed.
 
 First, following [this link](https://docs.docker.com/get-started/#test-docker-installation), please check that Docker and network work correctly on the TDA4 target.
 
@@ -119,6 +122,15 @@ The following two sections describe the Docker environment setup, details of bui
 
 **Docker Start**: After "docker build" is completed, it is important to use `docker_run_rosX.sh` script to start a Docker container, since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the TDA4 device. Please note that `docker_run_rosX.sh` includes `--rm` argument by default. Just remove `--rm` argument in `docker_run_rosX.sh` in case you want to do "docker commit" after exiting a Docker container. A short information about several useful Docker commands is provided in [this link](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_00_01_10/exports/docs/docker_environment.html#additional-docker-commands) [TODO: update the link].
 
-**Switching between ROS 1 and ROS 2 Docker Containers**: When the applications are built under the ROS1 container, two directories, `{build, devel}` are created under **ros_ws** directory under TDA4 host and similarly `{build, install, log}` directories are created when applications are built under ROS 2 container. Since the containers share the common space `ros_ws` on TDA4 host Linux filesystem, these directories need to be removed if switching between ROS 1 and ROS 2 containers.
+**Switching between ROS 1 and ROS 2 Docker Containers**: When the applications are built under the ROS1 container, two directories, `{build, devel}` are created under **ros_ws** directory under TDA4 host and similarly `{build, install, log}` directories are created when applications are built under ROS 2 container. Since the containers share the common space `ros_ws` on TDA4 host Linux filesystem, these directories need to be removed if switching between ROS 1 and ROS 2 containers. Alternatively, we can create different folders for each of ROS distro and apply soft-links as shown below as example before running "docker run" script.
 
----
+```
+# Before launching ROS 1 container, establish the following soft-links:
+$ROS_WS/build -> $ROS_WS/build_noetic
+$ROS_WS/devel -> $ROS_WS/devel_noetic
+
+# Before launching ROS 2 container, establish the following soft-links:
+$ROS_WS/build -> $ROS_WS/build_foxy
+$ROS_WS/install -> $ROS_WS/devel_foxy
+$ROS_WS/log -> $ROS_WS/log_foxy
+```

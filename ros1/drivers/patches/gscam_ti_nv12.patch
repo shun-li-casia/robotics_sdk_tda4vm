@@ -61,12 +61,12 @@ index 98166b7..70531c3 100644
 +endif()
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..1519cc3
+index 0000000..60afa82
 --- /dev/null
 +++ b/README_TI.md
-@@ -0,0 +1,44 @@
-+GStreamer-based Camera Node for ROS 1
-+=====================================
+@@ -0,0 +1,45 @@
++GStreamer Camera Node for ROS 1
++===============================
 +This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
 +
 +* Added GStreamer pipelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode.
@@ -76,6 +76,7 @@ index 0000000..1519cc3
 +    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
 +    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
 +
++**Note**: The customization are made only for Robotics SDK for TDA4, and some of examples from the original GIT repository may not work with these changes.
 +## Usage
 +
 +1. Camera Calibration and Rectification Map Generation: See corresponding parts of [mono_capture/README.md](../mono_capture/README.md).

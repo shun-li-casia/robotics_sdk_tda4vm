@@ -562,7 +562,7 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
 
     if (appCntxt->rtLogEnable == 1)
     {
-        std::string name = std::string("app_") + appCntxt->logFileName;
+        std::string name = std::string("app_") + appCntxt->logFileName + std::string(".bin");
         tivxLogRtTraceExportToFile((char *)name.c_str());
     }
 

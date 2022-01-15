@@ -52,7 +52,6 @@ In ROS 2 Docker container environment, ROS Foxy and necessary libraries and tool
     root@j7-docker:~/j7ros_home/ros_ws$ colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential
     root@j7-docker:~/j7ros_home/ros_ws$ source install/setup.bash
     ```
-    **NOTE**: In case when "colcon build" fails, you can try again after adding `--executor sequential` to the `colcon build` command above.
 
 5. The ROSBAG data downloaded is in ROS 1 specific format and the format and storage mechanism has changed in ROS 2. For converting the ROS 1 bag data to ROS 2 format, use `rosbags-convert <ros1_bag_name.bag>`. This will create a directory <ros_bag_name> and contains the data under this directory. To convert the downloaded ROSBAG file, run the following inside the ROS 2 Docker container.
     ```

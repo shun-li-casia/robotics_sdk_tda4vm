@@ -493,6 +493,7 @@ struct VISION_CNN_Context
     /** Flag to track if the performance counter has been initialized. */
     bool                    startPerfCapt;
 
+    /** File name to save performance stats. */
     const char             *logFileName{nullptr};
 };
 

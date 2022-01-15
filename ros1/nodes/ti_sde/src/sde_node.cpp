@@ -556,6 +556,9 @@ void SDEAppNode::readParams()
     m_privNodeHdl.param("enable_pc", tmp, 1);
     m_cntxt->enablePC = (uint8_t)tmp;
 
+    /* Set logFileName based on enablePC */
+    m_cntxt->logFileName = (m_cntxt->enablePC == 0) ? "sde" : "sdepcl";
+
     /*Sub-sampling ratio of point cloud */
     m_privNodeHdl.param("pc_subsample_ratio", tmp, 1);
     m_cntxt->pcSubsampleRatio = (uint8_t)tmp;
@@ -616,7 +619,7 @@ void SDEAppNode::readParams()
     /* Get the disparity merge core information. */
     m_privNodeHdl.getParam("disp_merge_deploy_core", str);
     m_cntxt->mlSdeCreateParams.dispMergeNodeCore = CM_getCoreName((const char *)str.c_str());
-    
+
     /* Get the hole filling core information. */
     m_privNodeHdl.getParam("hole_filling_deploy_core", str);
     m_cntxt->mlSdeCreateParams.holeFillingNodeCore = CM_getCoreName((const char *)str.c_str());

@@ -1,6 +1,6 @@
 ZED Stereo Camera ROS Node
 ==========================
-ZED stereo camera ROS node based on OpenCV VideoCapture API for publishing left and right raw images and their camera_info.
+This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture API. The ROS node publishes left and right raw images and their camera_info.
 
 ## Usage
 

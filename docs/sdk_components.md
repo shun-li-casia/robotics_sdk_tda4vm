@@ -17,7 +17,7 @@ In particular, the Robotics SDK has dependency on the following software compone
 
 * [Vision Apps Lib](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/vision_apps/docs/user_guide/index.html)
 
-* [Perception Tool Ki](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/perception/docs/ptk_api_guide/index.html)
+* [Perception Tool Kit](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/latest/exports/docs/perception/docs/ptk_api_guide/index.html)
 
 ## Processor SDK Linux for Edge AI
 The Robotics SDK gets deep-learning inference C++ framework and GStreamer plugins optimized on TDA4, and TI Edge AI Model Zoo.
