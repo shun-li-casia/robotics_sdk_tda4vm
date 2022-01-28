@@ -2,7 +2,7 @@ Robotics SDK
 ============
 ## Git Repository
 
-### Robotics SDK 8.1 RC3
+### Robotics SDK 8.1 RC4
 **WARNING**: This RC is currently only for TI-internal for testing.
 
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)

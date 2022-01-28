@@ -33,6 +33,8 @@ roslaunch ti_vision_cnn zed_semseg_cnn.launch
 To process the image stream from a USB mono camera:
 ```
 roslaunch ti_vision_cnn mono_semseg_cnn.launch
+# Alternatively
+roslaunch ti_vision_cnn gscam_semseg_cnn.launch
 ```
 
 **[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md)
@@ -56,6 +58,8 @@ ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py
 To process the image stream from a USB mono camera:
 ```
 roslaunch ti_vision_cnn mono_semseg_cnn.launch
+# Alternatively
+roslaunch ti_vision_cnn gscam_semseg_cnn.launch
 ```
 <!-- To launch semantic segmentation demo with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
