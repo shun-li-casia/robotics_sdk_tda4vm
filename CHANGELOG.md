@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-## 8.1.0 (2022-01-14)
+## 8.1.0 (2022-02-04)
 
 * Version labeling for the Robotics SDK starts following the version numbers of the Processor SDK Linux releases.
 * ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.1.0 pre-built image.
