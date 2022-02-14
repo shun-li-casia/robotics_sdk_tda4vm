@@ -2,7 +2,7 @@
 set -e
 
 # setup proxy as required
-/root/setup_proxy.sh
+source /root/setup_proxy.sh
 
 # Ubuntu version and ROS distro
 UBUNTU_VER=$(lsb_release -r | cut -f2)

@@ -2,7 +2,7 @@
 set -e
 
 # setup proxy as required
-/root/setup_proxy.sh
+source /root/setup_proxy.sh
 
 # Ubuntu version
 UBUNTU_VER=$(lsb_release -r | cut -f2)
