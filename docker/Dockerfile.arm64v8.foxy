@@ -196,7 +196,7 @@ RUN ln -s /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.s
 
 # install edgeai-tiovx-modules
 WORKDIR /root/src
-RUN git clone --single-branch --branch main https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
+RUN git clone --single-branch --branch release-0.2 https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
     cd edgeai-tiovx-modules && \
     mkdir build && \
     cd build && \
@@ -207,7 +207,7 @@ RUN git clone --single-branch --branch main https://github.com/TexasInstruments/
 
 # install edgeai-gst-plugins
 WORKDIR /root/src
-RUN git clone --single-branch --branch fix/pkgconfig-imaging-sdk-update https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
+RUN git clone --single-branch --branch release-0.5.3 https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
     cd edgeai-gst-plugins && \
     meson build --prefix=/usr -Dpkg_config_path=pkgconfig && \
     ninja -C build && \

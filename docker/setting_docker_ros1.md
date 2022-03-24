@@ -26,7 +26,7 @@ In ROS 1 Docker container environment, ROS Noetic and necessary libraries and to
 
 4. To build the ROS applications, inside the Docker container:
     ```
-    root@j7-docker:~/j7ros_home/ros_ws$ catkin_make --source /opt/robotics_sdk/ros1
+    root@j7-docker:~/j7ros_home/ros_ws$ catkin_make -j1 --source /opt/robotics_sdk/ros1
     root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     ```
 
