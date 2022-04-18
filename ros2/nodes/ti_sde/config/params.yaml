@@ -1,14 +1,11 @@
 sde:
     ros__parameters:
-        # left image LDC LUT definition
-        left_lut_file_path:                 /opt/robotics_sdk/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_left.bin
-
-        # right image LDC LUT definition
-        right_lut_file_path:                /opt/robotics_sdk/ros2/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin
-
         # input_format
-        # should be 1: YUV422
-        input_format:                       1
+        # 0 - VX_DF_IMAGE_U8
+        # 1 - VX_DF_IMAGE_NV12
+        # 2 - VX_DF_IMAGE_UYVY
+        # Should be 2
+        input_format:                       2
 
         # SDE type
         # 0: Single-layer SDE, 1: Multi-layer SDE
@@ -22,6 +19,7 @@ sde:
 
         # minimum disparity in pixels
         # minimum disparity (0 -> 0 pixels, 1 -> -3 pixels)
+        # Should be 0
         disparity_min:                      0
 
         # <disparity in pixels>, maximum disparity in pixels
@@ -51,8 +49,6 @@ sde:
         # baseline in meter
         stereo_baseline:                    0.12
 
-        # Enable PC generation
-        enable_pc:                          0
 
         # PC subsampling ratio (1, 2, 4)
         pc_subsample_ratio:                 1

@@ -3,7 +3,7 @@ project(common_msgs)
 
 add_compile_options(-std=c++17)
 
-find_package(catkin REQUIRED COMPONENTS message_generation std_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation std_msgs geometry_msgs)
 
 add_message_files(
     FILES
@@ -15,8 +15,10 @@ add_message_files(
     StereoDetection.msg
     BoundingBox2D.msg
     Detection2D.msg
+    BoundingBox2Dp.msg
+    Detection2Dp.msg
     )
 
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES std_msgs geometry_msgs)
 
 catkin_package(CATKIN_DEPENDS message_runtime std_msgs)

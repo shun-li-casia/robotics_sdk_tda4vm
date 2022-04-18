@@ -401,7 +401,12 @@ void VisLocNode::readParams()
     /* Get input format, which enable flag of LDC depends on */
     m_privNodeHdl.param("input_format", tmp, (int32_t)CM_IMG_FORMAT_UYVY);
     m_cntxt->inputFormat   = (uint8_t)tmp;
-    m_cntxt->enableLdcNode = m_cntxt->inputFormat;
+    if (m_cntxt->inputFormat != CM_IMG_FORMAT_NV12 && m_cntxt->inputFormat != CM_IMG_FORMAT_UYVY)
+    {
+        ROS_INFO("Input image format is not supported.");
+        exit(-1);
+    }
+    m_cntxt->enableLdcNode = (m_cntxt->inputFormat == CM_IMG_FORMAT_UYVY);
 
     /* Get LUT file path information. */
     status = m_privNodeHdl.getParam("lut_file_path", str);

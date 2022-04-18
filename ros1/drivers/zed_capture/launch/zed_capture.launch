@@ -6,9 +6,9 @@
 
 <launch>
 	<!-- string for ZED camera serial number -->
-	<!-- TI-Internal: SN5867575.conf:  ZED1 Camera -->
-	<!--              SN29788442.conf: ZED2 Camera -->
-	<arg name="zed_sn_str"               default="SN5867575"/>
+	<!-- TI-Internal: SN18059:    ZED1 Camera -->
+	<!--              SN29788442: ZED2 Camera -->
+	<arg name="zed_sn_str"               default="SN18059"/>
 	<!-- to find your device name, use ls /dev/video* and look for the name begin with video -->
 	<!-- typically camera recoginized as "/dev/video2" on the target with Edge AI base image -->
 	<arg name="device_name"              default="/dev/video2"/>

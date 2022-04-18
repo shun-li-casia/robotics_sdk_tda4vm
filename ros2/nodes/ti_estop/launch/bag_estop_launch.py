@@ -14,15 +14,15 @@ def generate_launch_description():
     # Include ESTOP launch file
     estop_launch_file = get_launch_file(pkg='ti_estop', file_name='estop_launch.py')
     estop_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(estop_launch_file)
-            )
+        PythonLaunchDescriptionSource(estop_launch_file)
+    )
 
     # Include rosbag launch file
     # The rosbag launch is located under ti_sde package
     bag_launch_file = get_launch_file(pkg='ti_sde', file_name='rosbag_launch.py')
     bag_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(bag_launch_file)
-            )
+        PythonLaunchDescriptionSource(bag_launch_file)
+    )
 
     ld.add_action(estop_launch)
     ld.add_action(bag_launch)

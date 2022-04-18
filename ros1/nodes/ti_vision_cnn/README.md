@@ -78,12 +78,13 @@ See [README_objdet.md](./README_objdet.md).
 
 ## Launch File Parameters
 
-Parameter               | Description                                                               | Value
-------------------------|---------------------------------------------------------------------------|-------------------
-rosparam file           | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
-input_topic_name        | Subscribe topic name for input camera image                               | camera/right/image_raw
-rectified_image_topic   | Publish topic name for output rectified image                             | camera/right/image_rect_mono
-vision_cnn_tensor_topic | Publish topic name for output tensor                                      | vision_cnn/tensor
+Parameter                | Description                                                               | Value
+-------------------------|---------------------------------------------------------------------------|-------------------
+rosparam file            | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
+input_topic_name         | Subscribe topic name for input camera image                               | camera/right/image_raw
+rectified_image_topic    | Publish topic name for output rectified image                             | camera/right/image_rect_nv12
+rectified_image_frame_id | frame_id for output rectified image                                       | right_frame
+vision_cnn_tensor_topic  | Publish topic name for output tensor                                      | vision_cnn/tensor
 
 ## ROSPARAM Parameters
 The table below describes the parameters in `config/params.yaml`:

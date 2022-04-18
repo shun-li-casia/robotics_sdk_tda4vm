@@ -61,4 +61,4 @@ ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
 ```
 ### Known Issue
 
-1. The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512) has initial loading time of about 20 seconds.
+1. The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512) has initial loading time of about 20 seconds.

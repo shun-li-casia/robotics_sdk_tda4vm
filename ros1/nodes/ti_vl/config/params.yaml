@@ -1,6 +1,9 @@
 # input foramt
-# 1 for 422 input, 0: for 420 input
-input_format:             1
+# 0 - VX_DF_IMAGE_U8
+# 1 - VX_DF_IMAGE_NV12
+# 2 - VX_DF_IMAGE_UYVY
+# Should be 1 or 2
+input_format:             2
 
 # LDC LUT definition
 lut_file_path:            $(find ti_vl)/ldc_lut/zero_768x384_LUT.bin

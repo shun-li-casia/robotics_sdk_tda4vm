@@ -171,8 +171,8 @@ namespace ti_ros2
                         outDisparity = (pixDisparity >> 3) & 0xFFF;
                         //outDisparity *= sign;
 
-                        // check if disparity is valid based on confidence threshold
-                        valid = 1; //((pixDisparity & 0x3) >= params->vis_confidence);
+                        // check if disparity confidence is larger than 0
+                        valid = ((pixDisparity & 0x3) > 0);
 
                         // Shift disparity so that minimum disparity and unknown disparity are both zero
                         value = (int)(outDisparity * scaleFactor * valid) + SDE_DISPARITY_OFFSET;

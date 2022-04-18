@@ -124,6 +124,7 @@ void VisionCnnNode::subscriberThread()
 void VisionCnnNode::publisherThread()
 {
     std::string rectImgTopic;
+    std::string rectImgFrame;
     std::string outTensorTopic;
     bool        status;
     bool        latch = true;
@@ -137,6 +138,13 @@ void VisionCnnNode::publisherThread()
             exit(-1);
         }
 
+        status = m_privNodeHdl.getParam("rectified_image_frame_id", rectImgFrame);
+        if (status == false)
+        {
+            ROS_ERROR("Config parameter 'rectified_image_frame_id' not found.");
+            exit(-1);
+        }
+
         // rectified image in YUV420 (NV12)
         m_rectImageSize = 1.5 * m_inputImgWidth * m_inputImgHeight;
         m_rectImagePubData.data.assign(m_rectImageSize, 0);
@@ -144,6 +152,7 @@ void VisionCnnNode::publisherThread()
         m_rectImagePubData.height   = m_inputImgHeight;
         m_rectImagePubData.step     = m_inputImgWidth;
         m_rectImagePubData.encoding = "yuv420";
+        m_rectImagePubData.header.frame_id = rectImgFrame;
 
         // Create the publisher for the rectified image
         m_rectImgPub = m_imgTrans->advertise(rectImgTopic, latch);
@@ -377,11 +386,11 @@ void VisionCnnNode::readParams()
         exit(-1);
     }
 
-    if (tmp == 0)
+    if (tmp == CM_IMG_FORMAT_UYVY)
     {
         m_cntxt->inputImageFormat = VX_DF_IMAGE_UYVY;
     }
-    else if (tmp == 1)
+    else if (tmp == CM_IMG_FORMAT_NV12)
     {
         m_cntxt->inputImageFormat = VX_DF_IMAGE_NV12;
     }

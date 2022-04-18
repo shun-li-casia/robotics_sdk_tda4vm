@@ -1269,7 +1269,7 @@ static vx_status VISLOC_createInputImageObjects(VISLOC_Context * appCntxt)
             appCntxt->vxInputImage[i] = vxCreateImage(appCntxt->vxContext,
                                                       appCntxt->inputImageWidth,
                                                       appCntxt->inputImageHeight,
-                                                     (appCntxt->inputFormat == 1 ? VX_DF_IMAGE_UYVY:VX_DF_IMAGE_NV12));
+                                                     (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY ? VX_DF_IMAGE_UYVY:VX_DF_IMAGE_NV12));
 
             if (appCntxt->vxInputImage[i] == NULL)
             {

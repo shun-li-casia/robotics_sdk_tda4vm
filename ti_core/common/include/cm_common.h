@@ -136,7 +136,8 @@ namespace ti_core_common
  */
 typedef enum {
     CM_IMG_FORMAT_Y    = 0,
-    CM_IMG_FORMAT_UYVY = 1
+    CM_IMG_FORMAT_NV12 = 1,
+    CM_IMG_FORMAT_UYVY = 2
 } CM_IMG_FORMAT;
 
 

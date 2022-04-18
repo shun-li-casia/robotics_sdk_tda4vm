@@ -5,6 +5,12 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node
 
+# Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY
+image_format = 1
+lut_file_path = "/opt/robotics_sdk/ros1/drivers/mono_capture/config/C920_HD_LUT.bin"
+dl_model_path = "/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"
+# dl_model_path = "/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"
+
 def get_launch_file(pkg, file_name):
     pkg_dir = get_package_share_directory(pkg)
     return os.path.join(pkg_dir, 'launch', file_name)
@@ -16,17 +22,22 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('ti_vision_cnn'),
         'config',
-        'objdet_params_c920.yaml'
+        'params.yaml'
     )
     params = [
         config,
         {
-            "input_topic_name":        "camera/image_raw",
-            "rectified_image_topic":   "camera/image_rect_nv12",
-            "vision_cnn_tensor_topic": "vision_cnn/tensor",
+            "image_format":             image_format,
+            "lut_file_path":            lut_file_path,
+            "dl_model_path":            dl_model_path,
+            "input_topic_name":         "camera/image_raw",
+            "rectified_image_topic":    "camera/image_rect_nv12",
+            "rectified_image_frame_id": "right_frame",
+            "vision_cnn_tensor_topic":  "vision_cnn/tensor",
         },
     ]
-    cnn_node = Node(package = "ti_vision_cnn",
+    cnn_node = Node(
+        package = "ti_vision_cnn",
         executable = "vision_cnn",
         name = "vision_cnn",
         output = "screen",
@@ -47,4 +58,3 @@ def generate_launch_description():
     ld.add_action(cam_launch)
 
     return ld
-

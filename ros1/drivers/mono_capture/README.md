@@ -7,7 +7,7 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
 
 ## Usage
 
-1. Camera Calibration: A Python tool for camera calibration is provided: `scripts/camera_calibration.py`. This calibration tool takes a set of checkerboard images captured with the target USB camera, and generates `camera_info.yaml`. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool, and for examples, please see `scripts/calib_C920.sh`.
+1. Camera Calibration: A Python tool for camera calibration is provided: `$SDK_DIR/tools/mono_camera/camera_calibration.py`. This calibration tool takes a set of checkerboard images captured with the target USB camera, and generates `camera_info.yaml`. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool, and for examples, please see `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
     ```
     usage: camera_calibration.py [-h] [-p PATH] [-e EXT] [-r PTS_ROWS] [-c PTS_COLUMNS] [-s SQUARE_SIZE] [-v VISUALIZE] [-f SCALING_FACTOR] [-o OUT_FNAME] [-n CAMERA_NAME]
 
@@ -31,7 +31,7 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
                             Camera name
     ```
 
-2. Rectification Map Generation: A Python tool for generating rectification map is provided: `scripts/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file, and generates a binary file for undistortion & rectification look-up-table (LUT) which is required in offloading the undistortion/rectification on J7 VPAC/LDC hardware accelerator. Below is the usage of the tool, and for examples, please see `scripts/calib_C920.sh`.
+2. Rectification Map Generation: A Python tool for generating rectification map is provided: `$SDK_DIR/tools/mono_camera/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file, and generates a binary file for undistortion & rectification look-up-table (LUT) which is required in offloading the undistortion/rectification on J7 VPAC/LDC hardware accelerator. Below is the usage of the tool, and for examples, please see `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
 
     ```
     usage: generate_rect_map_mono.py [-h] [--input INPUT] [--name NAME]
@@ -43,7 +43,7 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
     --name NAME, -n NAME  Camera name
     ```
 
-5. Build the USB mono camera ROS node
+3. Build the USB mono camera ROS node
     ```
     cd $ROS_WS
     # ROS1
@@ -54,7 +54,7 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
     source install/setup.bash
     ```
 
-5. Launch the mono camera node
+4. Launch the mono camera node
     ```
     # ROS1
     roslaunch mono_capture mono_capture.launch

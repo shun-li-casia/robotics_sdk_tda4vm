@@ -4,133 +4,26 @@
 #include <message_filters/time_synchronizer.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
-
 #include <common_msgs/Detection2D.h>
-
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include "viz_objdet.h"
 
 using namespace sensor_msgs;
+using namespace common_msgs;
 using namespace message_filters;
 using namespace cv;
-using namespace common_msgs;
 
-// OpenCV uses BGR format
-static const uint8_t color_map[20][3] =
+static cv::Mat overlayBoundingBox(cv::Mat &img,
+                                  const int32_t *box,
+                                  const int32_t label_id)
 {
-    {128,  64, 128},{244,  35, 232},{ 70,  70,  70},{102, 102, 156},{190, 153, 153},
-    {153, 153, 153},{250, 170,  30},{220, 220,   0},{107, 142,  35},{152, 251, 152},
-    { 70, 130, 180},{220,  20,  60},{255,   0,   0},{  0,   0, 142},{  0,   0,  70},
-    {  0,  60, 100},{  0,  80, 100},{  0,   0, 230},{119,  11,  32},{128, 128, 128}
-};
-
-static const std::string classnames_coco[] =
-{
-    [0] = "None",
-    [1] = "person",
-    [2] = "bicycle",
-    [3] = "car",
-    [4] = "motorcycle",
-    [5] = "airplane",
-    [6] = "bus",
-    [7] = "train",
-    [8] = "truck",
-    [9] = "boat",
-    [10] = "traffic light",
-    [11] = "fire hydrant",
-    [12] = "street sign",
-    [13] = "stop sign",
-    [14] = "parking meter",
-    [15] = "bench",
-    [16] = "bird",
-    [17] = "cat",
-    [18] = "dog",
-    [19] = "horse",
-    [20] = "sheep",
-    [21] = "cow",
-    [22] = "elephant",
-    [23] = "bear",
-    [24] = "zebra",
-    [25] = "giraffe",
-    [26] = "hat",
-    [27] = "backpack",
-    [28] = "umbrella",
-    [29] = "shoe",
-    [30] = "eye glasses",
-    [31] = "handbag",
-    [32] = "tie",
-    [33] = "suitcase",
-    [34] = "frisbee",
-    [35] = "skis",
-    [36] = "snowboard",
-    [37] = "sports ball",
-    [38] = "kite",
-    [39] = "baseball bat",
-    [40] = "baseball glove",
-    [41] = "skateboard",
-    [42] = "surfboard",
-    [43] = "tennis racket",
-    [44] = "bottle",
-    [45] = "plate",
-    [46] = "wine glass",
-    [47] = "cup",
-    [48] = "fork",
-    [49] = "knife",
-    [50] = "spoon",
-    [51] = "bowl",
-    [52] = "banana",
-    [53] = "apple",
-    [54] = "sandwich",
-    [55] = "orange",
-    [56] = "broccoli",
-    [57] = "carrot",
-    [58] = "hot dog",
-    [59] = "pizza",
-    [60] = "donut",
-    [61] = "cake",
-    [62] = "chair",
-    [63] = "couch",
-    [64] = "potted plant",
-    [65] = "bed",
-    [66] = "mirror",
-    [67] = "dining table",
-    [68] = "window",
-    [69] = "desk",
-    [70] = "toilet",
-    [71] = "door",
-    [72] = "tv",
-    [73] = "laptop",
-    [74] = "mouse",
-    [75] = "remote",
-    [76] = "keyboard",
-    [77] = "cell phone",
-    [78] = "microwave",
-    [79] = "oven",
-    [80] = "toaster",
-    [81] = "sink",
-    [82] = "refrigerator",
-    [83] = "blender",
-    [84] = "book",
-    [85] = "clock",
-    [86] = "vase",
-    [87] = "scissors",
-    [88] = "teddy bear",
-    [89] = "hair drier",
-    [90] = "toothbrush",
-    [91] = "hair brush"
-};
-
-static cv::Mat overlayBoundingBox(cv::Mat    &img,
-                            int32_t          *box,
-                            int32_t          label_id)
-{
-    // Mat img = Mat(outDataHeight, outDataWidth, CV_8UC3, frame);
     int32_t label_id_mod = label_id % 20;
-    Scalar box_color     = (color_map[label_id_mod][0], color_map[label_id_mod][1], color_map[label_id_mod][2]);
-    Scalar text_color    = (240, 240, 240);
-    Scalar text_bg_color = (128, 128, 128);
-    // Scalar text_color = box_color;
-
+    Scalar box_color = Scalar(color_map[label_id_mod][0],
+                              color_map[label_id_mod][1],
+                              color_map[label_id_mod][2]);
+    Scalar text_color    = Scalar(244,  35, 232);
+    Scalar text_bg_color = Scalar(120, 120, 120);
     std::string label = classnames_coco[label_id];
 
     // Draw bounding box for the detected object
@@ -139,12 +32,11 @@ static cv::Mat overlayBoundingBox(cv::Mat    &img,
     rectangle(img, topleft, bottomright, box_color, 3);
 
     // Draw text with detected class with a background box
-    Point t_topleft     = Point((box[0] + box[2])/2 - 5, (box[1] + box[3])/2 + 5);
-    Point t_bottomright = Point((box[0] + box[2])/2 + 80, (box[1] + box[3])/2 - 15);
+    Point center        = Point((box[0] + box[2])/2, (box[1] + box[3])/2);
+    Point t_topleft     = center + Point(-5, -10);
+    Point t_bottomright = center + Point( 80, 10);
     rectangle(img, t_topleft, t_bottomright, text_bg_color, -1);
-
-    // putText(img, objectname, t_topleft, FONT_HERSHEY_SIMPLEX, 0.5, text_color);
-    putText(img, label, t_topleft, FONT_HERSHEY_SIMPLEX, 0.6, text_color);
+    putText(img, label, t_topleft + Point(10, 15), FONT_HERSHEY_SIMPLEX, 0.6, text_color);
 
     return img;
 }
@@ -170,16 +62,16 @@ namespace ros_app_viz
             std::string odMapImgTopic;
 
             // input topics
-            private_nh->param("rectified_image_topic",    rectImgTopic, std::string(""));
-            private_nh->param("vision_cnn_tensor_topic",  tensorTopic,  std::string(""));
+            private_nh->param("rectified_image_topic", rectImgTopic, std::string(""));
+            private_nh->param("vision_cnn_tensor_topic", tensorTopic, std::string(""));
 
             // output topics
-            private_nh->param("vision_cnn_image_topic",   odMapImgTopic, std::string(""));
+            private_nh->param("vision_cnn_image_topic", odMapImgTopic, std::string(""));
 
             m_odMapImgPub = nh->advertise<Image>(odMapImgTopic, 1);
 
             message_filters::Subscriber<Detection2D> tensorSub(*nh, tensorTopic, 1);
-            message_filters::Subscriber<Image>       rectImgSub(*nh, rectImgTopic, 1);
+            message_filters::Subscriber<Image> rectImgSub(*nh, rectImgTopic, 1);
 
             TimeSynchronizer<Detection2D, Image> sync(tensorSub, rectImgSub, 10);
             sync.registerCallback(boost::bind(&VizObjDet::callback_vizObjDet, this, _1, _2));

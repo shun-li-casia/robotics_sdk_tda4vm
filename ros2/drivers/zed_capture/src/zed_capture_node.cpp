@@ -113,13 +113,8 @@ ZedCameraNode::ZedCameraNode(const std::string&         name,
     // populate camera_info
     RCLCPP_INFO(this->get_logger(), "Loading camera info from yaml files");
 
-    CameraInfoManager caminfo_left_manager(this,
-                                           "camera/left",
-                                           "package://zed_capture/config/"+camera_info_left_yaml_);
-
-    CameraInfoManager caminfo_right_manager(this,
-                                            "camera/right",
-                                            "package://zed_capture/config/"+camera_info_right_yaml_);
+    CameraInfoManager caminfo_left_manager(this, "camera/left", camera_info_left_yaml_);
+    CameraInfoManager caminfo_right_manager(this, "camera/right", camera_info_right_yaml_);
 
     auto caminfo_left             = caminfo_left_manager.getCameraInfo();
     auto caminfo_right            = caminfo_right_manager.getCameraInfo();

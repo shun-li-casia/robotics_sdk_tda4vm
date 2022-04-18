@@ -31,21 +31,21 @@ def generate_launch_description():
 
     # rosbag process
     rosbag_process = ExecuteProcess(
-                       output = "screen",
-                       cmd=['ros2', 'bag', 'play',
-                            '-r', LaunchConfiguration('ratefactor'),
-                            '-l', LaunchConfiguration('bagfile'),
-                            '--read-ahead-queue-size', '5000',
-                            '--topics',
-                            '/camera/left/image_raw',
-                            '/camera/right/image_raw',
-                            '/camera/left/camera_info',
-                            '/camera/right/camera_info'
-                       ],
-                       on_exit=[
-                          LogInfo(msg="rosbag2 exited")
-                       ]
-                  )
+        output = "screen",
+        cmd=['ros2', 'bag', 'play',
+            '-r', LaunchConfiguration('ratefactor'),
+            '-l', LaunchConfiguration('bagfile'),
+            '--read-ahead-queue-size', '5000',
+            '--topics',
+            '/camera/left/image_raw',
+            '/camera/right/image_raw',
+            '/camera/left/camera_info',
+            '/camera/right/camera_info'
+        ],
+        on_exit=[
+            LogInfo(msg="rosbag2 exited")
+        ]
+    )
 
     ld.add_action(rosbag_process)
 

@@ -32,6 +32,13 @@
 
 # build & install perf_stats (one-time)
 perf_stats_path=/opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats
+mkdir -p /usr/dlr/
+ln -snf /host/usr/lib/python3.8/site-packages/dlr/libdlr.so /usr/dlr/libdlr.so
+ln -snf /host/usr/lib/python3.8/site-packages/onnxruntime /usr/local/lib/python3.8/dist-packages/onnxruntime
+
+# Disable Neo-DLR phone-home feature
+echo '{"enable_phone_home": false}' > /usr/local/lib/python3.8/dist-packages/dlr/counter/ccm_config.json
+
 if [ -f "$perf_stats_path" ]; then
     ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 else

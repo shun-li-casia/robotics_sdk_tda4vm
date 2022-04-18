@@ -3,13 +3,13 @@ MAKEFLAGS += --no-print-directory
 
 # Defaults. These can be changed from command line
 ROS_VER          ?= 1
-TIVA_LIB_VER     ?= 8.1.0
+TIVA_LIB_VER     ?= 8.2.0
 
 # GPUS: if 'y', '--gpus all' argument is added in 'docker run' command
 GPUS             ?= n
 
 # Robotics SDK version
-RSDK_VER          = 1.0
+RSDK_VER          = 8.2
 
 # Set the operating variables based on the ROS version specified
 ROS_DISTRO        = foxy
@@ -71,8 +71,7 @@ ENV_FILE_PATH     = $(DOCKER_DIR)/$(ENV_FILE)
 # Tarball filenames
 ROSBAG_FILE       = ros-bag_2020_1109.tar.gz
 DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
-SEMSEG_MODEL_FILE = tidl-semseg-model_8.1.0.5.tar.gz
-VISUAL_LOC_FILE   = visual-localization_8.1.0.5.tar.gz
+VISUAL_LOC_FILE   = visual-localization_8.2.tar.gz
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 
@@ -80,14 +79,9 @@ CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 URL_BASE         = https://software-dl.ti.com/jacinto7/esd/robotics-sdk/data
 ROSBAG_URL   	 = $(URL_BASE)/$(ROSBAG_FILE)
 DLRT_LIBS_URL    = $(URL_BASE)/$(DLRT_LIBS_FILE)
-SEMSEG_MODEL_URL = $(URL_BASE)/$(SEMSEG_MODEL_FILE)
 VISUAL_LOC_URL   = $(URL_BASE)/$(VISUAL_LOC_FILE)
 LIDAR2D_LOC_URL  = $(URL_BASE)/$(LIDAR2D_FILE)
 CALIB_IMGS_URL   = $(URL_BASE)/$(CALIB_IMGS_FILE)
-
-# Semantic segmentation TVM-DLR model artifacts location
-SEMSEG_MODEL     = tvmdlr_deeplabv3lite_mobilenetv2_tv_768x432_qat-p2_onnx
-SEMSEG_ARTIFACTS_DIR = $(DATA_DIR)/tidl_semseg_model/$(SEMSEG_MODEL)/artifacts
 
 # IP address
 J7_IP_ADDR       := $(shell ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print $$2}')
@@ -163,7 +157,10 @@ docker_run:
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
-	@echo "IP_ADDR=\$$(ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print \$$2}')" >> $(TGT_NAME)
+	@echo "IP_ADDR=\$$(ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print \$$2}')"       >> $(TGT_NAME)
+	@echo "if [[ ! \$$IP_ADDR =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\$$ ]]; then"             >> $(TGT_NAME)
+	@echo "    IP_ADDR=\$$(ifconfig | grep -A 1 'wlp1s0' | tail -1 | awk '{print \$$2}')" >> $(TGT_NAME)
+	@echo "fi"                                                >> $(TGT_NAME)
 endif
 	@echo "if [ \"\$$#\" -lt 1 ]; then"                       >> $(TGT_NAME)
 	@echo "    CMD=/bin/bash"                                 >> $(TGT_NAME)
@@ -184,17 +181,13 @@ endif
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
 	@echo "    -v $(REPO_PATH):$(REPO_PATH) \\"               >> $(TGT_NAME)
-	@echo "    -v $(REPO_PATH)/${EXCLUDE} \\"                 >> $(TGT_NAME)
-endif
-ifeq ($(PLATFORM), pc)
-	@echo "    -v /root/$(WORK_DIR)/$(WS_NAME)/src/${REPO_NAME}/${EXCLUDE} \\" >> $(TGT_NAME)
 endif
 ifeq ($(PLATFORM), j7)
 	@echo "    -v $(WORK_PATH_HOST)/.ros:/root/.ros \\"       >> $(TGT_NAME)
 ifeq ($(ROS_DISTRO), melodic)
-	@echo "    -v /usr:/host/usr:ro \\"                       >> $(TGT_NAME)
 	@echo "    -v /opt/dl_runtime:/opt/dl_runtime \\"         >> $(TGT_NAME)
 endif
+	@echo "    -v /usr:/host/usr:ro \\"                       >> $(TGT_NAME)
 	@echo "    -v /opt/edge_ai_apps:/opt/edge_ai_apps \\"     >> $(TGT_NAME)
 	@echo "    -v /opt/dlpack:/opt/dlpack \\"                 >> $(TGT_NAME)
 	@echo "    -v /opt/tensorflow:/opt/tensorflow \\"         >> $(TGT_NAME)
@@ -257,18 +250,8 @@ docker_run_pc:
 	                    DOCKER_TAG=$(DOCKER_TAG_PC) \
 
 ## data files
-data_download: dlrt_download semseg_download rosbag_download \
+data_download: dlrt_download rosbag_download \
                vl_download lidar2d_download calib_download
-
-semseg_download: check_data_dir
-	@wget -O $(DATA_DIR)/$(SEMSEG_MODEL_FILE) "$(SEMSEG_MODEL_URL)"
-	@rm -rf  $(DATA_DIR)/tidl_semseg_model
-	@tar xzf $(DATA_DIR)/$(SEMSEG_MODEL_FILE) -C $(DATA_DIR)
-	@rm -f $(DATA_DIR)/$(SEMSEG_MODEL_FILE)
-	@cd $(SEMSEG_ARTIFACTS_DIR); \
-	ln -snf deploy_lib.so.j7 deploy_lib.so; \
-	ln -snf deploy_params.params.j7 deploy_params.params; \
-	ln -snf deploy_graph.json.j7 deploy_graph.json; cd -
 
 rosbag_download: check_data_dir
 	@wget -O $(DATA_DIR)/$(ROSBAG_FILE) "$(ROSBAG_URL)"
@@ -316,7 +299,6 @@ data_clean:
 
 ## .PHONY
 .PHONY: ip_show \
-        semseg_download \
 		rosbag_download \
 		vl_download \
 		lidar2d_download \

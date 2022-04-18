@@ -1,11 +1,11 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
 from launch.actions import OpaqueFunction
 from launch.substitutions import TextSubstitution
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
 
 # Launch for for ZED capture node.
 # Requirement: run <zed_capture>/script/gen_rect_map.py with factory calibration
@@ -15,9 +15,9 @@ from launch_ros.actions import Node
 def finalize_node(context, *args, **kwargs):
     zed_sn_str  = LaunchConfiguration("zed_sn_str").perform(context)
     camera_mode = LaunchConfiguration("camera_mode").perform(context)
-    tmp_str     = zed_sn_str + "_" + camera_mode
-    camera_info_left_yaml  = tmp_str + "_camera_info_left.yaml"
-    camera_info_right_yaml = tmp_str + "_camera_info_right.yaml"
+    camera_info_base = "/opt/robotics_sdk/ros1/drivers/zed_capture/config"
+    camera_info_left_yaml  = "file://" + os.path.join(camera_info_base, zed_sn_str+"_"+camera_mode+"_camera_info_left.yaml")
+    camera_info_right_yaml = "file://" + os.path.join(camera_info_base, zed_sn_str+"_"+camera_mode+"_camera_info_right.yaml")
 
     topic_ns_left           = LaunchConfiguration("topic_ns_left").perform(context)
     topic_ns_right          = LaunchConfiguration("topic_ns_right").perform(context)
@@ -64,7 +64,7 @@ def generate_launch_description():
     # zed_sn_str: arg that can be set from the command line or a default will be used
     zed_sn_str = DeclareLaunchArgument(
         name="zed_sn_str",
-        default_value=TextSubstitution(text="SN5867575"),
+        default_value=TextSubstitution(text="SN18059"),
         description='string for ZED camera serial number'
     )
 

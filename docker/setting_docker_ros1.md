@@ -8,19 +8,19 @@ In ROS 1 Docker container environment, ROS Noetic and necessary libraries and to
 
 1. To generate the scripts for building and running a Docker image for ROS 1 Noetic:
     ```
-    root@j7-evm:~/j7ros_home$ make scripts ROS_VER=1
+    root@tda4vm-sk:~/j7ros_home$ make scripts ROS_VER=1
     ```
     Please make sure that two bash scripts, `docker_build_ros1.sh` and `docker_run_ros1.sh`, are generated.
 
 2. To build the Docker image:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_build_ros1.sh
+    root@tda4vm-sk:~/j7ros_home$ ./docker_build_ros1.sh
     ```
     This step will take several minutes depending on the network speed, and once "docker build" is completed, you can check the resulting Docker image with `docker images`.
 
 3. To start/run the Docker container:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh
     ```
     It is important to use `docker_run_ros1.sh` script to start a Docker container, since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the TDA4 device.
 
@@ -91,6 +91,8 @@ Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.laun
 Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch  | same as above
 3D Obstacle Detection (ROSBAG)     | roslaunch ti_estop bag_estop.launch  | roslaunch ti_viz_nodes rviz_estop.launch
 3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch  | same as above
+3D Perception (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch
+3D Perception (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch  | same as above
 Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | roslaunch ti_viz_nodes rviz_visloc.launch
 
 In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be launched: either on the TDA4 target, or on the PC.
@@ -103,7 +105,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde.launch
     ```
     To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch` in the above.
 
@@ -120,7 +122,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde_pcl.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde_pcl.launch
     ```
     To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde_pcl.launch` in the above.
 
@@ -136,7 +138,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_semseg_cnn.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_semseg_cnn.launch
     ```
     To process the image stream from a ZED stereo camera or USB mono camera, replace the launch file with `zed_semseg_cnn.launch` or `gscam_semseg_cnn.launch` in the above.
 
@@ -153,7 +155,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_objdet_cnn.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_objdet_cnn.launch
     ```
     To process the image stream from a ZED stereo camera or USB mono camera, replace the launch file with `zed_semseg_cnn.launch` or `gscam_semseg_cnn.launch` in the above.
 
@@ -170,7 +172,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_estop bag_estop.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_estop bag_estop.launch
     ```
     To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch` in the above.
 
@@ -179,7 +181,24 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_estop.launch
     ```
 
-### 3.6. Run Visual Localization Application
+### 3.6. Run 3D Perception Application
+
+1. **[TDA4]** To launch `ti_objdet_range` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+    ```
+    root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_objdet_range bag_objdet_range.launch
+    ```
+    Alternatively, you can run the following directly on the TDA4 host Linux:
+    ```
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_objdet_range bag_objdet_range.launch
+    ```
+    To process the image stream from a ZED stereo camera, replace the launch file with `zed_objdet_range.launch` in the above.
+
+2. **[PC]** For visualization, in the ROS 1 container on the PC:
+    ```
+    root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_objdet_range.launch
+    ```
+
+### 3.7. Run Visual Localization Application
 
 1. **[J7]** To launch `ti_vl` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
@@ -187,13 +206,13 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vl bag_visloc.launch
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vl bag_visloc.launch
     ```
 2. **[PC]** For visualization, in the ROS 1 container on the PC:
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_visloc.launch
     ```
 
-### 3.7. Build and Run Hector SLAM Application
+### 3.8. Build and Run Hector SLAM Application
 
 Many open-source SLAM algorithms can run on TDA4. Among them, it is demonstrated how to setup and run Hector SLAM on 2D Lidar data. Please refer to [Hector SLAM Application](../ros1/slam/README.md) for details.

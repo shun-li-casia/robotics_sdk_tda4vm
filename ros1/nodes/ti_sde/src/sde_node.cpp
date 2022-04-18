@@ -236,8 +236,18 @@ void SDEAppNode::publisherThread()
     m_disparityPubData.data.assign(m_disparitySize, 0);
     m_disparityPubData.width    = m_imgWidth;
     m_disparityPubData.height   = m_imgHeight; 
-    m_disparityPubData.min_disp = 0;
-    m_disparityPubData.max_disp = 127;
+    m_disparityPubData.min_disp = 0;    
+    if (m_cntxt->sde_params.disparity_max == 0)
+    {
+        m_disparityPubData.max_disp = 63;
+    } else if (m_cntxt->sde_params.disparity_max == 1)
+    {
+        m_disparityPubData.max_disp = 127;
+    } else 
+    {
+        m_disparityPubData.max_disp = 191;
+    }
+
     m_disparityPubData.step     = m_imgWidth * 2;
 
     // Create the publisher for the disparity output
@@ -512,8 +522,8 @@ void SDEAppNode::readParams()
 
     /* SDE Parameters */ 
     /* Get the SDE minimum disparity information */
-    m_privNodeHdl.param("disparity_min", tmp, 0);
-    m_cntxt->sde_params.disparity_min = (uint16_t)tmp;
+    /* Always set to 0 */
+    m_cntxt->sde_params.disparity_min = 0;
 
     /* Get the SDE maximum disparity information */
     m_privNodeHdl.param("disparity_max", tmp, 1);

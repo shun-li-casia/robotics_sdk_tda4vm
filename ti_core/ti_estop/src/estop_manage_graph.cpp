@@ -93,13 +93,18 @@ vx_status ESTOP_APP_init_LDC(ESTOP_APP_Context *appCntxt)
                               appCntxt->height,
                               VX_DF_IMAGE_U8);
         }
-        else 
+        else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
         {
             appCntxt->vxInputLeftImage[i] =
                 vxCreateImage(appCntxt->vxContext,
                               appCntxt->width,
                               appCntxt->height,
                               VX_DF_IMAGE_UYVY);
+        } else
+        {
+            LOG_ERROR("Input image format NOT supported\n");
+            vxStatus = VX_FAILURE;
+            break;
         }
 
         if (appCntxt->vxInputLeftImage[i] == NULL)
@@ -121,13 +126,18 @@ vx_status ESTOP_APP_init_LDC(ESTOP_APP_Context *appCntxt)
                               appCntxt->height,
                               VX_DF_IMAGE_U8);
         }
-        else 
+        else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
         {
             appCntxt->vxInputRightImage[i] =
                 vxCreateImage(appCntxt->vxContext,
                               appCntxt->width,
                               appCntxt->height,
                               VX_DF_IMAGE_UYVY);
+        } else
+        {
+            LOG_ERROR("Input image format NOT supported\n");
+            vxStatus = VX_FAILURE;
+            break;
         }
 
         if (appCntxt->vxInputRightImage[i] == NULL)

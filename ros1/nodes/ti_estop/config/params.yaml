@@ -1,15 +1,9 @@
-# left image LDC LUT definition
-left_lut_file_path:                 $(find zed_capture)/config/SN5867575_HD_LUT_left.bin
-
-# right image LDC LUT definition
-right_lut_file_path:                $(find zed_capture)/config/SN5867575_HD_LUT_right.bin
-
-# location of DL model
-dl_model_path:                      $(env TI_DATA_PATH)/tidl_semseg_model/tvmdlr_deeplabv3lite_mobilenetv2_tv_768x432_qat-p2_onnx
-
 # input_format
-# should be 1: YUV422
-input_format:                       1
+# 0 - VX_DF_IMAGE_U8
+# 1 - VX_DF_IMAGE_NV12
+# 2 - VX_DF_IMAGE_UYVY
+# Should be 2
+input_format:                       2
 
 # Maximum number of Semantic Segmentation classes
 num_classes:                        20
@@ -24,6 +18,7 @@ num_layers:                         2
 
 # minimum disparity in pixels
 # minimum disparity (0 -> 0 pixels, 1 -> -3 pixels)
+# Should be 0
 disparity_min:                      0
 
 # <disparity in pixels>, maximum disparity in pixels
@@ -116,7 +111,7 @@ object_distance_mode:               0
 
 # E-Stop Config
 #        |<--- max_estop_width --->|
-#        --------------------------- -> max_estop_distance 
+#        --------------------------- -> max_estop_distance
 #        -                         -
 #         -                      -
 #          -                    -
@@ -139,11 +134,11 @@ min_estop_width:                    1500
 # Width of estop range at max_estop_distance (unit mm)
 max_estop_width:                    1500
 
-# Minimum number of consecutive frames without any obstacle in EStop range 
+# Minimum number of consecutive frames without any obstacle in EStop range
 # to set m_eStop = 0
 min_free_frame_run:                 3
 
-# Minimum number of consecutive frames with any obstacle in EStop range 
+# Minimum number of consecutive frames with any obstacle in EStop range
 # to set m_eStop = 1
 min_obs_frame_run:                  1
 

@@ -70,10 +70,10 @@ if [[ "$ARCH" == "aarch64" ]]; then
     mkdir -p ${DST_DIR}/lib
     Lib_files=(
         # Processor SDK libraries
-        /usr/lib/libtivision_apps.so.8.1.0
+        /usr/lib/libtivision_apps.so.8.2.0
         /usr/lib/libvx_tidl_rt.so.1.0
         /usr/lib/libion.so
-        /usr/lib/libti_rpmsg_char.so.0.3.1
+        /usr/lib/libti_rpmsg_char.so.0.4.0
         # DLR lib
         /usr/lib/python3.8/site-packages/dlr/libdlr.so
         # TFLite libs

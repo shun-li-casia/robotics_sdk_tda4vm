@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+## 8.2.0 (2022-04-22)
+
+* ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.2.0 pre-built image.
+* A new 3D perception demo application (`ti_objdet_range`) that is based on CNN object detection abd stereo vision is added.
+* OpenCV based stereo camera calibration tool is added.
+* Moved the mono and stereo camera tools under `tools` folder
+* Deep-learning runtime Python packages for ONNX, TFLite, TVM-DLR are added in the Robotics SDK ROS Docker containers.
+* Radar driver ROS node for TI mmWave radar devices (including IWR6843-ISK) is added.
+* The default semantic segmentation models are now part of Edge Ai model zoo: TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432, ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432.
+* The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512) was improved. It does not have long initial loading time any more.
+* Added support for WiFi station mode (as part of Processor SDK Linux for Edge AI).
+
 ## 8.1.0 (2022-02-04)
 
 * Version labeling for the Robotics SDK starts following the version numbers of the Processor SDK Linux releases.

@@ -5,6 +5,12 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node
 
+# Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY
+image_format = 2
+lut_file_path = "/opt/robotics_sdk/ros1/drivers/mono_capture/config/C920_HD_LUT.bin"
+dl_model_path = "/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"
+# dl_model_path = "/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"
+
 def get_launch_file(pkg, file_name):
     pkg_dir = get_package_share_directory(pkg)
     return os.path.join(pkg_dir, 'launch', file_name)
@@ -12,14 +18,30 @@ def get_launch_file(pkg, file_name):
 def generate_launch_description():
     ld = LaunchDescription()
 
-    pkg_dir    = get_package_share_directory('ti_vision_cnn')
-    launch_dir = os.path.join(pkg_dir, 'launch')
-
-    # Include SEMSEG launch file
-    cnn_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_dir, 'semseg_cnn_launch.py')
-        )
+    # ti_vision_cnn node
+    config = os.path.join(
+        get_package_share_directory('ti_vision_cnn'),
+        'config',
+        'params.yaml'
+    )
+    params = [
+        config,
+        {
+            "image_format":             image_format,
+            "lut_file_path":            lut_file_path,
+            "dl_model_path":            dl_model_path,
+            "input_topic_name":         "camera/image_raw",
+            "rectified_image_topic":    "camera/image_rect_nv12",
+            "rectified_image_frame_id": "right_frame",
+            "vision_cnn_tensor_topic":  "vision_cnn/tensor",
+        },
+    ]
+    cnn_node = Node(
+        package = "ti_vision_cnn",
+        executable = "vision_cnn",
+        name = "vision_cnn",
+        output = "screen",
+        parameters = params
     )
 
     # Include mono_capture launch file
@@ -27,12 +49,12 @@ def generate_launch_description():
         pkg='mono_capture',
         file_name='mono_capture_launch.py'
     )
-    mono_launch = IncludeLaunchDescription(
+    cam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(mono_launch_file)
     )
 
-    ld.add_action(cnn_launch)
-    ld.add_action(mono_launch)
+    ld.add_action(cnn_node)
+    ld.add_action(cam_launch)
 
     return ld
 

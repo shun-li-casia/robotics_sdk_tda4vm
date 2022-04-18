@@ -6,7 +6,8 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
 
 1. Obtain the factory camera calibration data file for your ZED camera with a script provided. Find the serial number of the ZED camera. The serial number can be found on the ZED camera box.
     ```
-    ./scripts/download_calib_file.sh <serial_number>
+    cd $SDK_DIR/tools/stereo_camera
+    ./download_calib_file.sh <serial_number>
     ```
     where `<serial_number>` is the serial number of the ZED camera.
 
@@ -16,16 +17,17 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
 
     Run the following script:
     ```
-    python3 scripts/generate_rect_map.py -i SNxxxx.conf -m <camera_mode>
+    cd $SDK_DIR/tools/stereo_camera
+    python3 generate_rect_map.py -i SNxxxx.conf -m <camera_mode> -p <output_folder_path>
     ```
     where
     * `SNxxxx.conf` is the factory calibration data file obtained from Step 1, and
     * `<camera_mode>` is camera mode. Valid `<camera_mode>`: 2K, FHD, FHD2, HD, HD2, VGA (see ``Launch File Parameters`` section for description). If the `-m` argument is not provided, by default the tool will iterate for the following three camera modes: HD, HD2, FHD and FHD2.
 
-    This script parses the calibration data and generates the following files:
+    This script parses the calibration data and generates the following files under `<output_folder_path>`:
 
-    * `config/<SN_string>_<camera_mode>_camera_info_{left,right}.yaml`: `camera_info` for left and right raw image,
-    * `config/<SN_string>_<camera_mode>_remap_LUT_{left,right}.bin`: undistortion and rectification remap LUT for left and right raw images.
+    * `<SN_string>_<camera_mode>_camera_info_{left,right}.yaml`: `camera_info` for left and right raw image,
+    * `<SN_string>_<camera_mode>_remap_LUT_{left,right}.bin`: undistortion and rectification remap LUT for left and right raw images.
 
 3. Update `launch/zed_capture.launch` (`launch/zed_capture_launch.py` in ROS2. Remember to run `colcon build` after any modification) to modify `zed_sn_str` parameter. Also update relevant parameters in `nodes/*/params.yaml` files for each of demo applications.
 
@@ -47,6 +49,10 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
     # ROS2
     ros2 launch zed_capture zed_capture_launch.py
     ```
+
+*** Note ***
+
+For the cases where ZED cameras need to be recalibrated, we provides the OpenCV based calibration tool. For more information, refer to [Stereo Camera Calibration](../../../tools/stereo_camera/calibration/README.md).
 
 ## Launch File Parameters
 

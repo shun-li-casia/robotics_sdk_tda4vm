@@ -75,12 +75,12 @@ int32_t CM_VISION_CNN_convertYUV2RGB(OutputT           *rgbImage,
 {
     const InputT   *srcPtrY;
     const InputT   *srcPtrUV;
-    float           meanR  = mean[0];
-    float           meanG  = mean[1];
-    float           meanB  = mean[2];
-    float           scaleR = scale[0];
-    float           scaleG = scale[1];
-    float           scaleB = scale[2];
+    float           meanR;
+    float           meanG;
+    float           meanB;
+    float           scaleR;
+    float           scaleG;
+    float           scaleB;
     float           r;
     float           g;
     float           b;
@@ -90,6 +90,32 @@ int32_t CM_VISION_CNN_convertYUV2RGB(OutputT           *rgbImage,
     int32_t         j;
     int32_t         y;
     int32_t         status = 0;
+
+    if (mean.size() >= 3)
+    {
+        meanR  = mean[0];
+        meanG  = mean[1];
+        meanB  = mean[2];
+    }
+    else
+    {
+        meanR  = 0.0;
+        meanG  = 0.0;
+        meanB  = 0.0;
+    }
+
+    if (scale.size() >= 3)
+    {
+        scaleR = scale[0];
+        scaleG = scale[1];
+        scaleB = scale[2];
+    }
+    else
+    {
+        scaleR = 1.0;
+        scaleG = 1.0;
+        scaleB = 1.0;
+    }
 
     srcPtrY  = yuvImage[0];
     srcPtrUV = yuvImage[1];

@@ -39,7 +39,8 @@ if(${BUILD_CORE_NODES})
 
     set(EDGEAI_COMMON_SRC
         ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_utils.cpp
-        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_debug.cpp)
+        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_debug.cpp
+        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_classnames.cpp)
 
     set(ALL_CORE_SRCS
         ${COMMON_SRCS}

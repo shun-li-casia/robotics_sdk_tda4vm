@@ -1,10 +1,19 @@
 <launch>
 
+    <arg name="image_format" default="2"/>
+    <arg name="lut_file_path" default="$(find mono_capture)/config/C920_HD_LUT.bin" />
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
+
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
-        <rosparam file="$(find ti_vision_cnn)/config/objdet_params_c920.yaml" subst_value="true" />
+        <rosparam file="$(find ti_vision_cnn)/config/params.yaml" subst_value="true" />
+        <param name = "image_format" value = "$(arg image_format)"/>
+        <param name = "lut_file_path" value = "$(arg lut_file_path)"/>
+        <param name = "dl_model_path" value = "$(arg dl_model_path)"/>
         <param name = "input_topic_name" value = "camera/image_raw"/>
         <param name = "rectified_image_topic" value = "camera/image_rect_nv12"/>
+        <param name = "rectified_image_frame_id" value = "right_frame"/>
         <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
     </node>
 

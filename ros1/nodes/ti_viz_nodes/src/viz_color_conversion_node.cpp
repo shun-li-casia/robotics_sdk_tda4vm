@@ -111,7 +111,7 @@ namespace ros_app_yuv2rgb
             out_msg.encoding     = "rgb8";
             out_msg.step         = width*3;
             out_msg.data         = vec_rgb;
-            out_msg.header.stamp = yuv_image.header.stamp;
+            out_msg.header       = yuv_image.header;
             out_pub.publish(out_msg);
         }
 

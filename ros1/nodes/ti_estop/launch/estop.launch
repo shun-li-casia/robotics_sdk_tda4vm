@@ -1,9 +1,26 @@
 <launch>
+
+    <!-- ZED camera serial number string -->
+    <arg name="zed_sn" default="SN5867575"/>
+
+    <!-- DL model path -->
+    <arg name="dl_model_path" default="/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"/>
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"/> -->
+
     <!-- openVX Estop graph node -->
     <node pkg = "ti_estop" type = "estop" name = "estop" output = "screen" args = "" required = "true">
 
         <!-- Configuration file for the openVX CNN graph -->
         <rosparam file="$(find ti_estop)/config/params.yaml" subst_value="true" />
+
+        <!-- Left image LDC LUT file -->
+        <param name = "left_lut_file_path" value = "$(find zed_capture)/config/$(arg zed_sn)_HD_LUT_left.bin"/>
+
+        <!-- Light image LDC LUT file -->
+        <param name = "right_lut_file_path" value = "$(find zed_capture)/config/$(arg zed_sn)_HD_LUT_right.bin"/>
+
+        <!-- DL model path -->
+        <param name = "dl_model_path" value = "$(arg dl_model_path)"/>
 
         <!-- Left input topic name to subscribe to -->
         <param name = "left_input_topic_name" value = "camera/left/image_raw"/>

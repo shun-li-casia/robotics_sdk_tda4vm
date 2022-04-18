@@ -1,7 +1,9 @@
 <launch>
 
     <!-- ti_sde -->
-    <include file="$(find ti_sde)/launch/sde.launch"/>
+    <include file="$(find ti_sde)/launch/sde.launch">
+        <arg name="zed_sn" value="SN18059"/>
+    </include>
 
     <!-- zed_capture -->
     <include file="$(find zed_capture)/launch/zed_capture.launch">

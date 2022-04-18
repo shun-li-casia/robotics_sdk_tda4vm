@@ -24,5 +24,9 @@ if (${BUILD_VISUALIZATION_NODES})
     set(VIZ_ESTOP_SRCS src/viz_estop_node.cpp)
     build_node(viz_estop VIZ_ESTOP_SRCS)
 
+    # viz_objdet_range_node
+    set(VIZ_OBJDET_RANGE_SRCS src/viz_objdet_range_node.cpp)
+    build_node(viz_objdet_range VIZ_OBJDET_RANGE_SRCS)
+
 endif()
 

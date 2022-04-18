@@ -31,7 +31,7 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Release tag info of the current release
-GIT_TAG="REL.08.01.00"
+GIT_TAG="REL.08.02.00"
 if [ "$#" -eq 1 ]; then
     GIT_TAG=$1
 fi
@@ -42,13 +42,13 @@ GIT_REPO="https://git.ti.com/git/processor-sdk-vision/jacinto_ros_perception.git
 BRANCH=master
 
 # git config on the target to avoid warnings
+ARCH=`arch`
 if [[ "$ARCH" == "aarch64" ]]; then
     git config --global user.email "user@example.com"
     git config --global user.name "User"
 fi
 
 # Define env variables
-ARCH=`arch`
 export WORK_DIR=$HOME/j7ros_home
 export ROS_WS=$WORK_DIR/ros_ws
 
@@ -96,8 +96,10 @@ function git_pull_to_current_folder {
 mkdir -p $SDK_DIR
 CWD=$(pwd)
 if [[ -d "$SDK_DIR/.git" ]]; then
-    cd $SDK_DIR
-    git pull
+    if [[ $(stat -f -L -c %T $SDK_DIR) -ne "nfs" ]]; then
+        cd $SDK_DIR
+        git pull
+    fi
 else
     if [[ "$CWD" == "$SDK_DIR" ]]; then
         git_pull_to_current_folder
@@ -110,6 +112,11 @@ git_checkout_with_tag $SDK_DIR
 # Install gscam/gscam2 or reinstall the packages if already exist
 if [[ -f "$SDK_DIR/scripts/install_gscam.sh" ]]; then
     bash $SDK_DIR/scripts/install_gscam.sh
+fi
+
+# Install TI mmWave radar driver node
+if [[ -f "$SDK_DIR/scripts/install_mmwave_rospkg.sh" ]]; then
+    bash $SDK_DIR/scripts/install_mmwave_rospkg.sh
 fi
 
 # Setup $WORK_DIR
@@ -126,29 +133,31 @@ fi
 # On the TDA target
 if [[ "$ARCH" == "aarch64" ]]; then
     # Download and install ROSBAG and other files
-    if [[ ! -d "${WORK_DIR}/data" ]]; then
+    if [[ ! -d "${WORK_DIR}/data" ]] || [[ -z "$(ls -A ${WORK_DIR}/data)" ]]; then
         make data_download
     fi
 
     # Install Tensorflow for CPP apps build
-    if [[ ! -d "/opt/tensorflow" ]]; then
+    if [[ ! -d "/opt/tensorflow" ]] || [[ -z "$(ls -A /opt/tensorflow)" ]]; then
         bash /opt/edge_ai_apps/scripts/install_tensorflow.sh
     fi
 
     # Install dlpack for CPP apps build
-    if [[ ! -d "/opt/dlpack" ]]; then
-        bash /opt/edge_ai_apps/scripts/install_dlpack.sh 0.5
+    if [[ ! -d "/opt/dlpack" ]] || [[ -z "$(ls -A /opt/dlpack)" ]]; then
+        bash /opt/edge_ai_apps/scripts/install_dlpack.sh
     fi
 
     # Install ONNX RT for CPP apps build
-    if [[ ! -d "/opt/onnxruntime" ]]; then
+    if [[ ! -d "/opt/onnxruntime" ]] || [[ -z "$(ls -A /opt/onnxruntime)" ]]; then
         bash /opt/edge_ai_apps/scripts/install_onnx_rt.sh
     fi
 
     # Download models in the model zoo
     Models=(
-        ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-coco-512x512
+        ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512
         TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
+        TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432
+        ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432
     )
     for Model in ${Models[@]}; do
 	    bash /opt/edge_ai_apps/download_models.sh -d $Model

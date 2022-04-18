@@ -106,10 +106,7 @@ MonoCamNode::MonoCamNode(const std::string&         name,
     // populate camera_info
     RCLCPP_INFO(this->get_logger(), "Loading camera info from yaml files");
 
-    CameraInfoManager caminfo_manager(this,
-                                           "camera",
-                                           "package://mono_capture/config/"+camera_info_yaml_);
-
+    CameraInfoManager caminfo_manager(this, "camera", camera_info_yaml_);
 
     auto caminfo             = caminfo_manager.getCameraInfo();
     caminfo.header.frame_id  = frame_id_;

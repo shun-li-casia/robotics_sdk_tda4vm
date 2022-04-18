@@ -2,16 +2,25 @@ Robotics SDK
 ============
 ## Git Repository
 
+### Robotics SDK 8.2 RC1 (Requires: Edge AI 8.2 RC2 SD Card Image)
+**WARNING**: This RC is currently only for TI-internal for testing.
+
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
 
-[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_01_00/docs/index.html)
+[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_02_00/docs/index.html)
+
+### Stable Version
+
+[Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/): Use tag 'REL.08.01.00'
+
+[User Guide Documentation (REL.08.01.00)](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_01_00/docs/index.html)
 
 ## Overview
 
-The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.1.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.01.00.02). We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
+The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.2.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.02.00.01) [TODO: update URL]. We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
 
 * Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, mapping and localization) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the TDA4 processors.
-* Direct compilation of application software on the target using APIs optimized on the TDA4 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV, Point-Cloud Library (PCL), and many more.
+* Application software development on the target using APIs optimized on the TDA4 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV, Point-Cloud Library (PCL), and many more.
 
 Figure 1 shows the software libraries and components that the Robotics SDK provides.
 
@@ -24,8 +33,8 @@ TI Vision Apps Library is included in the pre-built base image for the Processor
 
 * TI OpenVX kernels and software infrastructure
 * Imaging and vision applications
-* Advanced driver-assistance systems (ADAS) applications
 * Perception applications
+* Advanced driver-assistance systems (ADAS) applications
 
 ### Open-Source Deep-Learning Runtime
 The Processor SDK Linux for Edge AI also supports the following open-source deep-learning runtime:
@@ -45,7 +54,7 @@ Figure 2 shows a representative deep-learning and compute-intensive demo applica
 
 This section describes how to set up the Robotics SDK on top of the Processor SDK Linux for Edge AI. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
-**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_01_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
+**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_02_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
 
 ## Sensor Driver Nodes
 
@@ -56,6 +65,8 @@ Following ROS nodes for cameras are tested and supported by the SDK.
 ### [USB Mono Camera Capture Node](ros1/drivers/mono_capture/README.md)
 
 ### [GStreamer-based Camera Capture Node](ros1/drivers/gscam/README_TI.md)
+
+### [mmWave Radar Driver Node](docs/radar_driver_node.md)
 
 ## Demo Applications
 
@@ -69,6 +80,8 @@ The SDK supports following out-of-box demo applications.
 
 ### [3D Obstacle Detection Accelerated on SDE and C7x/MMA](ros1/nodes/ti_estop/README.md)
 
+### [Vision Object Detection with 3D Spatial Information](ros1/nodes/ti_objdet_range/README.md)
+
 ### [Visual Localization Accelerated on C7x/MMA](ros1/nodes/ti_vl/README.md)
 
 ![](ros1/nodes/ti_vision_cnn/docs/objdet_rviz.png)
@@ -79,7 +92,7 @@ The SDK supports following out-of-box demo applications.
 
 ## Scope of Robotics SDK
 
-![](docs/scope_of_release_08_01_00.png)
+![](docs/scope_of_release_08_02_00.png)
 
 ## Limitations and Known Issues
 See [known_issues.md](docs/known_issues.md)

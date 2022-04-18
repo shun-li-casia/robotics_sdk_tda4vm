@@ -18,14 +18,14 @@ def generate_launch_description():
 
     # rosbag process
     rosbag_process = ExecuteProcess(
-                       output = "screen",
-                       cmd=['ros2', 'bag', 'record',
-                            '-b', LaunchConfiguration('maxsize'),
-                            '/camera/left/image_raw',
-                            '/camera/left/camera_info',
-                            '/camera/right/image_raw'
-                            '/camera/right/camera_info']
-                  )
+        output = "screen",
+        cmd=['ros2', 'bag', 'record',
+            '-b', LaunchConfiguration('maxsize'),
+            '/camera/left/image_raw',
+            '/camera/left/camera_info',
+            '/camera/right/image_raw'
+            '/camera/right/camera_info']
+    )
 
     ld.add_action(rosbag_process)
 

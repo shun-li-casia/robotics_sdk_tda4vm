@@ -31,19 +31,19 @@ In ROS 2 Docker container environment, ROS Foxy and necessary libraries and tool
 
 1. To generate the scripts for building and running a Docker image for ROS 2 Foxy:
     ```
-    root@j7-evm:~/j7ros_home$ make scripts ROS_VER=2
+    root@tda4vm-sk:~/j7ros_home$ make scripts ROS_VER=2
     ```
     Please make sure that two bash scripts, `docker_build_ros2.sh` and `docker_run_ros2.sh`, are generated.
 
 2. To build the Docker image:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_build_ros2.sh
+    root@tda4vm-sk:~/j7ros_home$ ./docker_build_ros2.sh
     ```
     This step will take several minutes depending on the network speed, and once "docker build" is completed, you can check the resulting Docker image with `docker images`.
 
 3. To start/run the Docker container:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh
     ```
     It is important to use `docker_run_ros2.sh` script to start a Docker container, since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the TDA4 device.
 
@@ -147,7 +147,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_sde zed_sde_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_sde zed_sde_launch.py
     ```
 
 2. **[PC]** For visualization, in the ROS 2 container on the PC:
@@ -163,7 +163,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_sde zed_sde_pcl_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_sde zed_sde_pcl_launch.py
     ```
 
 2. **[PC]** For visualization, in the ROS 2 container on the PC:
@@ -179,7 +179,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py
     ```
     To process the image stream from a USB mono camera, replace the launch file with `gscam_semseg_cnn_launch.py` in the above.
 
@@ -192,7 +192,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
 
 1. **[TDA4]** To launch object detection demo with a ZED stereo camera, run the following launch command **inside** the ROS 2 container:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
@@ -209,7 +209,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
 
 1. **[TDA4]** To launch `ti_estop` node with a ZED stereo camera, run the following launch command **inside** the ROS 2 container:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_estop zed_estop_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_estop zed_estop_launch.py
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
@@ -229,7 +229,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     ```
     Alternatively, you can run the following directly on the TDA4 host Linux:
     ```
-    root@j7-evm:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vl bag_visloc_launch.py
+    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros2.sh ros2 launch ti_vl bag_visloc_launch.py
     ```
 
 2. **[PC]**  For visualization, in the ROS 2 container on the PC:

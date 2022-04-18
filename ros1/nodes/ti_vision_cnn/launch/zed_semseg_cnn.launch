@@ -1,10 +1,16 @@
 <launch>
 
+    <arg name="zed_sn" default="SN18059"/>
+
     <!-- ti_vision_cnn -->
-    <include file="$(find ti_vision_cnn)/launch/semseg_cnn.launch"/>
+    <include file="$(find ti_vision_cnn)/launch/semseg_cnn.launch">
+        <arg name="image_format" value="2"/>
+        <arg name="lut_file_path" value="$(find zed_capture)/config/$(arg zed_sn)_HD_LUT_right.bin" />
+    </include>
 
     <!-- zed_capture -->
     <include file="$(find zed_capture)/launch/zed_capture_remap.launch">
+        <arg name="zed_sn_str" value="$(arg zed_sn)"/>
         <arg name="frame_rate" value="15"/>
         <arg name="topic_ns_right" value="camera"/>
     </include>

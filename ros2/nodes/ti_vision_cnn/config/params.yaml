@@ -1,0 +1,42 @@
+vision_cnn:
+    ros__parameters:
+        # input data width in pixels
+        width:                  1280
+
+        # input data height in lines
+        height:                 720
+
+        # Maximum number of Semantic Segmentation classes
+        num_classes:            20
+
+        # interactive mode
+        is_interactive:         0
+
+        # To enable showing output on display when display_option = 1
+        display_option:         1
+
+        # pipeline depth
+        pipeline_depth:         4
+
+        # Flag to indicate if the graph should be exported
+        #  0 - disable
+        #  1 - enable
+        exportGraph:            0
+
+        # Flag to indicate if the performance data should be exported
+        # to a file
+        #  0 - disable
+        #  1 - enable
+        exportPerfStats:        0
+
+        # Real-time logging enable.
+        #  0 - disable
+        #  1 - enable
+        rtLogEnable:            0
+
+        # log level for the app
+        # 0 - DEBUG: Used to show general debug messages
+        # 1 - INFO: Used to show run-time processing debug
+        # 2 - WARN: Used to warning developers of possible issues
+        # 3 - ERROR: Used for most errors
+        log_level:              2

@@ -12,17 +12,19 @@ def generate_launch_description():
 
     # Include SDE launch file
     sde_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(launch_dir, 'sde_pcl_launch.py')
-                )
-            )
+        PythonLaunchDescriptionSource(os.path.join(launch_dir, 'sde_launch.py')),
+        launch_arguments={
+            "sde_algo_type": "1",
+            "enable_pc": "1",
+        }.items()
+    )
 
     # Include rosbag launch file
     bag_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(launch_dir, 'rosbag_launch.py')
-                )
-            )
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_dir, 'rosbag_launch.py')
+        )
+    )
 
     ld.add_action(sde_launch)
     ld.add_action(bag_launch)
