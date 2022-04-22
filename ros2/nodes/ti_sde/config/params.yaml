@@ -100,12 +100,6 @@ sde:
         #  1 - enable
         exportGraph:                        0
 
-        # Flag to indicate if the performance data should be exported
-        # to a file
-        #  0 - disable
-        #  1 - enable
-        exportPerfStats:                    0
-
         # Real-time logging enable.
         #  0 - disable
         #  1 - enable

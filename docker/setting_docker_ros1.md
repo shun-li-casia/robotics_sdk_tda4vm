@@ -91,8 +91,8 @@ Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.laun
 Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch  | same as above
 3D Obstacle Detection (ROSBAG)     | roslaunch ti_estop bag_estop.launch  | roslaunch ti_viz_nodes rviz_estop.launch
 3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch  | same as above
-3D Perception (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch
-3D Perception (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch  | same as above
+Object Detection with 3D Spatial Information (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch
+Object Detection with 3D Spatial Information (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch  | same as above
 Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | roslaunch ti_viz_nodes rviz_visloc.launch
 
 In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be launched: either on the TDA4 target, or on the PC.
@@ -181,7 +181,7 @@ In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be l
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_estop.launch
     ```
 
-### 3.6. Run 3D Perception Application
+### 3.6. Run Object Detection with 3D Spatial Information
 
 1. **[TDA4]** To launch `ti_objdet_range` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```

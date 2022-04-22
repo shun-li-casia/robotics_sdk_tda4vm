@@ -1,10 +1,12 @@
 <launch>
 
     <arg name="zed_sn" default="SN18059"/>
+	<arg name="exportPerfStats" default="0"/>
 
     <!-- objdet_range.launch -->
     <include file="$(find ti_objdet_range)/launch/objdet_range.launch">
         <arg name="zed_sn" value="$(arg zed_sn)"/>
+		<arg name="exportPerfStats" value="$(arg exportPerfStats)"/>
     </include>
 
     <!-- zed_capture -->

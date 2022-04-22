@@ -13,7 +13,7 @@ This section describes how to set up the Robotics SDK on the TDA4 Processor SDK 
  J721E    | [TDA4VM](https://www.ti.com/product/TDA4VM) | [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM)
 
 ### 1.2. Processor SDK Linux for Edge AI
-The Robotics SDK requires [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_02_00_09/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL] from [Processor SDK Linux for Edge AI 8.2.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.02.00.01) [TODO: update URL]. The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
+The Robotics SDK requires [the SD card image](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) from [Processor SDK Linux for Edge AI 8.2.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.02.00.01). The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
 
 ### 1.3. Ubuntu PC
 A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. We have tested only with native x86_64 Ubuntu PCs, and have **not** tested with any other Ubuntu systems: including Ubuntu virtual machines and Docker Desktop on Mac or Windows.
@@ -42,13 +42,13 @@ The Robotics SDK provides camera ROS nodes for [ZED stereo camera](https://www.s
 
 <!-- ================================================================================= -->
 ## 2. Set Up the TDA4 Target and Development Environment
-Figure 1 shows the hardware setup and high-level installation steps on the TDA4 target and the Ubuntu PC. The target EVM and the remote Ubuntu PC are assumed to be connected through Ethernet in the same network.
+Figure 1 shows the hardware setup and high-level installation steps on the TDA4 target and the Ubuntu PC. The target EVM and the remote Ubuntu PC are assumed to be connected in the same network through Ethernet or WiFi connectivity. For details on how to set up the WiFi on the TDA4VM SK board, please refer to [this section of Edge AI documentation](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/docs/wifi_oob_demo.html).
 
 ### 2.1. Build SD Card
 
-1. From Ubuntu PC, download [the SD card image](http://udc0393891.dhcp.ti.com/webgen/publish/nightly/PROCESSOR_SDK_LINUX_SK_TDA4VM/08_02_00_09/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip) [TODO: update URL].
+1. From Ubuntu PC, download [the SD card image](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/ti-processor-sdk-linux-sk-tda4vm-etcher-image.zip).
 
-2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_01_00_02/exports/docs/getting_started.html#software-setup) [TODO: update URL].
+2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/docs/getting_started.html#software-setup).
 
 **NOTE**: The etcher image is created for 16 GB SD cards, if you are using a larger SD card, it is highly recommended to expand the root filesystem to use the full SD card capacity using below steps on the Ubuntu PC.
 
@@ -87,7 +87,7 @@ This script takes care of:
 * Cloning the main GIT repository for Robotics SDK under `/opt/robotics_sdk`
 * Setting up the folders for evaluating the Robotics SDK under `$HOME/j7ros_home`
 * Downloading ROSBAG and other data files
-* Downloading several deep-learning models from the edge AI model zoo. You can also use the model downloader tool (please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_01_00_02/exports/docs/inference_models.html) [TODO: update URL] for more details).
+* Downloading several deep-learning models from the edge AI model zoo. You can also use the model downloader tool (please refer to [this section of Edge AI documentation](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/docs/inference_models.html) for more details).
 
 ### 2.3.2 On the Remote Ubuntu PC
 In a similar way, you can use the same script to set up on the remote Ubuntu PC for visualization:

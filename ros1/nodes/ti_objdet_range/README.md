@@ -1,5 +1,5 @@
 Vision Object Detection with 3D Spatial Information
-================================================
+===================================================
 
 ![](docs/objdet_range_rviz.png)
 <br />
@@ -27,7 +27,7 @@ roslaunch ti_objdet_range bag_objdet_range.launch
 
 With a live ZED stereo camera as input:
 ```
-roslaunch ti_objdet_range zed_objdet_range.launch
+roslaunch ti_objdet_range zed_objdet_range.launch zed_sn:=SNxxxxx
 ```
 
 **[Visualization on Ubuntu PC]**

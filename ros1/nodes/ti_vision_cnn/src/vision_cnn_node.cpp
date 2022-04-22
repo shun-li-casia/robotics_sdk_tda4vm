@@ -129,35 +129,32 @@ void VisionCnnNode::publisherThread()
     bool        status;
     bool        latch = true;
 
-    if (m_cntxt->enableLdcNode)
+    status = m_privNodeHdl.getParam("rectified_image_topic", rectImgTopic);
+    if (status == false)
     {
-        status = m_privNodeHdl.getParam("rectified_image_topic", rectImgTopic);
-        if (status == false)
-        {
-            ROS_ERROR("Config parameter 'rectified_image_topic' not found.");
-            exit(-1);
-        }
-
-        status = m_privNodeHdl.getParam("rectified_image_frame_id", rectImgFrame);
-        if (status == false)
-        {
-            ROS_ERROR("Config parameter 'rectified_image_frame_id' not found.");
-            exit(-1);
-        }
-
-        // rectified image in YUV420 (NV12)
-        m_rectImageSize = 1.5 * m_inputImgWidth * m_inputImgHeight;
-        m_rectImagePubData.data.assign(m_rectImageSize, 0);
-        m_rectImagePubData.width    = m_inputImgWidth;
-        m_rectImagePubData.height   = m_inputImgHeight;
-        m_rectImagePubData.step     = m_inputImgWidth;
-        m_rectImagePubData.encoding = "yuv420";
-        m_rectImagePubData.header.frame_id = rectImgFrame;
-
-        // Create the publisher for the rectified image
-        m_rectImgPub = m_imgTrans->advertise(rectImgTopic, latch);
-        ROS_INFO_STREAM("Created Publisher for topic: " << rectImgTopic);
+        ROS_ERROR("Config parameter 'rectified_image_topic' not found.");
+        exit(-1);
     }
+
+    status = m_privNodeHdl.getParam("rectified_image_frame_id", rectImgFrame);
+    if (status == false)
+    {
+        ROS_ERROR("Config parameter 'rectified_image_frame_id' not found.");
+        exit(-1);
+    }
+
+    // rectified image in YUV420 (NV12)
+    m_rectImageSize = 1.5 * m_inputImgWidth * m_inputImgHeight;
+    m_rectImagePubData.data.assign(m_rectImageSize, 0);
+    m_rectImagePubData.width    = m_inputImgWidth;
+    m_rectImagePubData.height   = m_inputImgHeight;
+    m_rectImagePubData.step     = m_inputImgWidth;
+    m_rectImagePubData.encoding = "yuv420";
+    m_rectImagePubData.header.frame_id = rectImgFrame;
+
+    // Create the publisher for the rectified image
+    m_rectImgPub = m_imgTrans->advertise(rectImgTopic, latch);
+    ROS_INFO_STREAM("Created Publisher for topic: " << rectImgTopic);
 
     status = m_privNodeHdl.getParam("vision_cnn_tensor_topic", outTensorTopic);
     if (status == false)
@@ -203,10 +200,7 @@ void VisionCnnNode::publisherThread()
     processCompleteEvtHdlr();
 
     // Shutdown the publishers
-    if (m_cntxt->enableLdcNode)
-    {
-        m_rectImgPub.shutdown();
-    }
+    m_rectImgPub.shutdown();
 
     m_outTensorPub.shutdown();
 }
@@ -248,20 +242,17 @@ void VisionCnnNode::processCompleteEvtHdlr()
                              &outRef,
                              &m_cntxt->outTimestamp);
 
-        if (m_cntxt->enableLdcNode)
-        {
-            // Extract rectified right image data (YUV420 or NV12)
-            vxStatus = CM_extractImageData(m_rectImagePubData.data.data(),
-                                           m_cntxt->vxInputDisplayImage,
-                                           m_rectImagePubData.width,
-                                           m_rectImagePubData.height,
-                                           2,
-                                           0);
+        // Extract rectified right image data (YUV420 or NV12)
+        vxStatus = CM_extractImageData(m_rectImagePubData.data.data(),
+                                       m_cntxt->vxInputDisplayImage,
+                                       m_rectImagePubData.width,
+                                       m_rectImagePubData.height,
+                                       2,
+                                       0);
 
-            if (vxStatus != (vx_status)VX_SUCCESS)
-            {
-                ROS_ERROR("CM_extractImageData() failed.");
-            }
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            ROS_ERROR("CM_extractImageData() failed.");
         }
 
         // Extract raw tensor data
@@ -282,12 +273,9 @@ void VisionCnnNode::processCompleteEvtHdlr()
             ros::Time time;
             time.fromNSec(m_cntxt->outTimestamp);
 
-            if (m_cntxt->enableLdcNode)
-            {
-                // Publish Rectified (Right) image
-                m_rectImagePubData.header.stamp = time;
-                m_rectImgPub.publish(m_rectImagePubData);
-            }
+            // Publish Rectified (Right) image
+            m_rectImagePubData.header.stamp = time;
+            m_rectImgPub.publish(m_rectImagePubData);
 
             // Publish output tensor
             if (m_taskType == "segmentation")
@@ -397,6 +385,16 @@ void VisionCnnNode::readParams()
     else
     {
         ROS_INFO("Config parameter 'image_format' not supported.");
+        exit(-1);
+    }
+
+    /* Get enable ldc node flag */
+    m_privNodeHdl.param("enable_ldc_node", tmp, 1);
+    m_cntxt->enableLdcNode = (bool)tmp;
+
+    if (m_cntxt->enableLdcNode == 0 && m_cntxt->inputImageFormat != VX_DF_IMAGE_NV12)
+    {
+        ROS_INFO("LDC Node can be bypassed only when input is NV12.");
         exit(-1);
     }
 

@@ -28,7 +28,7 @@ roslaunch ti_vision_cnn bag_semseg_cnn.launch
 ```
 To process the image stream from a ZED stereo camera:
 ```
-roslaunch ti_vision_cnn zed_semseg_cnn.launch
+roslaunch ti_vision_cnn zed_semseg_cnn.launch zed_sn:=SNxxxxx
 ```
 To process the image stream from a USB mono camera:
 ```
@@ -53,7 +53,7 @@ roslaunch ti_vision_cnn bag_semseg_cnn.launch ratefactor:=2.0
 
 **[TDA4]** To launch semantic segmentation demo with a ZED stereo camera, run the following inside the Docker container on TDA4 target:
 ```
-ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py
+ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py zed_sn:=SNxxxxx
 ```
 To process the image stream from a USB mono camera:
 ```
@@ -78,21 +78,24 @@ See [README_objdet.md](./README_objdet.md).
 
 ## Launch File Parameters
 
-Parameter                | Description                                                               | Value
--------------------------|---------------------------------------------------------------------------|-------------------
-rosparam file            | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
-input_topic_name         | Subscribe topic name for input camera image                               | camera/right/image_raw
-rectified_image_topic    | Publish topic name for output rectified image                             | camera/right/image_rect_nv12
-rectified_image_frame_id | frame_id for output rectified image                                       | right_frame
-vision_cnn_tensor_topic  | Publish topic name for output tensor                                      | vision_cnn/tensor
+Parameter                | Description                                                                | Value
+-------------------------|----------------------------------------------------------------------------|-------------------
+rosparam file            | Algorithm configuration parameters (see "ROSPARAM Parameters" section)     | config/params.yaml
+image_format             | Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY | 0, 1, 2
+enable_ldc_node          | LDC node enable/disable flag                                               | 0, 1
+lut_file_path            | LDC rectification table path                                               | String
+dl_model_path            | DL model artifacts folder path                                             | String
+input_topic_name         | Subscribe topic name for input camera image                                | camera/right/image_raw
+rectified_image_topic    | Publish topic name for output rectified image                              | camera/right/image_rect_nv12
+rectified_image_frame_id | frame_id for output rectified image                                        | right_frame
+vision_cnn_tensor_topic  | Publish topic name for output tensor                                       | vision_cnn/tensor
+exportPerfStats          | Flag for exporting the performance data to a file: 0 - disable, 1 - enable | 0, 1
 
 ## ROSPARAM Parameters
 The table below describes the parameters in `config/params.yaml`:
 
  Parameter                | Description                                        | Value
 --------------------------|----------------------------------------------------|----------
- lut_file_path            | LDC rectification table path                       | String
- dl_model_path            | DL model artifacts folder path                     | String
  width                    | Input image width                                  | Integer
  height                   | Input image height                                 | Integer
  num_classes              | Number of semantic segmentation classes            | 0 - 20

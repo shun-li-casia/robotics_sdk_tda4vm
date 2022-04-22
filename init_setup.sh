@@ -96,7 +96,7 @@ function git_pull_to_current_folder {
 mkdir -p $SDK_DIR
 CWD=$(pwd)
 if [[ -d "$SDK_DIR/.git" ]]; then
-    if [[ $(stat -f -L -c %T $SDK_DIR) -ne "nfs" ]]; then
+    if [[ "$(stat -f -L -c %T $SDK_DIR)" != "nfs" ]]; then
         cd $SDK_DIR
         git pull
     fi

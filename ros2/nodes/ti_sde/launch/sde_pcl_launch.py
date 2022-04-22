@@ -63,14 +63,14 @@ def generate_launch_description():
     # SDE algorithm type: 0 - single-layer SDE, 1 - multi-layer SDE
     sde_algo_type = DeclareLaunchArgument(
         name="sde_algo_type",
-        default_value=TextSubstitution(text="0"),
+        default_value=TextSubstitution(text="1"),
         description='string for ZED camera serial number'
     )
 
     # Enable point-cloud generation: 0 - disable, 1 - enable
     enable_pc = DeclareLaunchArgument(
         name="enable_pc",
-        default_value=TextSubstitution(text="0"),
+        default_value=TextSubstitution(text="1"),
         description='Enable point-cloud generation'
     )
 

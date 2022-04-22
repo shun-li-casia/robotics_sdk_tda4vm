@@ -22,7 +22,7 @@ roslaunch ti_vision_cnn bag_objdet_cnn.launch
 ```
 To process the image stream from a ZED stereo camera:
 ```
-roslaunch ti_vision_cnn zed_objdet_cnn.launch
+roslaunch ti_vision_cnn zed_objdet_cnn.launch zed_sn:=SNxxxxx
 ```
 To process the image stream from a USB mono camera:
 ```
@@ -41,7 +41,7 @@ roslaunch ti_viz_nodes rviz_objdet_cnn.launch
 
 **[TDA4]** To launch object detection demo with a ZED stereo camera, run the following inside the Docker container on TDA4 target:
 ```
-ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py
+ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py zed_sn:=SNxxxxx
 ```
 To process the image stream from a USB mono camera:
 ```
@@ -59,6 +59,3 @@ ros2 launch ti_vision_cnn bag_objdet_cnn_launch.py
 ```
 ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
 ```
-### Known Issue
-
-1. The default 2D object detection model (ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512) has initial loading time of about 20 seconds.

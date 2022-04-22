@@ -1,8 +1,12 @@
 <launch>
 
+    <arg name="zed_sn" default="SN18059"/>
+    <arg name="exportPerfStats" default="0"/>
+
     <!-- ti_sde -->
     <include file="$(find ti_sde)/launch/sde.launch">
-        <arg name="zed_sn" value="SN18059"/>
+        <arg name="zed_sn" value="$(arg zed_sn)"/>
+        <arg name="exportPerfStats" value="0"/>
     </include>
 
     <!-- ti_vision_cnn -->
@@ -15,10 +19,12 @@
         <param name = "rectified_image_topic" value = "camera/right/image_rect_nv12"/>
         <param name = "rectified_image_frame_id" value = "right_frame"/>
         <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
+        <param name = "exportPerfStats" value = "$(arg exportPerfStats)"/>
     </node>
 
     <!-- zed_capture -->
     <include file="$(find zed_capture)/launch/zed_capture.launch">
+        <arg name="zed_sn_str" value="$(arg zed_sn)"/>
         <arg name="frame_rate" value="15"/>
     </include>
 

@@ -14,7 +14,7 @@ optional arguments:
     -h, --help                    Show this help message and exit.
     -p PATH, --path PATH          Path to the directory where snapshots will be stored for calibration.
                                   Left and right images are saved in PATH/imageL and PATH/imageR, respectively.
-    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, HD and VGA are supported.
+    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, FHD2, HD and VGA are supported. FHD2 is 1920x1024, which is cropped from FHD.
     -d DEVNUM, --device DEVNUM     Device number, e.g., 0 for /dev/video0, 2 for /dev/video2.
 ```
 
@@ -57,7 +57,7 @@ optional arguments:
     -h, --help                    Show this help message and exit.
     -p PATH, --path PATH          Path to the directory where snapshots are stored for calibration.
                                   Left and right images are saved in PATH/imageL and PATH/imageR, respectively.
-    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, HD and VGA are supported.
+    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, FHD2, HD and VGA are supported. FHD2 is 1920x1024, which is cropped from FHD.
     -c COLUMN, --column COLUMN    Checkerboard width in terms of the number of control points
     -r ROW, --row ROW             Checkerboard height in terms of the number of control points
     -s SIZE, --size SIZE          Checkerboard grid size in mm
@@ -106,7 +106,7 @@ optional arguments:
     -h, --help                    Show this help message and exit.
     -p PATH, --path PATH          Path to the directory where snapshots will be stored for calibration.
                                   Left and right images are saved in PATH/imageL and PATH/imageR, respectively.
-    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, HD and VGA are supported.
+    -m CAMMODE, --mode CAMMODE    Camera mode. FHD, FHD2, HD and VGA are supported. FHD2 is 1920x1024, which is cropped from FHD.
     -d DEVNUM, --device DEVNUM    Device number, e.g., 0 for /dev/video0, 2 for /dev/video2.
 ```
 

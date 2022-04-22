@@ -14,3 +14,4 @@ Limitations and Known Issues
     root@tda4vm-sk:~# lsusb -v -d 2b03:f582 | grep bcdUSB
       bcdUSB               3.00
     ```
+8. In WiFi station mode, "ifconfig" reports a wrong IP address. A workaround is running "udhcpc -i wlp1s0" before "ifconfig"

@@ -2,22 +2,13 @@ Robotics SDK
 ============
 ## Git Repository
 
-### Robotics SDK 8.2 RC1 (Requires: Edge AI 8.2 RC2 SD Card Image)
-**WARNING**: This RC is currently only for TI-internal for testing.
-
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
 
 [User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_02_00/docs/index.html)
 
-### Stable Version
-
-[Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/): Use tag 'REL.08.01.00'
-
-[User Guide Documentation (REL.08.01.00)](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_01_00/docs/index.html)
-
 ## Overview
 
-The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.2.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM#release-notes/08.02.00.01) [TODO: update URL]. We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
+The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.2.0](hhttps://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.02.00.01). We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
 
 * Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, mapping and localization) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the TDA4 processors.
 * Application software development on the target using APIs optimized on the TDA4 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV, Point-Cloud Library (PCL), and many more.

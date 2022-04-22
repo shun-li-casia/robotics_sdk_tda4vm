@@ -1,2 +1,1 @@
-* SN29788442.conf: ZED2
-* SN5867575.conf: ZED1
+* SN5867575.conf: ZED1 camera used in zed1_2020-11-09-18-01-08.bag

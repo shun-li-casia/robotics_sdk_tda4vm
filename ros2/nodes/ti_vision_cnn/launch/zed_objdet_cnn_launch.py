@@ -4,12 +4,12 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node
-
-# ZED camera serial number
-zed_sn = 'SN18059'
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import TextSubstitution
+from launch.substitutions import LaunchConfiguration
 
 # Folder that contains camera params
-config_dir = "/opt/robotics_sdk/ros1/drivers/zed_capture/config"
+config_dir = "/opt/robotics_sdk/ros1/drivers/zed_capture/config/"
 
 def get_launch_file(pkg, file_name):
     pkg_dir = get_package_share_directory(pkg)
@@ -18,27 +18,40 @@ def get_launch_file(pkg, file_name):
 def generate_launch_description():
     ld = LaunchDescription()
 
-    pkg_dir = get_package_share_directory('ti_vision_cnn')
-    launch_dir = os.path.join(pkg_dir, 'launch')
+    # ZED camera serial number
+    zed_sn_arg = DeclareLaunchArgument(
+        "zed_sn", default_value=TextSubstitution(text="SN18059")
+    )
+
+    exportPerfStats_arg = DeclareLaunchArgument(
+        "exportPerfStats", default_value=TextSubstitution(text="0")
+    )
+
+    # ref: https://answers.ros.org/question/384712/ros2-launch-how-to-concatenate-launchconfiguration-with-string/?answer=384740
+    lut_file_path_arg = DeclareLaunchArgument(
+        "lut_file_path", default_value=[config_dir, LaunchConfiguration('zed_sn'), "_HD_LUT_right.bin"]
+    )
 
     # Include OBJDET launch file
     cnn_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(launch_dir, 'objdet_cnn_launch.py')),
+        PythonLaunchDescriptionSource(get_launch_file('ti_vision_cnn', 'objdet_cnn_launch.py')),
         launch_arguments={
-            'lut_file_path': os.path.join(config_dir, zed_sn+"_HD_LUT_right.bin")
+            'lut_file_path': LaunchConfiguration('lut_file_path')
         }.items()
     )
 
     # Include ZED launch file
-    zed_launch_file = get_launch_file('zed_capture', 'zed_capture_launch.py')
     zed_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(zed_launch_file),
+        PythonLaunchDescriptionSource(get_launch_file('zed_capture', 'zed_capture_launch.py')),
         launch_arguments={
-            'zed_sn_str': zed_sn,
+            "zed_sn_str": LaunchConfiguration('zed_sn'),
             'topic_ns_right': 'camera',
         }.items()
     )
 
+    ld.add_action(zed_sn_arg)
+    ld.add_action(exportPerfStats_arg)
+    ld.add_action(lut_file_path_arg)
     ld.add_action(cnn_launch)
     ld.add_action(zed_launch)
 

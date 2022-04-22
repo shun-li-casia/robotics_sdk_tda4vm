@@ -45,22 +45,27 @@ def setStereoCameraMode(camera_mode):
     elif camera_mode == 'HD':
         stereo_width  = 2560
         stereo_height = 720
-    elif camera_mode == 'FHD':
+    elif camera_mode == 'FHD' or camera_mode == 'FHD2':
         stereo_width  = 3840
         stereo_height = 1080
     else:
         sys.exit("Error: Wrong camer mode {}".format(camera_mode))
 
-    out_width     = int(stereo_width/2)
-    out_height    = int(stereo_height)
+    out_width      = int(stereo_width/2)
+    out_height     = int(stereo_height)
 
-    return stereo_width, stereo_height, out_width, out_height
+    if camera_mode == 'FHD2':
+        ver_offset = int((stereo_height - 1024)/2)
+    else:
+        ver_offset = 0
+
+    return stereo_width, stereo_height, out_width, out_height, ver_offset
 
 
 def main(camera_mode, device_num, image_path):
     """Main function"""
 
-    stereo_width, stereo_height, out_width, out_height = \
+    stereo_width, stereo_height, out_width, out_height, ver_offset = \
         setStereoCameraMode(camera_mode)
 
     # /dev/videoX (X = device_num)
@@ -86,8 +91,8 @@ def main(camera_mode, device_num, image_path):
         if k == ord('q'):
             break
         elif k == ord('s'): # wait for 's' key to save and exit
-            imgL = img[0:out_height, 0:out_width]
-            imgR = img[0:out_height, out_width:2*out_width]
+            imgL = img[ver_offset:out_height-ver_offset, 0:out_width]
+            imgR = img[ver_offset:out_height-ver_offset, out_width:2*out_width]
             cv2.imwrite(pathL + '/image' + str(num).zfill(2) + '.png', imgL)
             cv2.imwrite(pathR + '/image' + str(num).zfill(2) + '.png', imgR)
             print("images saved!")
@@ -109,9 +114,10 @@ if __name__ == '__main__':
     # Path to directory
     parser.add_argument('-p', '--path', type=str, default='./stereo_calib',
         help="Path to the directory storing images for calibration")
-    # valid camera_mode: 'FHD', HD', 'VGA'
+    # valid camera_mode: 'FHD', 'FHD2',  HD', 'VGA'
+    # FHD2: 1920x1024
     parser.add_argument('-m', '--mode',type=str, default='HD',
-        help="Camera mode. Valid camera mode: FHD, HD, VGA")
+        help="Camera mode. Valid camera mode: FHD, FHD2, HD, VGA")
     # Device number
     parser.add_argument('-d', '--device', type=int, default=2,
         help="Video device number")

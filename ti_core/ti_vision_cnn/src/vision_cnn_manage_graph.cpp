@@ -412,29 +412,12 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
     scalerObj  = &appCntxt->scalerObj;
     cnt        = 0;
 
-    appCntxt->numGraphParams = 3;
-
-    /* LDC node Param 6 ==> graph param 0. */
-    vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
-                                      ldcObj->vxNode,
-                                      6);
-
-    if (vxStatus != (vx_status)VX_SUCCESS)
+    if (appCntxt->enableLdcNode)
     {
-        PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                    __FUNCTION__, __LINE__);
-    }
-    else
-    {
-        q[cnt++].refs_list = (vx_reference*)appCntxt->vxInputImage;
-    }
-
-    if (vxStatus == (vx_status)VX_SUCCESS)
-    {
-        /* LDC node Param 7 ==> graph param 1. */
+        /* LDC node Param 6 ==> graph param 0. */
         vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
                                           ldcObj->vxNode,
-                                          7);
+                                          6);
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
@@ -443,8 +426,43 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
         }
         else
         {
-            q[cnt++].refs_list = (vx_reference*)appCntxt->vxRectifiedImage;
+            q[cnt++].refs_list = (vx_reference*)appCntxt->vxInputImage;
         }
+
+        if (vxStatus == (vx_status)VX_SUCCESS)
+        {
+            /* LDC node Param 7 ==> graph param 1. */
+            vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
+                                              ldcObj->vxNode,
+                                              7);
+
+            if (vxStatus != (vx_status)VX_SUCCESS)
+            {
+                PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
+                            __FUNCTION__, __LINE__);
+            }
+            else
+            {
+                q[cnt++].refs_list = (vx_reference*)appCntxt->vxRectifiedImage;
+            }
+        }
+    } else
+    {
+
+        /* Scaler node Param 9 ==> graph param 0 */
+        vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
+                                          scalerObj->vxNode,
+                                          0);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
+                        __FUNCTION__, __LINE__);
+        }
+        else
+        {
+            q[cnt++].refs_list = (vx_reference*)appCntxt->vxInputImage;
+        }        
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -465,6 +483,8 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
         }
     }
 
+    appCntxt->numGraphParams = cnt;
+
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
         for (i = 0; i < cnt; i++)
@@ -483,7 +503,11 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
             paramDesc->inferInputBuff   = &appCntxt->inferInputBuff[i];
             paramDesc->inferOutputBuff  = &appCntxt->inferOutputBuff[i];
             paramDesc->vxScalerOut      = scalerObj->outImage[i];
-            paramDesc->vxRectifiedImage = appCntxt->vxRectifiedImage[i];
+
+            if (appCntxt->enableLdcNode)
+            {
+                paramDesc->vxRectifiedImage = appCntxt->vxRectifiedImage[i];
+            }
 
             VISION_CNN_enqueInputDesc(appCntxt, paramDesc);
         }
@@ -532,7 +556,6 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
     return vxStatus;
 }
 
-
 void VISION_CNN_printStats(VISION_CNN_Context * appCntxt)
 {
     tivx_utils_graph_perf_print(appCntxt->vxGraph);
@@ -544,7 +567,6 @@ void VISION_CNN_printStats(VISION_CNN_Context * appCntxt)
     CM_printProctime(stdout);
     PTK_printf("\n");
 }
-
 
 vx_status VISION_CNN_exportStats(VISION_CNN_Context * appCntxt, FILE *fp, bool exportAll)
 {
@@ -567,7 +589,6 @@ vx_status VISION_CNN_exportStats(VISION_CNN_Context * appCntxt, FILE *fp, bool e
 
     return vxStatus;
 }
-
 
 vx_status VISION_CNN_waitGraph(VISION_CNN_Context * appCntxt)
 {
@@ -594,7 +615,6 @@ vx_status VISION_CNN_waitGraph(VISION_CNN_Context * appCntxt)
 
     return vxStatus;
 }
-
 
 vx_status  VISION_CNN_process(VISION_CNN_Context     * appCntxt, 
                               VISION_CNN_graphParams * gpDesc,
@@ -776,7 +796,6 @@ vx_status VISION_CNN_popFreeInputDesc(VISION_CNN_Context        *appCntxt,
     return vxStatus;
 }
 
-
 vx_status VISION_CNN_popPreprocInputDesc(VISION_CNN_Context       *appCntxt,
                                          VISION_CNN_graphParams  **gpDesc)
 {
@@ -791,7 +810,6 @@ vx_status VISION_CNN_popPreprocInputDesc(VISION_CNN_Context       *appCntxt,
 
     return vxStatus;
 }
-
 
 vx_status VISION_CNN_popDlInferInputDesc(VISION_CNN_Context        *appCntxt,
                                          VISION_CNN_graphParams   **gpDesc)
@@ -858,13 +876,11 @@ vx_status VISION_CNN_popOutputDesc(VISION_CNN_Context       *appCntxt,
     return vxStatus;
 }
 
-
 void VISION_CNN_enqueInputDesc(VISION_CNN_Context      *appCntxt,
                                VISION_CNN_graphParams  *gpDesc)
 {
     appCntxt->freeQ.push(gpDesc);
 }
-
 
 void VISION_CNN_enquePreprocInputDesc(VISION_CNN_Context      *appCntxt,
                                       VISION_CNN_graphParams  *gpDesc)
@@ -884,13 +900,11 @@ void VISION_CNN_enquePostprocInputDesc(VISION_CNN_Context      *appCntxt,
     appCntxt->postProcQ.push(gpDesc);
 }
 
-
 void VISION_CNN_enqueOutputDesc(VISION_CNN_Context      *appCntxt,
                                 VISION_CNN_graphParams  *gpDesc)
 {
     appCntxt->outputQ.push(gpDesc);
 }
-
 
 vx_status VISION_CNN_processEvent(VISION_CNN_Context * appCntxt, vx_event_t * event)
 {
@@ -1006,7 +1020,6 @@ vx_status VISION_CNN_getOutBuff(VISION_CNN_Context   * appCntxt,
     }
 
     return vxStatus;
-
 }
 
 vx_status VISION_CNN_releaseOutBuff(VISION_CNN_Context * appCntxt)

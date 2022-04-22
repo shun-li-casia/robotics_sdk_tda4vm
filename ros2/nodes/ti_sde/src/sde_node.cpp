@@ -540,7 +540,7 @@ void SDEAppNode::readParams()
     m_cntxt->baseline = (float)ftmp;
 
     /* Get PC creation flag information */
-    get_parameter_or("enable_pc", tmp, 1);
+    get_parameter_or("enable_pc", tmp, 0);
     m_cntxt->enablePC = (uint8_t)tmp;
 
     /* Set logFileName based on enablePC */

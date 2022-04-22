@@ -54,13 +54,13 @@ num_voxels:               111556
 # number of features in a map
 num_map_feat:             13718
 
-# initial pose estimate used in campling the map data 
+# initial pose estimate used in campling the map data
 init_pose_est:            [-156.546, 0.0, -132.51]
 
-# should be consistant with scale of filter coefficients passed through file input_upsampling_weight
+# should be consistent with scale of filter coefficients passed through file input_upsampling_weight
 filter_scale_pw2:          8
 
-# should be consistant with scale of descriptors present in input_map_feat_desc_file
+# should be consistent with scale of descriptors present in input_map_feat_desc_file
 hi_res_desc_scale_pw2:     0
 
 # interactive mode
@@ -76,12 +76,6 @@ pipeline_depth:            4
 #  0 - disable
 #  1 - enable
 exportGraph:               0
-
-# Flag to indicate if the performance data should be exported
-# to a file
-#  0 - disable
-#  1 - enable
-exportPerfStats:           0
 
 # Real-time logging enable.
 #  0 - disable

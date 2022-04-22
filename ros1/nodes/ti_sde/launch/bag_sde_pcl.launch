@@ -1,9 +1,12 @@
 <launch>
 
+    <arg name="exportPerfStats" default="0"/>
+
     <!-- ti_sde with enable_pc: 1 -->
     <include file="$(find ti_sde)/launch/sde.launch">
         <arg name="sde_algo_type" value="1"/>
         <arg name="enable_pc" value="1" />
+        <arg name="exportPerfStats" value="$(arg exportPerfStats)"/>
     </include>
 
     <!-- rosbag play -->

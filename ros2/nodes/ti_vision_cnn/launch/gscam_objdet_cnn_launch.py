@@ -4,9 +4,13 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import TextSubstitution
+from launch.substitutions import LaunchConfiguration
 
 # Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY
 image_format = 1
+enable_ldc_node = 1
 lut_file_path = "/opt/robotics_sdk/ros1/drivers/mono_capture/config/C920_HD_LUT.bin"
 dl_model_path = "/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"
 # dl_model_path = "/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"
@@ -18,22 +22,27 @@ def get_launch_file(pkg, file_name):
 def generate_launch_description():
     ld = LaunchDescription()
 
-    # ti_vision_cnn node
-    config = os.path.join(
-        get_package_share_directory('ti_vision_cnn'),
-        'config',
-        'params.yaml'
+    exportPerfStats_arg = DeclareLaunchArgument(
+        "exportPerfStats", default_value=TextSubstitution(text="0")
     )
+
+    exportPerfStats_str_arg = DeclareLaunchArgument(
+        "exportPerfStats_str", default_value=[LaunchConfiguration('exportPerfStats')]
+    )
+
+    # ti_vision_cnn node
     params = [
-        config,
+        os.path.join(get_package_share_directory('ti_vision_cnn'), 'config', 'params.yaml'),
         {
             "image_format":             image_format,
+            "enable_ldc_node":          enable_ldc_node,
             "lut_file_path":            lut_file_path,
             "dl_model_path":            dl_model_path,
             "input_topic_name":         "camera/image_raw",
             "rectified_image_topic":    "camera/image_rect_nv12",
             "rectified_image_frame_id": "right_frame",
             "vision_cnn_tensor_topic":  "vision_cnn/tensor",
+            "exportPerfStats":           LaunchConfiguration('exportPerfStats_str'),
         },
     ]
     cnn_node = Node(
@@ -46,14 +55,12 @@ def generate_launch_description():
     )
 
     # Include gscam2 launch file
-    cam_launch_file = get_launch_file(
-        pkg='gscam2',
-        file_name='v4l_mjpg_launch.py'
-    )
     cam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(cam_launch_file)
+        PythonLaunchDescriptionSource(get_launch_file('gscam2', 'v4l_mjpg_launch.py'))
     )
 
+    ld.add_action(exportPerfStats_arg)
+    ld.add_action(exportPerfStats_str_arg)
     ld.add_action(cnn_node)
     ld.add_action(cam_launch)
 

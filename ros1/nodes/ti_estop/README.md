@@ -26,7 +26,7 @@ roslaunch ti_estop bag_estop.launch
 ```
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
 ```
-roslaunch ti_estop zed_estop.launch
+roslaunch ti_estop zed_estop.launch zed_sn:=SNxxxxx
 ```
 **[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
@@ -44,7 +44,7 @@ roslaunch ti_estop rviz_ogmap.launch
 
 **[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
 ```
-ros2 launch ti_estop zed_estop_launch.py
+ros2 launch ti_estop zed_estop_launch.py zed_sn:=SNxxxxx
 ```
 <!-- To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
@@ -68,6 +68,9 @@ ros2 launch ti_viz_nodes rviz_estop_ogmap_launch.py
 Parameter                | Description                                                                | Value
 -------------------------|----------------------------------------------------------------------------|-------------------
 rosparam file            | Algorithm configuration parameters (see "ROSPARAM Parameters" section)     | config/params.yaml
+left_lut_file_path       | LDC rectification table path for left image                                | String
+right_lut_file_path      | LDC rectification table path for right image                               | String
+dl_model_path            | Deep-learning model path                                                   | String
 left_input_topic_name    | Left input topic name to read left images from a stereo camera             | camera/left/image_raw
 right_input_topic_name   | Right input topic name to read right images from a stereo camera           | camera/right/image_raw
 camera_info_topic        | Right camera_info topic name to read relevant camera parameters            | camera/right/camera_info
@@ -77,6 +80,7 @@ bounding_box_topic       | Publish topic name for 3D bounding boxes coordinates 
 raw_disparity_topic_name | Publish topic name for raw disparity map                                   | camera/disparity/raw
 ogmap_topic_name         | Publish topic name for ego-centric occupancy grid map                      | detection3D/ogmap
 estop_topic_name         | Publish topic name for binary emergency stop message, indicating whether obstacle(s) is in proximity to the  robot or not | detection3D/estop
+exportPerfStats          | Flag for exporting the performance data to a file: 0 - disable, 1 - enable | 0, 1
 
 ## ROSPARAM Parameters
 
@@ -84,8 +88,6 @@ estop_topic_name         | Publish topic name for binary emergency stop message,
 
 Parameter                | Description                                                                  | Value
 -------------------------|------------------------------------------------------------------------------|----------
-left_lut_file_path       | LDC rectification table path for left image                                  | String
-right_lut_file_path      | LDC rectification table path for right image                                 | String
 input_format             | Input image format, 0: U8, 1: YUV422                                         | 0, 1
 sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE                  | 0, 1
 num_layers               | Number of layers in multi-layer SDE                                          | 2, 3

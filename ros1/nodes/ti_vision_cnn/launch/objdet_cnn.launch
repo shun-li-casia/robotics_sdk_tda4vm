@@ -2,11 +2,15 @@
 
     <!-- Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY -->
     <arg name="image_format" default="2"/>
+    <!-- LDC Node enable flag -->
+    <arg name="enable_ldc_node" default="1"/>
     <!-- LDC LUT definition file path -->
     <arg name="lut_file_path" default="$(find zed_capture)/config/SN5867575_HD_LUT_right.bin" />
     <!-- DL model path -->
     <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
     <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
+    <!-- Flag for exporting the performance data to a file: 0 - disable, 1 - enable -->
+    <arg name="exportPerfStats" default="0"/>
 
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
@@ -14,6 +18,8 @@
         <rosparam file="$(find ti_vision_cnn)/config/params.yaml" subst_value="true" />
         <!-- Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY -->
         <param name = "image_format" value = "$(arg image_format)"/>
+        <!-- LDC Node enable flag -->
+        <param name = "enable_ldc_node" value="$(arg enable_ldc_node)"/>
         <!-- LDC LUT definition file path -->
         <param name = "lut_file_path" value = "$(arg lut_file_path)"/>
         <!-- DL model path -->
@@ -26,6 +32,8 @@
         <param name = "rectified_image_frame_id" value = "right_frame"/>
         <!-- Output semantic segmentation tensor topic name to publish to -->
         <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
+        <!-- Flag for exporting the performance data to a file: 0 - disable, 1 - enable -->
+        <param name = "exportPerfStats" value = "$(arg exportPerfStats)"/>
     </node>
 
 </launch>

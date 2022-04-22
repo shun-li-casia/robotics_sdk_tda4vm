@@ -30,7 +30,7 @@ roslaunch ti_sde bag_sde.launch
 ```
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch`:
 ```
-roslaunch ti_sde zed_sde.launch
+roslaunch ti_sde zed_sde.launch zed_sn:=SNxxxxx
 ```
 **[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
@@ -46,7 +46,7 @@ roslaunch ti_sde bag_sde_pcl.launch
 ```
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch`:
 ```
-roslaunch ti_sde zed_sde_pcl.launch
+roslaunch ti_sde zed_sde_pcl.launch zed_sn:=SNxxxxx
 ```
 **[Visualization on Ubuntu PC]**  To display the point-cloud data using RViz on PC, run:
 ```
@@ -59,7 +59,7 @@ roslaunch ti_viz_nodes rviz_sde_pcl.launch
 **[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde_launch.py`:
 ```
-ros2 launch ti_sde zed_sde_launch.py
+ros2 launch ti_sde zed_sde_launch.py zed_sn:=SNxxxxx
 ```
 <!-- To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
@@ -76,7 +76,7 @@ ros2 launch ti_viz_nodes rviz_sde_launch.py
 ### Run the Stereo Demo with Point-Cloud Enabled
 **[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG fil on a ZED stereo camera, run the following inside the Docker container on TDA4 target:
 ```
-ros2 launch ti_sde zed_sde_pcl_launch.py
+ros2 launch ti_sde zed_sde_pcl_launch.py zed_sn:=SNxxxxx
 ```
 <!-- run the following inside the Docker container on TDA4 target:
 ```
@@ -90,15 +90,20 @@ ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
 
 ## Launch File Parameters
 
-Parameter          | Description                                                               | Value
--------------------|---------------------------------------------------------------------------|-------------------
-rosparam file      | Algorithm configuration parameters (see "ROSPARAM Parameters" section)    | config/params.yaml
-enable_pc          | Enable point-cloud. This overrides setting in `config/params.yaml`        | 0, 1
-left_input_topic   | Subscribe topic name for left camera image                                | camera/left/image_raw
-right_input_topic  | Subscribe topic name for right camera image                               | camera/right/image_raw
-camera_info_topic  | Subscribe topic name for right camera info                                | camera/right/camera_info
-disparity_topic    | Publish topic name topic for raw disparity                                | camera/disparity/raw
-point_cloud_topic  | Publish topic name for point cloud                                        | point_cloud
+Parameter          | Description                                                                | Value
+-------------------|----------------------------------------------------------------------------|-------------------
+rosparam file      | Algorithm configuration parameters (see "ROSPARAM Parameters" section)     | config/params.yaml
+left_lut_file_path | LDC rectification table path for left image                                | String
+right_lut_file_path| LDC rectification table path for right image                               | String
+sde_algo_type      | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE                | 0, 1
+num_layers         | Number of layers in multi-layer SDE                                        | 2, 3
+enable_pc          | Flag to enable/disable point cloud creation                                | 0, 1
+left_input_topic   | Subscribe topic name for left camera image                                 | camera/left/image_raw
+right_input_topic  | Subscribe topic name for right camera image                                | camera/right/image_raw
+camera_info_topic  | Subscribe topic name for right camera info                                 | camera/right/camera_info
+disparity_topic    | Publish topic name topic for raw disparity                                 | camera/disparity/raw
+point_cloud_topic  | Publish topic name for point cloud                                         | point_cloud
+exportPerfStats    | Flag for exporting the performance data to a file: 0 - disable, 1 - enable | 0, 1
 
 ## ROSPARM Parameters
 
@@ -106,11 +111,7 @@ point_cloud_topic  | Publish topic name for point cloud                         
 
 Parameter                | Description                                                         | Value
 -------------------------|---------------------------------------------------------------------|----------
-left_lut_file_path       | LDC rectification table path for left image                         | String
-right_lut_file_path      | LDC rectification table path for right image                        | String
 input_format             | Input image format, 0: U8, 1: YUV422                                | 0, 1
-sde_algo_type            | SDE algorithm type, 0: single-layer SDE, 1: multi-layer SDE         | 0, 1
-num_layers               | Number of layers in multi-layer SDE                                 | 2, 3
 disparity_min            | Minimum disparity to search, 0: 0, 1: -3                            | 0, 1
 disparity_max            | Maximum disparity to search, 0: 63, 1: 127, 2: 191                  | 0, 1, 2
 stereo_baseline          | Stereo camera baseline in meter                                     | Float32
@@ -119,7 +120,6 @@ stereo_baseline          | Stereo camera baseline in meter                      
 
 Parameter                | Description                                                         | Value
 -------------------------|---------------------------------------------------------------------|----------
-enable_pc                | Flag to enable/disable point cloud creation                         | 0, 1
 use_pc_config            | Flag to use the following point cloud configurations                | 0, 1
 sde_confidence_threshold | Disparity with confidence less than this value is invalidated       | Integer, [0, 7]
 point_low_x              | Min X position of a point to be rendered                            | Float32

@@ -17,6 +17,9 @@ def setStereoCameraMode(camera_mode):
     elif camera_mode == 'FHD':
         stereo_width  = 3840
         stereo_height = 1080
+    elif camera_mode == 'FHD2':
+        stereo_width  = 3840
+        stereo_height = 1024
     else:
         sys.exit("Error: Wrong camer mode {}".format(camera_mode))
 
@@ -265,9 +268,10 @@ if __name__ == "__main__":
     # Output folder for saving camera_info_*.yaml and LDC remap tables
     parser.add_argument('-o', '--outfolder', type=str, default='../../ros1/drivers/zed_capture/config',
         help="Path to the output folder for storing images for calibration")
-    # valid camera_mode: 'FHD', HD', 'VGA'
+    # valid camera_mode: 'FHD', 'FHD2', HD', 'VGA'
+    # FHD2: 1920x1024
     parser.add_argument('-m', '--mode',type=str, default='HD',
-        help="Camera mode. Valid camera mode: FHD, HD, VGA")
+        help="Camera mode. Valid camera mode: FHD, FHD2, HD, VGA")
     # Chess board width in terms of the number of control points
     parser.add_argument('-c', '--column', type=int, default=8,
         help="Chessboard width")

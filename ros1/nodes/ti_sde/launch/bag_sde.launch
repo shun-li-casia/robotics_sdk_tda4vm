@@ -1,7 +1,11 @@
 <launch>
 
+    <arg name="exportPerfStats" default="0"/>
+
     <!-- ti_sde -->
-    <include file="$(find ti_sde)/launch/sde.launch"/>
+    <include file="$(find ti_sde)/launch/sde.launch">
+        <arg name="exportPerfStats" value="$(arg exportPerfStats)"/>
+    </include>
 
     <!-- rosbag play -->
     <arg name="bagfile" default="$(env TI_DATA_PATH)/ros_bag/zed1_2020-11-09-18-01-08.bag"/>

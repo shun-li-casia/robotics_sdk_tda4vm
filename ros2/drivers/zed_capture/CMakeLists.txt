@@ -47,11 +47,5 @@ else()
     message("No launch directory exists." ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config)
-    install(DIRECTORY config
-            DESTINATION share/${PROJECT_NAME})
-else()
-    message("No config directory exists." ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
 
 ament_package()

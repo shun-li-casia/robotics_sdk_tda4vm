@@ -51,7 +51,7 @@ input_topic        | Subscribe topic name for input camera image                
 out_image_topic    | Publish topic name topic for top-down image with overlaid vehicle trajectory | vis_localize/out_image
 out_pose_topic     | Publish topic name topic for vehicle pose                                    | vis_localize/pose
 map_topic          | Publish topic name for feature points in offline map                         | vis_localize/map
-
+exportPerfStats    | Flag for exporting the performance data to a file: 0 - disable, 1 - enable   | 0, 1
 ## ROSPARM Parameters
 
 ### Basic input, DL model Parameters
@@ -66,7 +66,6 @@ height                   | Input image height                                   
 out_width                | Output semantic segmentation output (tensor) width                   | Integer
 out_height               | Output semantic segmentation output (tensor) height                  | Integer
 pipeline_depth           | OpenVX graph pipeline depth                                          | 1 ~ 8
-
 
 ### Visual Localization Parameters
 
@@ -85,7 +84,7 @@ num_map_feat:            | Number of key points in a map                        
 max_frame_feat           | Max number of key points for a frame                                 | Integer
 num_voxels               | Number of voxels                                                     | Integer
 filter_scale_pw2         | Scale of filter coefficients for input_upsample_wt_path              | Integer
-hi_res_desc_scale_pw2    | Scale of descriptors for input_map_feat_desc_path                    | Integer 
+hi_res_desc_scale_pw2    | Scale of descriptors for input_map_feat_desc_path                    | Integer
 pose_calc_skip_flag      | Pose calculation skip flag (Should be 0)                             | 0, 1
 
 ## Processing Blocks
@@ -93,12 +92,12 @@ pose_calc_skip_flag      | Pose calculation skip flag (Should be 0)             
 Referring to Figure 1, below are the descriptions of the processing blocks implemented in this application:
 
 1. The first step is to process input images. J7 LDC (Lens Distortion Correction) hardware accelerator (HWA) changes image format as well a removes lens distortion. The input format to the application is  YUV422 (UYVY) format. It is converted to YUV420 (NV12) by the LDC.
-2. Input images are resized to a smaller resolution, which is specified by `dl_width` and `dl_height` in `params.yaml`, for the DKAZE network. The MSC (Multi-Scaler) HWA resizes the images to a desired size. 
+2. Input images are resized to a smaller resolution, which is specified by `dl_width` and `dl_height` in `params.yaml`, for the DKAZE network. The MSC (Multi-Scaler) HWA resizes the images to a desired size.
 3. The pre-processing block converts YUV420 (NV12) to RGB, which is expected input format for the DKAZE network.
 4. The DKAZE network is accelerated by C7x/MMA with DLR runtime, and outputs feature score tensor and feature descriptor tensor.
-5. Two output tensors from the DAKZE network go to the pose calculation (PoseCalc) block, which runs on C6x. This block estimates the ego-vehicle's pose. 
+5. Two output tensors from the DAKZE network go to the pose calculation (PoseCalc) block, which runs on C6x. This block estimates the ego-vehicle's pose.
 6. The estimate pose goes to the pose visualization (PoseViz) block, which runs on C6x too. This block creates the top-down output image with overlaid vehicle's trajectory. This output image is published along with the estimated pose.
 
 
 ## Known Issues
-1. The provided sparse 3D map is for the input bag file we provide. Both the input bag file and the sparse 3D map are created using CARLA simulator. Since the sparse 3D map should cover the area where the input image is being captured for localization. This demo does not work for live camera input with the provided sparse 3D map.   
+1. The provided sparse 3D map is for the input bag file we provide. Both the input bag file and the sparse 3D map are created using CARLA simulator. Since the sparse 3D map should cover the area where the input image is being captured for localization. This demo does not work for live camera input with the provided sparse 3D map.

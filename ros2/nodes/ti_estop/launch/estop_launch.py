@@ -16,6 +16,9 @@ def finalize_node(context, *args, **kwargs):
     left_lut_file_path  = os.path.join(lut_folder, zed_sn+"_HD_LUT_left.bin")
     right_lut_file_path = os.path.join(lut_folder, zed_sn+"_HD_LUT_right.bin")
 
+    exportPerfStats = int(LaunchConfiguration("exportPerfStats").perform(context))
+    print(f"exportPerfStats = {exportPerfStats}")
+
     params = [
         os.path.join(get_package_share_directory('ti_estop'),'config','params.yaml'),
         {
@@ -31,6 +34,7 @@ def finalize_node(context, *args, **kwargs):
             "raw_disparity_topic_name": "camera/disparity/raw",
             "ogmap_topic_name":         "detection3D/ogmap",
             "estop_topic_name":         "detection3D/estop",
+            "exportPerfStats":           exportPerfStats,
         }
     ]
 
@@ -48,14 +52,22 @@ def finalize_node(context, *args, **kwargs):
 def generate_launch_description():
     ld = LaunchDescription()
 
-    # zed_sn_str: arg that can be set from the command line or a default will be used
-    zed_sn = DeclareLaunchArgument(
+    # String for ZED camera serial number
+    zed_sn_arg = DeclareLaunchArgument(
         name="zed_sn",
         default_value=TextSubstitution(text="SN5867575"),
         description='string for ZED camera serial number'
     )
 
-    ld.add_action(zed_sn)
+    # Flag for exporting the performance data to a file: 0 - disable, 1 - enable
+    exportPerfStats_arg = DeclareLaunchArgument(
+        name="exportPerfStats",
+        default_value=TextSubstitution(text="0"),
+        description='flag for exporting the performance data'
+    )
+
+    ld.add_action(zed_sn_arg)
+    ld.add_action(exportPerfStats_arg)
     ld.add_action(OpaqueFunction(function=finalize_node))
 
     return ld
