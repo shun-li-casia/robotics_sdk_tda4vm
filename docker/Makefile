@@ -175,7 +175,7 @@ endif
 	@echo "    USE_PROXY=0"                                   >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
 ifeq ($(PLATFORM), pc)
-	@echo "xhost +local:$$USER"                               >> $(TGT_NAME)
+	@echo "xhost +local:\$$USER"                               >> $(TGT_NAME)
 endif
 	@echo "docker run -it --rm \\"                            >> $(TGT_NAME)
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)
@@ -192,6 +192,7 @@ endif
 	@echo "    -v /opt/dlpack:/opt/dlpack \\"                 >> $(TGT_NAME)
 	@echo "    -v /opt/tensorflow:/opt/tensorflow \\"         >> $(TGT_NAME)
 	@echo "    -v /opt/onnxruntime:/opt/onnxruntime \\"       >> $(TGT_NAME)
+	@echo "    -v /opt/imaging:/opt/imaging \\"               >> $(TGT_NAME)
 	@echo "    -v /opt/model_zoo:/opt/model_zoo \\"           >> $(TGT_NAME)
 endif
 	@echo "    -v /dev:/dev \\"                               >> $(TGT_NAME)
@@ -223,7 +224,7 @@ endif
 endif
 	@echo "      \$$DOCKER_TAG \$$CMD"                        >> $(TGT_NAME)
 ifeq ($(PLATFORM), pc)
-	@echo "xhost -local:$$USER"                               >> $(TGT_NAME)
+	@echo "xhost -local:\$$USER"                               >> $(TGT_NAME)
 endif
 	@chmod +x $(TGT_NAME)
 	@echo "$(TGT_NAME) is generated"
