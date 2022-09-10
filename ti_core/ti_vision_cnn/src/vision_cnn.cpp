@@ -187,7 +187,7 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        /* Set input data width and height based on the infererence engine
+        /* Set input data width and height based on the inference engine
          * information. This is only used for semantic segmentation models
          * which have 4 dimensions. The logic is extended to any models that
          * have atleast three dimensions which has the following
@@ -215,6 +215,10 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
 
         appCntxt->outImageHeight = appCntxt->postProcCfg.inDataHeight;
         appCntxt->outImageWidth  = appCntxt->postProcCfg.inDataWidth;
+
+        /* assign the outDataWidth & outDataHeight */
+        appCntxt->postProcCfg.outDataWidth  = appCntxt->inputImageWidth;
+        appCntxt->postProcCfg.outDataHeight = appCntxt->inputImageHeight;
 
         appCntxt->postProcObj =
             CmPostprocessImage::makePostprocessImageObj(appCntxt->postProcCfg);
@@ -263,7 +267,7 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
         /* load HWA kernels */
         tivxHwaLoadKernels(appCntxt->vxContext);
 
-        /* Create CNN semantic semgentation nodes */
+        /* Create CNN semantic segmentation nodes */
         vxStatus = VISION_CNN_init_SS(appCntxt);
     }
 

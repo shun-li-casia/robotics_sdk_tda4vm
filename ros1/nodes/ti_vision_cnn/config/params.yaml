@@ -1,9 +1,3 @@
-# input data width in pixels
-width:                  1280
-
-# input data height in lines
-height:                 720
-
 # Maximum number of Semantic Segmentation classes
 num_classes:            20
 

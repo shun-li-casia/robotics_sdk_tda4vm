@@ -44,7 +44,7 @@ static cv::Mat overlayBoundingBox(cv::Mat &img,
 namespace ros_app_viz
 {
     /**
-     * @brief  VizObjDet ROS warpper class
+     * @brief  VizObjDet ROS wrapper class
      */
 
     class VizObjDet

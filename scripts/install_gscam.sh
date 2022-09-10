@@ -22,7 +22,7 @@ if [[ ! -d "gscam" ]]; then
     git apply $WORK_PATH/patches/gscam_ti_nv12.patch
     git add -u
     git add config/* launch/*
-    git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses 'tiovxcolorconvert', and added NV12 encoding mode."
+    git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses TI GStreamer plugins, and added NV12 encoding mode."
 fi
 
 # install gscam2 (for ROS2) and apply a patch
@@ -35,7 +35,7 @@ if [[ ! -d "gscam2" ]]; then
     git apply $WORK_PATH/patches/gscam2_ti_nv12.patch
     git add -u
     git add config/* launch/*
-    git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses 'tiovxcolorconvert', and added NV12 encoding mode."
+    git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses TI GStreamer plugins', and added NV12 encoding mode."
 fi
 
 # install dependency of gscam2

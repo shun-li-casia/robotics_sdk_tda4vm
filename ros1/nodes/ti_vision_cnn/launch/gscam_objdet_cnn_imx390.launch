@@ -2,12 +2,17 @@
 
     <arg name="width" default="1280"/>
     <arg name="height" default="720"/>
-    <arg name="image_format" default="2"/>
-    <arg name="enable_ldc_node" default="1"/>
+    <arg name="image_format" default="1"/>
+    <arg name="enable_ldc_node" default="0"/>
     <arg name="lut_file_path" default="$(find mono_capture)/config/C920_HD_LUT.bin" />
-    <arg name="dl_model_path" default="/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"/>
-    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"/> -->
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8220-yolox-s-lite-mmdet-coco-640x640"/> -->
     <arg name="exportPerfStats" default="0"/>
+    <!-- video device ID used in /dev/videoX -->
+    <arg name="video_id" default="18"/>
+    <!-- camera name-->
+    <arg name="camera_name" default="camera"/>
 
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
@@ -25,9 +30,13 @@
         <param name = "exportPerfStats" value = "$(arg exportPerfStats)"/>
     </node>
 
-    <!-- mono_capture -->
-    <include file="$(find mono_capture)/launch/mono_capture.launch">
-        <arg name="topic_ns" value="camera"/>
+    <!-- gscam -->
+    <include file="$(find gscam)/launch/v4l_imx390.launch">
+        <arg name="device" value="/dev/video$(arg video_id)" />
+        <arg name="width" value="$(arg width)"/>
+        <arg name="height" value="$(arg height)"/>
+        <arg name="node_name" value="gscam$(arg video_id)" />
+        <arg name="camera_name" value="$(arg camera_name)" />
     </include>
 
 </launch>

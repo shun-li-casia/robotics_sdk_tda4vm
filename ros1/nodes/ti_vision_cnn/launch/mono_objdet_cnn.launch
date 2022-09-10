@@ -1,5 +1,7 @@
 <launch>
 
+    <arg name="width" default="1280"/>
+    <arg name="height" default="720"/>
     <arg name="image_format" default="2"/>
     <arg name="enable_ldc_node" default="1"/>
     <arg name="lut_file_path" default="$(find mono_capture)/config/C920_HD_LUT.bin" />
@@ -10,6 +12,8 @@
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
         <rosparam file="$(find ti_vision_cnn)/config/params.yaml" subst_value="true" />
+        <param name = "width" value = "$(arg width)"/>
+        <param name = "height" value = "$(arg height)"/>
         <param name = "image_format" value = "$(arg image_format)"/>
         <param name = "enable_ldc_node" value= "$(arg enable_ldc_node)"/>
         <param name = "lut_file_path" value = "$(arg lut_file_path)"/>
