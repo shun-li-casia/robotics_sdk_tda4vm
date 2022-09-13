@@ -32,6 +32,7 @@ ARG USE_PROXY
 ARG HTTP_PROXY
 ARG REPO_LOCATION=arm64v8
 ARG DEBIAN_FRONTEND=noninteractive
+ARG TIVA_LIB_VER
 
 #=========================================================================
 # The environment variable REPO_LOCATION is set from outside as needed,
@@ -133,6 +134,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #=========================================================================
 FROM ubuntu-ros
 ARG DEBIAN_FRONTEND
+ARG TIVA_LIB_VER
 
 # install dependency for tivision_apps.so
 # TODO: check if these are still required in 20.04
@@ -163,21 +165,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     v4l-utils && \
     rm -rf /var/lib/apt/lists/*
 
+#Install OSRT dependencies
+ADD install_osrt.sh /usr/bin/
+RUN /usr/bin/install_osrt.sh
+
 # install vision_apps lib and DL runtime libs
-ARG TIVA_LIB_VER=8.2.0
 COPY lib/*  /usr/lib/
+COPY lib_gstreamer-1.0/* /usr/lib/aarch64-linux-gnu/gstreamer-1.0/
 COPY include/processor_sdk /usr/include/processor_sdk
-COPY include/dlr.h /usr/include/
 RUN ln -s /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so && \
     ln -s /usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so && \
-    ln -s /usr/lib/libti_rpmsg_char.so.0.4.0 /usr/lib/libti_rpmsg_char.so.0 && \
-    ln -s /usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so && \
-    ln -s /usr/lib/libonnxruntime.so.1.7.0 /usr/lib/libonnxruntime.so && \
-    ln -s /usr/lib/libtidl_onnxrt_EP.so.1.0 /usr/lib/libtidl_onnxrt_EP.so
+    ln -s /usr/lib/libti_rpmsg_char.so.0.4.1 /usr/lib/libti_rpmsg_char.so.0 && \
+    ln -s /usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so
 
 # install edgeai-tiovx-modules
+ENV SOC=j721e
 WORKDIR /root/src
-RUN git clone --single-branch --branch release-8.2 https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
+RUN git clone --single-branch --branch release-8.4.1 https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
     cd edgeai-tiovx-modules && \
     mkdir build && \
     cd build && \
@@ -188,7 +192,7 @@ RUN git clone --single-branch --branch release-8.2 https://github.com/TexasInstr
 
 # install edgeai-gst-plugins
 WORKDIR /root/src
-RUN git clone --single-branch --branch release-0.6.0 https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
+RUN git clone --single-branch --branch release-0.7.0 https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
     cd edgeai-gst-plugins && \
     meson build --prefix=/usr -Dpkg_config_path=pkgconfig && \
     ninja -C build && \
@@ -196,13 +200,10 @@ RUN git clone --single-branch --branch release-0.6.0 https://github.com/TexasIns
     ldconfig && \
     rm -rf /root/src/edgeai-gst-plugins
 
-# install python modules for DL RT
+# Install python modules for DL RT
 RUN apt update && apt-get install -y \
     python3-gi && \
-    python3 -m pip install \
-        PyYAML \
-        Dlr && \
-    python3 -m pip install --extra-index-url https://google-coral.github.io/py-repo/ tflite_runtime
+    python3 -m pip install PyYAML
 
 # install packages for ROS navigation
 RUN apt-get update && apt-get install -y \

@@ -11,7 +11,7 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
     ```
     where `<serial_number>` is the serial number of the ZED camera.
 
-    Then place the downloaded calibration data file (`SNxxxx.conf`) under `config` folder.
+    Then place the downloaded calibration data file (`SNxxxx.conf`) under `$SDK_DIR/ros1/drivers/zed_capture/config` folder.
 
 2. Generate `camera_info` YAML files, and undistortion & rectification look-up-table (LUT) files which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator.
 

@@ -31,15 +31,16 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 usage() {
-    echo "usage: prepare_docker_build.sh <DLRT_DIR> <DST_DIR>"
+    echo "usage: prepare_docker_build.sh <DLRT_DIR> <DST_DIR> <TIVA_LIB_VER>"
     echo "  <DLRT_DIR> DL runtime lib path"
     echo "  <DST_DIR>  destination path"
     exit 1
 }
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 3 ]; then
     DLRT_DIR=$1
     DST_DIR=$2
+    TIVA_LIB_VER=$3
 else
     usage
 fi
@@ -64,31 +65,28 @@ cp -p ${SDK_DIR}/docker/setup_proxy.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/ros_setup.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/entrypoint_*.sh ${DST_DIR}
 cp -rp ${SDK_DIR}/docker/proxy ${DST_DIR}
+cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
 
 # Copy library files to the temporary folder
 if [[ "$ARCH" == "aarch64" ]]; then
     mkdir -p ${DST_DIR}/lib
     Lib_files=(
         # Processor SDK libraries
-        /usr/lib/libtivision_apps.so.8.2.0
-        /usr/lib/libvx_tidl_rt.so.1.0
+        /usr/lib/libtivision_apps.so.${TIVA_LIB_VER}
         /usr/lib/libion.so
-        /usr/lib/libti_rpmsg_char.so.0.4.0
-        # DLR lib
-        /usr/lib/python3.8/site-packages/dlr/libdlr.so
-        # TFLite libs
-        ${DLRT_DIR}/libtensorflow-lite.a
+        /usr/lib/libti_rpmsg_char.so.0.4.1
         /usr/lib/libtidl_tfl_delegate.so
-        # ONNX-RT lib
-        ${DLRT_DIR}/libonnxruntime.so.1.7.0
-        /usr/lib/libtidl_onnxrt_EP.so.1.0
+        /usr/lib/libvx_tidl_rt.so.1.0
     )
     for Lib_file in ${Lib_files[@]}; do
         cp $Lib_file ${DST_DIR}/lib
     done
 
+    # Copy a GST lib that was updated from PSDK
+    mkdir -p ${DST_DIR}/lib_gstreamer-1.0
+    cp /usr/lib/gstreamer-1.0/libgstvideo4linux2.so ${DST_DIR}/lib_gstreamer-1.0
+
     # Copy header files
     mkdir -p ${DST_DIR}/include
     cp -rp /usr/include/processor_sdk ${DST_DIR}/include
-    cp /usr/include/dlr.h ${DST_DIR}/include
 fi

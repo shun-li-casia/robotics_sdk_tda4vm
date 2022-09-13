@@ -80,19 +80,19 @@ Table below summarizes the launch commands that you can use in the Docker contai
 Demo (Input Source) | Launch command on TDA4          | Launch command on Remote Visualization PC
 --------------------|---------------------------------|-------------------------------------------
 Stereo Vision (ROSBAG)     | roslaunch ti_sde bag_sde.launch  | roslaunch ti_viz_nodes rviz_sde.launch
-Stereo Vision (ZED camera) | roslaunch ti_sde zed_sde.launch  | same as above
+Stereo Vision (ZED camera) | roslaunch ti_sde zed_sde.launch zed_sn:=SNxxxxx | same as above
 Stereo Vision with point-cloud (ROSBAG)     | roslaunch ti_sde bag_sde_pcl.launch  | roslaunch ti_viz_nodes rviz_sde_pcl.launch
-Stereo Vision with point-cloud (ZED camera) | roslaunch ti_sde zed_sde_pcl.launch  | same as above
+Stereo Vision with point-cloud (ZED camera) | roslaunch ti_sde zed_sde_pcl.launch zed_sn:=SNxxxxx | same as above
 Semantic Segmentation CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch
-Semantic Segmentation CNN (ZED camera)  | roslaunch ti_vision_cnn zed_semseg_cnn.launch   | same as above
+Semantic Segmentation CNN (ZED camera)  | roslaunch ti_vision_cnn zed_semseg_cnn.launch zed_sn:=SNxxxxx | same as above
 Semantic Segmentation CNN (Mono camera) | roslaunch ti_vision_cnn gscam_semseg_cnn.launch  | same as above
 Object Detection CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch
-Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.launch   | same as above
+Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.launch zed_sn:=SNxxxxx | same as above
 Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch  | same as above
 3D Obstacle Detection (ROSBAG)     | roslaunch ti_estop bag_estop.launch  | roslaunch ti_viz_nodes rviz_estop.launch
-3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch  | same as above
+3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch zed_sn:=SNxxxxx | same as above
 Object Detection with 3D Spatial Information (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch
-Object Detection with 3D Spatial Information (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch  | same as above
+Object Detection with 3D Spatial Information (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch zed_sn:=SNxxxxx | same as above
 Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | roslaunch ti_viz_nodes rviz_visloc.launch
 
 In the following, **[TDA4]** and **[PC]** indicate where the step(s) should be launched: either on the TDA4 target, or on the PC.

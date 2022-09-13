@@ -51,15 +51,19 @@ For setting up the ROS1 environment on the remote PC, please follow [Docker Setu
     user@pc:~/j7ros_home$ $SLAM_ROOT/j7_setup_hector_slam.sh
     ```
 
-2. Compile the Hector SLAM:
+2. Launch the Docker image.
     ```
-    user@pc:~/j7ros_home$ cd ros_ws
-    user@pc:~/j7ros_home/ros_ws$ catkin_make --source ./src/robotics_sdk/ros1/slam/hector_slam
+    user@pc:~/j7ros_home$ ./docker_run_ros1.sh
     ```
 
-3. To display map and pose, run:
+3. Compile the Hector SLAM:
     ```
-    user@pc:~/j7ros_home/ros_ws$ roslaunch hector_slam_launch map_rviz.launch
+    root@pc-docker:~/j7ros_home/ros_ws$ catkin_make --source ./src/robotics_sdk/ros1/slam/hector_slam
+    ```
+
+4. To display map and pose, run:
+    ```
+    root@pc-docker:~/j7ros_home/ros_ws$ roslaunch hector_slam_launch map_rviz.launch
     ```
 
 

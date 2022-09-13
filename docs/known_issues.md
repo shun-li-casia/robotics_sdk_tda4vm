@@ -11,7 +11,10 @@ Limitations and Known Issues
 6. The USB mono camera capture node ('mono_capture') currently is tested with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. To use the USB camera in 'MJPG' (Motion-JPEG) mode, it is recommended to use the GStreamer based camera capture node ('gscam' or 'gscam2') instead.
 7. ZED camera is sometimes recognized as USB 2.1 device. The ZED camera should be connected to USB 3.0 for the demos, which can be checked with following command:
     ```text
+    # For ZED camera
     root@tda4vm-sk:~# lsusb -v -d 2b03:f582 | grep bcdUSB
       bcdUSB               3.00
+    # For ZED 2 camera
+    root@tda4vm-sk:~# lsusb -v -d 2b03:f780 | grep bcdUSB
+      bcdUSB               3.00
     ```
-8. In WiFi station mode, "ifconfig" reports a wrong IP address. A workaround is running "udhcpc -i wlp1s0" before "ifconfig"

@@ -111,13 +111,13 @@ Visual Localization (ROSBAG)       | ros2 launch ti_vl bag_visloc_launch.py    |
 
 Demo (Input Source) | Launch command on TDA4          | Launch command on Remote Visualization PC
 --------------------|---------------------------------|-------------------------------------------
-Stereo Vision (ZED camera) | ros2 launch ti_sde zed_sde_launch.py  | ros2 launch ti_viz_nodes rviz_sde_launch.py
-Stereo Vision with point-cloud (ZED camera) | ros2 launch ti_sde zed_sde_pcl_launch.py  | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
-Semantic Segmentation CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
+Stereo Vision (ZED camera) | ros2 launch ti_sde zed_sde_launch.py zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_sde_launch.py
+Stereo Vision with point-cloud (ZED camera) | ros2 launch ti_sde zed_sde_pcl_launch.py zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
+Semantic Segmentation CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py
 Semantic Segmentation CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_launch.py  | same as above
-Object Detection CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py   | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
+Object Detection CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py
 Object Detection CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_launch.py  | same as above
-3D Obstacle Detection (ZED camera) | ros2 launch ti_estop zed_estop_launch.py  | ros2 launch ti_viz_nodes rviz_estop_launch.py
+3D Obstacle Detection (ZED camera) | ros2 launch ti_estop zed_estop_launch.py zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_estop_launch.py
 
 **Running Demos with ROSBAG**
 

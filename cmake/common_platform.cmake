@@ -66,6 +66,10 @@ set(CGT7X_ROOT          ti-cgt-c7000_1.4.2.LTS)
 set(PDK_PACKAGE_ROOT    pdk/packages/ti)
 set(TIADALG_PATH        tiadalg)
 
+set(TENSORFLOW_INSTALL_DIR /usr/include/tensorflow)
+set(ONNXRT_INSTALL_DIR     /usr/include/onnxruntime)
+set(TFLITE_INSTALL_DIR     /usr/lib/tflite_2.8)
+
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     set(BUILD_CORE_NODES          OFF)
     set(BUILD_VISUALIZATION_NODES ON CACHE BOOL "Build Visualization nodes")
@@ -84,6 +88,47 @@ else()
     message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
 endif()
 
+set(TENSORFLOW_RT_LIBS 
+    tensorflow-lite
+    flatbuffers
+    fft2d_fftsg2d
+    fft2d_fftsg
+    cpuinfo
+    clog
+    farmhash
+    ruy_allocator
+    ruy_apply_multiplier
+    ruy_blocking_counter
+    ruy_block_map
+    ruy_context
+    ruy_context_get_ctx
+    ruy_cpuinfo
+    ruy_ctx
+    ruy_denormal
+    ruy_frontend
+    ruy_have_built_path_for_avx2_fma
+    ruy_have_built_path_for_avx512
+    ruy_have_built_path_for_avx
+    ruy_kernel_arm
+    ruy_kernel_avx2_fma
+    ruy_kernel_avx512
+    ruy_kernel_avx
+    ruy_pack_arm
+    ruy_pack_avx2_fma
+    ruy_pack_avx512
+    ruy_pack_avx
+    ruy_prepacked_cache
+    ruy_prepare_packed_matrices
+    ruy_system_aligned_alloc
+    ruy_thread_pool
+    ruy_trmul
+    ruy_tune
+    ruy_wait
+    pthreadpool
+    #xnn lib
+    XNNPACK
+)
+
 if (${BUILD_CORE_NODES})
     set(TI_EXTERNAL_LIBS
         ti_core
@@ -91,10 +136,11 @@ if (${BUILD_CORE_NODES})
         edgeai_utils
         ncurses
         dlr
-        tensorflow-lite
         onnxruntime
+        pthread
         dl
         yaml-cpp
+        ${TENSORFLOW_RT_LIBS}
        )
 else()
     set(TI_EXTERNAL_LIBS "")
@@ -191,6 +237,15 @@ if (${TARGET_PLATFORM} STREQUAL J7)
         ${TI_EXTERNAL_LIB_DIRS}
         /usr/local/dlr
         /usr/lib
+        ${TENSORFLOW_INSTALL_DIR}/tensorflow/lite/tools/make/gen/linux_aarch64/lib
+        ${TFLITE_INSTALL_DIR}/ruy-build
+        ${TFLITE_INSTALL_DIR}/xnnpack-build
+        ${TFLITE_INSTALL_DIR}/pthreadpool
+        ${TFLITE_INSTALL_DIR}/fft2d-build
+        ${TFLITE_INSTALL_DIR}/cpuinfo-build
+        ${TFLITE_INSTALL_DIR}/flatbuffers-build
+        ${TFLITE_INSTALL_DIR}/clog-build
+        ${TFLITE_INSTALL_DIR}/farmhash-build
         )
 
     set(TARGET_LINK_LIBS

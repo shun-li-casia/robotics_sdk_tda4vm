@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+## 8.4.0 (2022-09-15)
+
+* ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.4.0 pre-built image.
+* Open-source runtime libraries (ONNX, TFLite, TVM-DLR) pre-built for the Ubuntu 20.04 Docker container are installed.
+* Support for IMX390 FPD-link camera is added in `gscam` and `ti_vision_cnn` processing chain. [Need more testing]
+* In the radar driver ROS node for TI mmWave radar devices, new coarse synchronization between multiple mmWave devices are added.
+* Debugged the `ti_vision_cnn` object detection to published the detected bounding boxes correctly scaled to the output resolution.
+
 ## 8.2.0 (2022-04-22)
 
 * ROS development environment in a Docker container on top of Processor Linux SDK for edge AI 8.2.0 pre-built image.

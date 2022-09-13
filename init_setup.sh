@@ -31,7 +31,7 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Release tag info of the current release
-GIT_TAG="REL.08.02.00"
+GIT_TAG="REL.08.04.00"
 if [ "$#" -eq 1 ]; then
     GIT_TAG=$1
 fi
@@ -137,31 +137,8 @@ if [[ "$ARCH" == "aarch64" ]]; then
         make data_download
     fi
 
-    # Install Tensorflow for CPP apps build
-    if [[ ! -d "/opt/tensorflow" ]] || [[ -z "$(ls -A /opt/tensorflow)" ]]; then
-        bash /opt/edge_ai_apps/scripts/install_tensorflow.sh
-    fi
-
-    # Install dlpack for CPP apps build
-    if [[ ! -d "/opt/dlpack" ]] || [[ -z "$(ls -A /opt/dlpack)" ]]; then
-        bash /opt/edge_ai_apps/scripts/install_dlpack.sh
-    fi
-
-    # Install ONNX RT for CPP apps build
-    if [[ ! -d "/opt/onnxruntime" ]] || [[ -z "$(ls -A /opt/onnxruntime)" ]]; then
-        bash /opt/edge_ai_apps/scripts/install_onnx_rt.sh
-    fi
-
     # Download models in the model zoo
-    Models=(
-        ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512
-        TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320
-        TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432
-        ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432
-    )
-    for Model in ${Models[@]}; do
-	    bash /opt/edge_ai_apps/download_models.sh -d $Model
-    done
+    bash $SDK_DIR/scripts/download_models.sh
 fi
 
 sync

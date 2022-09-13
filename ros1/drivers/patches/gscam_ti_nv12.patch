@@ -61,10 +61,10 @@ index 98166b7..70531c3 100644
 +endif()
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..032627d
+index 0000000..94fcc2f
 --- /dev/null
 +++ b/README_TI.md
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,66 @@
 +GStreamer Camera Node for ROS 1
 +===============================
 +This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
@@ -72,6 +72,7 @@ index 0000000..032627d
 +* Added GStreamer pipelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode.
 +* Added an example `camera_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use TI TDA4 LDC hardware accelerator).
 +* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode), and OV5640 (in YUYV mode).
++* Added a launch file for IMX390 FPD-Link cameras.
 +* Dependency: following modules are already built and installed in the the Robotics SDK ROS Docker images.
 +    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
 +    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
@@ -111,7 +112,7 @@ index 0000000..032627d
 +```
 +
 +## Usage: IMX390 Camera
-+Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_02_00/exports/docs/getting_started.html).
++Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/getting_started.html).
 +
 +To run the gscam node for IMX390 camera,
 +```
@@ -121,16 +122,15 @@ index 0000000..032627d
 +roslaunch gscam v4l_imx390.launch width:=1280 height:=720
 +```
 +
-+**Note**: The GStreamer pipeline in the launch file also includes the LDC plugin (tiovxldc). Raw resolution is 1936 x 1100. The LDC plugin performs rectification and then cropping to produce 1920 x 1080 images in NV12 format, followed by MSC plugin (tiovxmultiscaler) to resize to the output resolution.
++**Note**: The GStreamer pipeline in the launch file also includes the LDC plugin (tiovxldc). Raw resolution is 1936 x 1100. The LDC plugin performs rectification and then cropping to produce 1920 x 1080 images in NV12 format, followed by MSC plugin (tiovxmultiscaler) to resize the images to the output resolution.
 +
-+For visualization in the PC Docker container,
++For visualization, run the following in the PC Docker container,
 +```
 +# 1080p
 +roslaunch ti_viz_nodes gscam_nv12.launch width:=1920 height:=1080
 +# 720p
 +roslaunch ti_viz_nodes gscam_nv12.launch width:=1280 height:=720
 +```
-\ No newline at end of file
 diff --git a/config/C920_HD_camera_info.yaml b/config/C920_HD_camera_info.yaml
 new file mode 100644
 index 0000000..3ce26c2
@@ -236,12 +236,13 @@ index e4b4ee2..dc7e2ff 100644
      image_transport::CameraPublisher camera_pub_;
 diff --git a/launch/v4l_imx390.launch b/launch/v4l_imx390.launch
 new file mode 100644
-index 0000000..6e0143b
+index 0000000..b8f1a8b
 --- /dev/null
 +++ b/launch/v4l_imx390.launch
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,44 @@
 +<launch>
-+    <arg name="device"         default="/dev/video18"/>
++
++    <arg name="device" default="/dev/video18"/>
 +    <!-- output resolution: width -->
 +    <arg name="width" default="1280"/>
 +    <!-- output resolution: height -->
@@ -256,7 +257,7 @@ index 0000000..6e0143b
 +    <arg name="camera_name" default="camera"/>
 +    <!-- LDC binary file -->
 +    <arg name="ldc_dcc_file" default="/opt/imaging/imx390/dcc_ldc.bin"/>
-+    <!-- camera_info URL -->
++    <!-- camera_info URL: replace with camera_info from camera calibration -->
 +    <arg name="camera_info_url" default="package://gscam/config/IMX390_HD_camera_info.yaml"/>
 +
 +    <!-- GStreamer pipeline specified in gscam_config was tested with IMX390 camera,

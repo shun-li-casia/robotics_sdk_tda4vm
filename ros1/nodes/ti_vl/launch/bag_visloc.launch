@@ -7,7 +7,7 @@
         <arg name="exportPerfStats" value="$(arg exportPerfStats)"/>
     </include>
 
-    <arg name="bagfile" default="$(env TI_DATA_PATH)/visual_localization/ros_bag/carla_768x384_visloc.bag"/>
+    <arg name="bagfile" default="$(env TI_DATA_PATH)/visual_localization_data/ros_bag/carla_768x384_visloc.bag"/>
     <arg name="ratefactor" default="1"/>
     <arg name="node_start_delay" default="3.0"/>
     <node name="rosbag_play" pkg="rosbag" type="play" output="screen"

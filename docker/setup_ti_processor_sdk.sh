@@ -32,13 +32,6 @@
 
 # build & install perf_stats (one-time)
 perf_stats_path=/opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats
-mkdir -p /usr/dlr/
-ln -snf /host/usr/lib/python3.8/site-packages/dlr/libdlr.so /usr/dlr/libdlr.so
-ln -snf /host/usr/lib/python3.8/site-packages/onnxruntime /usr/local/lib/python3.8/dist-packages/onnxruntime
-
-# softlink update required for v4l2h264enc
-rm /usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstvideo4linux2.so
-ln -snf /host/usr/lib/gstreamer-1.0/libgstvideo4linux2.so /usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstvideo4linux2.so
 
 # disable Neo-DLR phone-home feature
 echo '{"enable_phone_home": false}' > /usr/local/lib/python3.8/dist-packages/dlr/counter/ccm_config.json

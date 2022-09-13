@@ -69,7 +69,6 @@
 
 #include <TI/tivx.h>
 #include <TI/tivx_debug.h>
-#include <TI/j7.h>
 #include <TI/tivx_stereo.h>
 #include <TI/tivx_img_proc.h>
 
