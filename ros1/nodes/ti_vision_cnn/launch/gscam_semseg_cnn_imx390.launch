@@ -5,9 +5,8 @@
     <arg name="image_format" default="1"/>
     <arg name="enable_ldc_node" default="0"/>
     <arg name="lut_file_path" default="$(find mono_capture)/config/IMX390_HD_LUT.bin" />
-    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
-    <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
-    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8220-yolox-s-lite-mmdet-coco-640x640"/> -->
+    <arg name="dl_model_path" default="/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"/>
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"/> -->
     <arg name="exportPerfStats" default="0"/>
     <!-- video device ID used in /dev/videoX -->
     <arg name="video_id" default="18"/>

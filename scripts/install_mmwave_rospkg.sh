@@ -17,7 +17,7 @@ cd $WORK_PATH
 if [[ ! -d "ti_mmwave_rospkg" ]]; then
     git clone --single-branch --branch master https://git.ti.com/git/mmwave_radar/mmwave_ti_ros.git
     cd mmwave_ti_ros
-    git checkout 4d3efaaa476259a0cec09db660a21d48dd9860ca
+    git checkout 0338025e79470e4170902833c199bcbc500f247a
     cd ..
     cp -r mmwave_ti_ros/ros_driver/src/* .
     rm -rf mmwave_ti_ros

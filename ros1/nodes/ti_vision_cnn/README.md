@@ -37,12 +37,27 @@ roslaunch ti_vision_cnn mono_semseg_cnn.launch
 roslaunch ti_vision_cnn gscam_semseg_cnn.launch
 ```
 
+For IMX390 camera as input, depending on choice of resolution, run one from the following:
+```
+roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch width:=1920 height:=1080
+roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch width:=1280 height:=720
+roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch width:=960 height:=540
+```
+
 **[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md)
 
 The semantic segmentation output tensor is published by the application. For visualization, a color-coded semantic segmentation image is generated. Following command launches the resulting color-mapped semantic segmentation image along with the raw image on RViz:
 ```
 roslaunch ti_viz_nodes rviz_semseg_cnn.launch
 ```
+
+For IMX390 camera, depending on the resolution from the TDA4, run one from the following:
+```
+roslaunch ti_viz_nodes rviz_semseg_cnn.launch width:=1920 height:=1080
+roslaunch ti_viz_nodes rviz_semseg_cnn.launch width:=1280 height:=720
+roslaunch ti_viz_nodes rviz_semseg_cnn.launch width:=960 height:=540
+```
+
 #### Testing Higher Input Frame Rate with ROSBAG
 We can publish the images at higher frame rate with `rosbag play --rate` option. Below is an example to publish the raw images at 30 fps (double the native frame rate of the ROSBAG file).
 ```
@@ -65,6 +80,8 @@ roslaunch ti_vision_cnn gscam_semseg_cnn.launch
 ```
 ros2 launch ti_vision_cnn bag_semseg_cnn_launch.py
 ``` -->
+
+Launch example for IMX390 camera is to be added later for ROS 2.
 
 **[Visualization on Ubuntu PC]** For setting up environment of the remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md)
 

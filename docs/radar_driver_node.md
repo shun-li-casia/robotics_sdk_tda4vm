@@ -119,6 +119,10 @@ The launch files for the radar driver also create a static transofrm. If the pos
 
 For example, one can use the center of the robot as a baseline. In the file, `/launch/6843_quad_3d_TDA4VM.launch`, update `tf_args` (X Y Z Yaw Pitch Roll) for each sensor to describe the position of the sensor relative to the center of the robot.
 
+### Synchronization
+
+For details regarding time synchronization of frames from multiple mmWave devices click [here](multi_sensor_time_synchronization.md).
+
 ## Usage
 
 1. Build the mmWave radar ROS node
@@ -155,6 +159,5 @@ roslaunch ti_mmwave_rospkg viz_remote_pc_quad.launch # for multiple sensor
  device_num                      | The device number for this sensor                                                     | int
  com_user                        | Serial port used for configuring mmWave radar device                                  | string
  com_data                        | Serial port used for receiving data from mmWave radar device                          | string
- node_start_delay                | Duration (in seconds) to delay launching of node                                      | int
  tf_args                         | Values to be used for tf transformation                                               | string
 

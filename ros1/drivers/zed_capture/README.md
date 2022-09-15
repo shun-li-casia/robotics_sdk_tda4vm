@@ -45,9 +45,9 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
 5. Launch the ZED camera node
     ```
     # ROS1
-    roslaunch zed_capture zed_capture.launch
+    roslaunch zed_capture zed_capture.launch zed_sn_str:=SNxxxxx
     # ROS2
-    ros2 launch zed_capture zed_capture_launch.py
+    ros2 launch zed_capture zed_capture_launch.py zed_sn_str:=SNxxxxx
     ```
 
 *** Note ***
@@ -83,7 +83,7 @@ When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the ZED c
 
 3. On the first terminal, launch the ZED capture node with following, and keep it running:
     ```
-    $ roslaunch zed_capture zed_capture.launch
+    $ roslaunch zed_capture zed_capture.launch zed_sn_str:=SNxxxxx
     ```
 
 4. On the second terminal, to capture into ROS bag files, run one of two examples below

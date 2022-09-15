@@ -1,7 +1,7 @@
 Robotics SDK
 ============
-## Robotics SDK 8.4 RC1
-**WARNING**: This RC is currently ONLY for TI-internal testing (Compatible with EdgeAI Nightly Build 08_04_00_06).
+## Robotics SDK 8.4 RC2
+**WARNING**: This RC is currently ONLY for TI-internal testing (Compatible with EdgeAI Nightly Build 08_04_00_08).
 
 ## Git Repository
 
@@ -86,7 +86,7 @@ The SDK supports following out-of-box demo applications.
 
 ## Scope of Robotics SDK
 
-![](docs/scope_of_release_08_02_00.png)
+![](docs/scope_of_release_08_04_00.png)
 
 ## Limitations and Known Issues
 See [known_issues.md](docs/known_issues.md)

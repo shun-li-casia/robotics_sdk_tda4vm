@@ -32,12 +32,12 @@ roslaunch ti_estop zed_estop.launch zed_sn:=SNxxxxx
 
 As shown in the "Launch File Parameters" section below, this application publishes many topics regarding 3D bounding box coordinates, semantic segmentation output tensor and disparity map. Using these information, we can produce color-coded disparity map, color-coded semantic segmentation map and 3D bounding boxes overlaid on image. To visualize them on PC, run
 ```
-roslaunch ti_estop rviz.launch
+roslaunch ti_estop rviz_estop.launch
 ```
 
 The ego-centric occupancy grid map is created based on 3D bounding boxes. To visualize OG map along with 3D bounding box image, run
 ```
-roslaunch ti_estop rviz_ogmap.launch
+roslaunch ti_estop rviz_estop_ogmap.launch
 ```
 
 ## How to Run the Application in ROS 2
