@@ -31,16 +31,14 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 usage() {
-    echo "usage: prepare_docker_build.sh <DLRT_DIR> <DST_DIR> <TIVA_LIB_VER>"
-    echo "  <DLRT_DIR> DL runtime lib path"
+    echo "usage: prepare_docker_build.sh <DST_DIR> <TIVA_LIB_VER>"
     echo "  <DST_DIR>  destination path"
     exit 1
 }
 
-if [ "$#" -eq 3 ]; then
-    DLRT_DIR=$1
-    DST_DIR=$2
-    TIVA_LIB_VER=$3
+if [ "$#" -eq 2 ]; then
+    DST_DIR=$1
+    TIVA_LIB_VER=$2
 else
     usage
 fi
@@ -65,7 +63,12 @@ cp -p ${SDK_DIR}/docker/setup_proxy.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/ros_setup.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/entrypoint_*.sh ${DST_DIR}
 cp -rp ${SDK_DIR}/docker/proxy ${DST_DIR}
-cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
+if [[ "$ARCH" == "aarch64" ]]; then
+    cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
+    cp -p /opt/edge_ai_apps/scripts/install_tiovx_modules.sh ${DST_DIR}
+    cp -p /opt/edge_ai_apps/scripts/install_gst_plugins.sh ${DST_DIR}
+    cp -p /opt/edge_ai_apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
+fi
 
 # Copy library files to the temporary folder
 if [[ "$ARCH" == "aarch64" ]]; then

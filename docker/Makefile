@@ -11,10 +11,6 @@ GPUS             ?= n
 # Robotics SDK version
 RSDK_VER          = 8.4
 
-# Branch names for edgeai-tiovx-modules and edgeai-gst-plugins
-TIOVX_MODULES_BRANCH = release-8.4.1
-GST_PLUGINS_BRANCH   = release-0.7.1
-
 # Set the operating variables based on the ROS version specified
 ROS_DISTRO        = foxy
 DOCKER_TAG_PC     = pc-ros2-$(ROS_DISTRO):$(RSDK_VER)
@@ -135,23 +131,18 @@ docker_build:
 	@echo "fi"                                                >> $(TGT_NAME)
 	@echo "echo \"USE_PROXY = \$$USE_PROXY\""                 >> $(TGT_NAME)
 	@echo "echo \"REPO_LOCATION = \$$REPO_LOCATION\""         >> $(TGT_NAME)
-ifeq ($(PLATFORM), j7)
-	@echo "DLRT_DIR=/usr/lib"                                 >> $(TGT_NAME)
-endif
 	@echo "DST_DIR=$(WORK_PATH_HOST)/docker_src"              >> $(TGT_NAME)
 	@echo "TIVA_LIB_VER=$(TIVA_LIB_VER)"                      >> $(TGT_NAME)
-	@echo "TIOVX_MODULES_BRANCH=$(TIOVX_MODULES_BRANCH)"      >> $(TGT_NAME)
-	@echo "GST_PLUGINS_BRANCH=$(GST_PLUGINS_BRANCH)"          >> $(TGT_NAME)
-	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DLRT_DIR \$$DST_DIR \$$TIVA_LIB_VER" >> $(TGT_NAME)
+	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DST_DIR \$$TIVA_LIB_VER" >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
 	@echo "    -t \$$DOCKER_TAG \\"                           >> $(TGT_NAME)
 	@echo "    --build-arg USE_PROXY=\$$USE_PROXY \\"         >> $(TGT_NAME)
 	@echo "    --build-arg REPO_LOCATION=\$$REPO_LOCATION \\" >> $(TGT_NAME)
 	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
 	@echo "    --build-arg TIVA_LIB_VER=\$$TIVA_LIB_VER \\"   >> $(TGT_NAME)
-	@echo "    --build-arg TIOVX_MODULES_BRANCH=\$$TIOVX_MODULES_BRANCH \\" >> $(TGT_NAME)
-	@echo "    --build-arg GST_PLUGINS_BRANCH=\$$GST_PLUGINS_BRANCH \\"     >> $(TGT_NAME)
+endif
 	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./docker_src"  >> $(TGT_NAME)
 	@echo "rm -r \$$DST_DIR"	                              >> $(TGT_NAME)
 	@chmod +x $(TGT_NAME)

@@ -33,8 +33,6 @@ ARG HTTP_PROXY
 ARG REPO_LOCATION=arm64v8
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TIVA_LIB_VER
-ARG TIOVX_MODULES_BRANCH
-ARG GST_PLUGINS_BRANCH
 
 #=========================================================================
 # The environment variable REPO_LOCATION is set from outside as needed,
@@ -146,8 +144,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 FROM ubuntu-ros2
 ARG DEBIAN_FRONTEND
 ARG TIVA_LIB_VER
-ARG TIOVX_MODULES_BRANCH
-ARG GST_PLUGINS_BRANCH
 
 # install dependency for tivision_apps.so
 # TODO: check if these are still required in 20.04
@@ -188,7 +184,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 -m pip install rosbags && \
     rm -rf /var/lib/apt/lists/*
 
-#Install OSRT dependencies
+# install OSRT dependencies
 ADD install_osrt.sh /usr/bin/
 RUN /usr/bin/install_osrt.sh
 
@@ -203,30 +199,23 @@ RUN ln -s /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.s
 
 # install edgeai-tiovx-modules
 ENV SOC=j721e
-WORKDIR /root/src
-RUN git clone --single-branch --branch $TIOVX_MODULES_BRANCH https://github.com/TexasInstruments/edgeai-tiovx-modules.git && \
-    cd edgeai-tiovx-modules && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j1 && \
-    make install && \
-    rm -rf /root/src/edgeai-tiovx-modules
+ADD install_tiovx_modules.sh /usr/bin/
+RUN /usr/bin/install_tiovx_modules.sh && \
+    rm -rf /opt/edgeai-tiovx-modules
 
 # install edgeai-gst-plugins
-WORKDIR /root/src
-RUN git clone --single-branch --branch $GST_PLUGINS_BRANCH https://github.com/TexasInstruments/edgeai-gst-plugins.git && \
-    cd edgeai-gst-plugins && \
-    meson build --prefix=/usr -Dpkg_config_path=pkgconfig && \
-    ninja -C build && \
-    ninja -C build install && \
-    ldconfig && \
-    rm -rf /root/src/edgeai-gst-plugins
+ADD install_gst_plugins.sh /usr/bin/
+RUN /usr/bin/install_gst_plugins.sh && \
+    rm -rf /opt/edgeai-gst-plugins
 
-# Install python modules for DL RT
+# install python modules for DL RT
 RUN apt update && apt-get install -y \
     python3-gi && \
     pip3 install PyYAML
+
+# install ti-gpio-cpp
+ADD install_ti_gpio_libs.sh /usr/bin/
+RUN /usr/bin/install_ti_gpio_libs.sh
 
 # add scripts
 COPY entrypoint_arm64v8.sh /root/entrypoint.sh

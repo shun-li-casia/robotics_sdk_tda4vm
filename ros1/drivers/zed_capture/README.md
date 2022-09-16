@@ -13,7 +13,7 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
 
     Then place the downloaded calibration data file (`SNxxxx.conf`) under `$SDK_DIR/ros1/drivers/zed_capture/config` folder.
 
-2. Generate `camera_info` YAML files, and undistortion & rectification look-up-table (LUT) files which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator.
+2. Generate `camera_info` YAML files, and undistortion & rectification look-up-table (LUT) files which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator. It is recommended to perform the following steps in the Robotics SDK ROS 1 container on the Ubuntu PC, and then "scp" the output artifacts to the TDA4 target host filesystem, under `/opt/robotics_sdk/ros1/drivers/zed_capture/config`.
 
     Run the following script:
     ```
