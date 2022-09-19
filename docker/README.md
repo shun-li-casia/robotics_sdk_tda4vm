@@ -13,7 +13,7 @@ This section describes how to set up the Robotics SDK on the TDA4 Processor SDK 
  J721E    | [TDA4VM](https://www.ti.com/product/TDA4VM) | [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM)
 
 ### 1.2. Processor SDK Linux for Edge AI
-The Robotics SDK requires the **SD card image** from [Processor SDK Linux for Edge AI 8.4.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.04.00.02) [TODO: update URL]. The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
+The Robotics SDK requires the **SD card image** from [Processor SDK Linux for Edge AI 8.4.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.04.00.10). The SD card image contains Processor SDK Linux and libraries that are necessary for setting up the Robotics SDK environment.
 
 ### 1.3. Ubuntu PC
 A Ubuntu PC is required for visualization of ROS topics published from the TDA4 target. We have tested only with native x86_64 Ubuntu PCs, and have **not** tested with any other Ubuntu systems: including Ubuntu virtual machines and Docker Desktop on Mac or Windows.
@@ -46,7 +46,7 @@ Figure 1 shows the hardware setup and high-level installation steps on the TDA4 
 
 ### 2.1. Build SD Card
 
-1. From Ubuntu PC, download the **SD card image** from [Processor SDK Linux for Edge AI 8.4.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.04.00.02) [TODO: update URL].
+1. From Ubuntu PC, download the **SD card image** from [Processor SDK Linux for Edge AI 8.4.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM/08.04.00.10).
 
 2. Flash the downloaded image to a SD card (minimum 32GB, high-performance) using Balena Etcher tool. For detailed instruction, please refer to [this section](http://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/08_04_00/exports/docs/getting_started.html#software-setup).
 
