@@ -115,8 +115,10 @@ if [[ -f "$SDK_DIR/scripts/install_gscam.sh" ]]; then
 fi
 
 # Install TI mmWave radar driver node
-if [[ -f "$SDK_DIR/scripts/install_mmwave_rospkg.sh" ]]; then
-    bash $SDK_DIR/scripts/install_mmwave_rospkg.sh
+if [[ "$ARCH" == "aarch64" ]]; then
+    if [[ -f "$SDK_DIR/scripts/install_mmwave_rospkg.sh" ]]; then
+        bash $SDK_DIR/scripts/install_mmwave_rospkg.sh
+    fi
 fi
 
 # Setup $WORK_DIR
