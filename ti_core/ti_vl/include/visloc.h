@@ -74,18 +74,13 @@
 #include <TI/j7_tidl.h>
 #include <TI/tivx_img_proc.h>
 
-#include <perception/perception.h>
-
 #include <cm_scaler_node_cntxt.h>
 #include <cm_preproc_node_cntxt.h>
 #include <cm_ldc_node_cntxt.h>
 #include <cm_pose_calc_node_cntxt.h>
 #include <cm_pose_viz_node_cntxt.h>
 #include <cm_profile.h>
-#include <cm_common.h>
 #include <cm_pre_process_image.h>
-#include <dl_inferer/include/ti_dl_inferer.h>
-#include <common/include/edgeai_utils.h>
 #include <ti_queue.h>
 
 #include <Eigen/Dense>
@@ -119,14 +114,15 @@
  */
 
 using namespace ti_core_common;
-using namespace ti::dl;
-using namespace ti::edgeai::common;
+using namespace ti::dl_inferer;
+
+#include <utils/app_init/include/app_init.h>
+#include <utils/perf_stats/include/app_perf_stats.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <utils/perf_stats/include/app_perf_stats.h>
 #include <tivx_utils_graph_perf.h>
 
 #ifdef __cplusplus
@@ -237,7 +233,6 @@ extern "C" {
 
 
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
-
 
 /**
  * \brief Graph parameters 
@@ -627,7 +622,7 @@ vx_status VISLOC_waitGraph(VISLOC_Context * appCntxt);
 
 /**
  * \brief Function to process the events programmed to be handled by the
- *        APPLIB. Currently VX_EVENT_NODE_COMPLETED event is handled.
+ *        . Currently VX_EVENT_NODE_COMPLETED event is handled.
  *
  * \param [in] appCntxt APP context
  *

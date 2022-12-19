@@ -71,7 +71,7 @@ index 0000000..00fdd3a
 +2. Build the ROS node:
 +    ```
 +    cd $ROS_WS
-+    colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential
++    colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential --cmake-force-configure
 +    source install/setup.bash
 +    ```
 +

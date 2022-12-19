@@ -68,7 +68,7 @@
 
 vx_status ESTOP_APP_init_LDC(ESTOP_APP_Context *appCntxt)
 {
-    SDELDCAPPLIB_createParams * createParams;
+    SDELDC_createParams * createParams;
     int32_t                     i;
     vx_status                   vxStatus = VX_SUCCESS;
 
@@ -230,11 +230,11 @@ vx_status ESTOP_APP_init_LDC(ESTOP_APP_Context *appCntxt)
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        appCntxt->sdeLdcHdl = SDELDCAPPLIB_create(createParams);
+        appCntxt->sdeLdcHdl = SDELDC_create(createParams);
 
         if (appCntxt->sdeLdcHdl == NULL)
         {
-            LOG_ERROR("SDELDCAPPLIB_create() failed\n");
+            LOG_ERROR("SDELDC_create() failed\n");
             vxStatus = VX_FAILURE;;
         }
     }
@@ -249,7 +249,7 @@ vx_status ESTOP_APP_init_SDE(ESTOP_APP_Context *appCntxt)
 
     if (appCntxt->sdeAlgoType == 0)
     {
-        SL_SDEAPPLIB_createParams   * slSdeCreateParams;
+        SL_SDE_createParams   * slSdeCreateParams;
 
         slSdeCreateParams            = &appCntxt->slSdeCreateParams;
         slSdeCreateParams->vxContext = appCntxt->vxContext;
@@ -295,11 +295,11 @@ vx_status ESTOP_APP_init_SDE(ESTOP_APP_Context *appCntxt)
 
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
-            appCntxt->slSdeHdl = SL_SDEAPPLIB_create(slSdeCreateParams);
+            appCntxt->slSdeHdl = SL_SDE_create(slSdeCreateParams);
 
             if (appCntxt->slSdeHdl == NULL)
             {
-                LOG_ERROR("SL_SDEAPPLIB_create() failed\n");
+                LOG_ERROR("SL_SDE_create() failed\n");
 
                 vxStatus = VX_FAILURE;;
             }
@@ -307,7 +307,7 @@ vx_status ESTOP_APP_init_SDE(ESTOP_APP_Context *appCntxt)
     }
     else if (appCntxt->sdeAlgoType == 1)
     {
-        ML_SDEAPPLIB_createParams   * mlSdeCreateParams;
+        ML_SDE_createParams   * mlSdeCreateParams;
 
         mlSdeCreateParams            = &appCntxt->mlSdeCreateParams;
         mlSdeCreateParams->vxContext = appCntxt->vxContext;
@@ -372,10 +372,10 @@ vx_status ESTOP_APP_init_SDE(ESTOP_APP_Context *appCntxt)
 
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
-            appCntxt->mlSdeHdl = ML_SDEAPPLIB_create(mlSdeCreateParams);
+            appCntxt->mlSdeHdl = ML_SDE_create(mlSdeCreateParams);
             if (appCntxt->mlSdeHdl == NULL)
             {
-                LOG_ERROR("ML_SDEAPPLIB_create() failed\n");
+                LOG_ERROR("ML_SDE_create() failed\n");
                 vxStatus = VX_FAILURE;
             }
         }
@@ -583,7 +583,7 @@ vx_status ESTOP_APP_deinit_SS(ESTOP_APP_Context *appCntxt)
 
 vx_status ESTOP_APP_init_SS_Detection(ESTOP_APP_Context *appCntxt)
 {
-    SS_DETECT_APPLIB_createParams  *ssDetectCreateParams;
+    SS_DETECT_createParams  *ssDetectCreateParams;
     vx_tensor                      *vxOutTensor;
     int32_t                         vxStatus = VX_SUCCESS;
     int32_t                         i;
@@ -634,10 +634,10 @@ vx_status ESTOP_APP_init_SS_Detection(ESTOP_APP_Context *appCntxt)
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        appCntxt->ssDetectHdl = SS_DETECT_APPLIB_create(ssDetectCreateParams);
+        appCntxt->ssDetectHdl = SS_DETECT_create(ssDetectCreateParams);
         if (appCntxt->ssDetectHdl == NULL)
         {
-            LOG_ERROR("SS_DETECT_APPLIB_create() failed\n");
+            LOG_ERROR("SS_DETECT_create() failed\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -646,7 +646,7 @@ vx_status ESTOP_APP_init_SS_Detection(ESTOP_APP_Context *appCntxt)
     for (i = 0; i < appCntxt->pipelineDepth; i++)
     {
         appCntxt->vx3DBoundBox[i] =
-            SS_DETECT_APPLIB_get3DBBObject(appCntxt->ssDetectHdl, i);
+            SS_DETECT_get3DBBObject(appCntxt->ssDetectHdl, i);
     }
 
     return vxStatus;
@@ -720,11 +720,11 @@ vx_status ESTOP_APP_setupPipeline_SL(ESTOP_APP_Context * appCntxt)
     appCntxt->numGraphParams = 5;
     scalerObj    = &appCntxt->scalerObj;
     vxOutTensor  = appCntxt->vxOutTensor;
-    leftLdcNode  = SDELCDAPPLIB_getLeftLDCNode(appCntxt->sdeLdcHdl);
-    rightLdcNode = SDELCDAPPLIB_getRightLDCNode(appCntxt->sdeLdcHdl);
-    sdeNode      = SL_SDEAPPLIB_getSDENode(appCntxt->slSdeHdl);
-    pcNode       = SS_DETECT_APPLIB_getPCNode(appCntxt->ssDetectHdl);
-    ogNode       = SS_DETECT_APPLIB_getOGNode(appCntxt->ssDetectHdl);
+    leftLdcNode  = SDELCD_getLeftLDCNode(appCntxt->sdeLdcHdl);
+    rightLdcNode = SDELCD_getRightLDCNode(appCntxt->sdeLdcHdl);
+    sdeNode      = SL_SDE_getSDENode(appCntxt->slSdeHdl);
+    pcNode       = SS_DETECT_getPCNode(appCntxt->ssDetectHdl);
+    ogNode       = SS_DETECT_getOGNode(appCntxt->ssDetectHdl);
 
     /* LDC left node Param 6 (leftInputImg) ==> graph param 0. */
     vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
@@ -948,20 +948,20 @@ vx_status ESTOP_APP_setupPipeline_ML(ESTOP_APP_Context * appCntxt)
     appCntxt->numGraphParams = 5;
     scalerObj      = &appCntxt->scalerObj; 
     vxOutTensor    = appCntxt->vxOutTensor;
-    leftLdcNode    = SDELCDAPPLIB_getLeftLDCNode(appCntxt->sdeLdcHdl);
-    rightLdcNode   = SDELCDAPPLIB_getRightLDCNode(appCntxt->sdeLdcHdl);
-    sdeNodeL0      = ML_SDEAPPLIB_getSDENodeL0(appCntxt->mlSdeHdl);
-    sdeNodeL1      = ML_SDEAPPLIB_getSDENodeL1(appCntxt->mlSdeHdl);
-    sdeNodeL2      = ML_SDEAPPLIB_getSDENodeL2(appCntxt->mlSdeHdl);
-    medFilterNode  = ML_SDEAPPLIB_getMedFilterNode(appCntxt->mlSdeHdl);
-    mergeNodeL1    = ML_SDEAPPLIB_getMergeNodeL1(appCntxt->mlSdeHdl);
-    mergeNodeL2    = ML_SDEAPPLIB_getMergeNodeL2(appCntxt->mlSdeHdl);
-    leftMscNodeL1  = ML_SDEAPPLIB_getLeftMSCNodeL1(appCntxt->mlSdeHdl);
-    rightMscNodeL1 = ML_SDEAPPLIB_getRightMSCNodeL1(appCntxt->mlSdeHdl);
-    leftMscNodeL2  = ML_SDEAPPLIB_getLeftMSCNodeL2(appCntxt->mlSdeHdl);
-    rightMscNodeL2 = ML_SDEAPPLIB_getRightMSCNodeL2(appCntxt->mlSdeHdl);
-    pcNode         = SS_DETECT_APPLIB_getPCNode(appCntxt->ssDetectHdl);
-    ogNode         = SS_DETECT_APPLIB_getOGNode(appCntxt->ssDetectHdl);
+    leftLdcNode    = SDELCD_getLeftLDCNode(appCntxt->sdeLdcHdl);
+    rightLdcNode   = SDELCD_getRightLDCNode(appCntxt->sdeLdcHdl);
+    sdeNodeL0      = ML_SDE_getSDENodeL0(appCntxt->mlSdeHdl);
+    sdeNodeL1      = ML_SDE_getSDENodeL1(appCntxt->mlSdeHdl);
+    sdeNodeL2      = ML_SDE_getSDENodeL2(appCntxt->mlSdeHdl);
+    medFilterNode  = ML_SDE_getMedFilterNode(appCntxt->mlSdeHdl);
+    mergeNodeL1    = ML_SDE_getMergeNodeL1(appCntxt->mlSdeHdl);
+    mergeNodeL2    = ML_SDE_getMergeNodeL2(appCntxt->mlSdeHdl);
+    leftMscNodeL1  = ML_SDE_getLeftMSCNodeL1(appCntxt->mlSdeHdl);
+    rightMscNodeL1 = ML_SDE_getRightMSCNodeL1(appCntxt->mlSdeHdl);
+    leftMscNodeL2  = ML_SDE_getLeftMSCNodeL2(appCntxt->mlSdeHdl);
+    rightMscNodeL2 = ML_SDE_getRightMSCNodeL2(appCntxt->mlSdeHdl);
+    pcNode         = SS_DETECT_getPCNode(appCntxt->ssDetectHdl);
+    ogNode         = SS_DETECT_getOGNode(appCntxt->ssDetectHdl);
 
     /* LDC left node Param 6 (leftInputImg) ==> graph param 0. */
     vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
@@ -1299,11 +1299,11 @@ void ESTOP_APP_printStats(ESTOP_APP_Context * appCntxt)
 {
     tivx_utils_graph_perf_print(appCntxt->vxGraph);
     appPerfPointPrint(&appCntxt->estopPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     appPerfPointPrintFPS(&appCntxt->estopPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     CM_printProctime(stdout);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
 }
 
 vx_status ESTOP_APP_exportStats(ESTOP_APP_Context * appCntxt, FILE *fp, bool exportAll)
@@ -1336,7 +1336,7 @@ vx_status ESTOP_APP_waitGraph(ESTOP_APP_Context * appCntxt)
     /* Wait for the output queue to get flushed. */
     while (appCntxt->freeQ.size() != appCntxt->pipelineDepth)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for (std::chrono::milliseconds(50));
     }
 
     return vxStatus;
@@ -1682,7 +1682,7 @@ vx_status ESTOP_APP_processEvent(ESTOP_APP_Context * appCntxt, vx_event_t * even
     ref      = NULL;
     vxStatus = (vx_status)VX_SUCCESS;
 
-    if(event->type == VX_EVENT_NODE_COMPLETED)
+    if (event->type == VX_EVENT_NODE_COMPLETED)
     {
         uint32_t appValue = appCntxt->vxEvtAppValBase + 
                             ESTOP_APP_SCALER_NODE_COMPLETE_EVENT;
@@ -1704,7 +1704,7 @@ vx_status ESTOP_APP_processEvent(ESTOP_APP_Context * appCntxt, vx_event_t * even
         }
 
     } else
-    if(event->type == VX_EVENT_GRAPH_COMPLETED)
+    if (event->type == VX_EVENT_GRAPH_COMPLETED)
     {
         uint32_t appValue;
 

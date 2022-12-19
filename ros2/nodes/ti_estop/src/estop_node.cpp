@@ -832,7 +832,7 @@ void EStopNode::readParams()
     logSetLevel((LogLevel) tmp);
 
     /* Get pipeline depth information. */
-    get_parameter_or("pipeline_depth", tmp, PTK_GRAPH_MAX_PIPELINE_DEPTH);
+    get_parameter_or("pipeline_depth", tmp, GRAPH_MAX_PIPELINE_DEPTH);
     m_cntxt->pipelineDepth = (uint8_t)tmp;
 
     /* Get the disparity merge core information. */
@@ -864,10 +864,10 @@ void EStopNode::readParams()
         m_cntxt->height = 128;
     }
 
-    if (m_cntxt->pipelineDepth > PTK_GRAPH_MAX_PIPELINE_DEPTH)
+    if (m_cntxt->pipelineDepth > GRAPH_MAX_PIPELINE_DEPTH)
     {
         RCLCPP_ERROR(this->get_logger(), "Pipeline depth is larger than maximum pipeline depth allowed. Clipped..");
-        m_cntxt->pipelineDepth = PTK_GRAPH_MAX_PIPELINE_DEPTH;
+        m_cntxt->pipelineDepth = GRAPH_MAX_PIPELINE_DEPTH;
     }
 
     if (m_cntxt->inputFormat != CM_IMG_FORMAT_UYVY)

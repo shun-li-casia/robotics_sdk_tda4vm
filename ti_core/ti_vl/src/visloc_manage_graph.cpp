@@ -688,11 +688,11 @@ void VISLOC_printStats(VISLOC_Context * appCntxt)
     tivx_utils_graph_perf_print(appCntxt->vxGraph);
 
     appPerfPointPrint(&appCntxt->vlPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     appPerfPointPrintFPS(&appCntxt->vlPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     CM_printProctime(stdout);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
 }
 
 
@@ -735,7 +735,7 @@ vx_status VISLOC_waitGraph(VISLOC_Context * appCntxt)
         /* Wait for the output queue to get flushed. */
         while (appCntxt->freeQ.size() != appCntxt->pipelineDepth)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for (std::chrono::milliseconds(50));
         }
     }
 
@@ -1132,7 +1132,7 @@ vx_status VISLOC_processEvent(VISLOC_Context * appCntxt, vx_event_t * event)
     ref      = NULL;
     vxStatus = (vx_status)VX_SUCCESS;
 
-    if(event->type == VX_EVENT_NODE_COMPLETED)
+    if (event->type == VX_EVENT_NODE_COMPLETED)
     {
         uint32_t appValue = appCntxt->vxEvtAppValBase + 
                             VISLOC_SCALER_NODE_COMPLETE_EVENT;
@@ -1153,7 +1153,7 @@ vx_status VISLOC_processEvent(VISLOC_Context * appCntxt, vx_event_t * event)
             appCntxt->preProcSem->notify();
         }
     } else
-    if(event->type == VX_EVENT_GRAPH_COMPLETED)
+    if (event->type == VX_EVENT_GRAPH_COMPLETED)
     {
         if (vxStatus == (vx_status)VX_SUCCESS)
         {
@@ -1266,10 +1266,11 @@ static vx_status VISLOC_createInputImageObjects(VISLOC_Context * appCntxt)
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
             // create objects
-            appCntxt->vxInputImage[i] = vxCreateImage(appCntxt->vxContext,
-                                                      appCntxt->inputImageWidth,
-                                                      appCntxt->inputImageHeight,
-                                                     (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY ? VX_DF_IMAGE_UYVY:VX_DF_IMAGE_NV12));
+            appCntxt->vxInputImage[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->inputImageWidth,
+                              appCntxt->inputImageHeight,
+                              (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY ? VX_DF_IMAGE_UYVY:VX_DF_IMAGE_NV12));
 
             if (appCntxt->vxInputImage[i] == NULL)
             {

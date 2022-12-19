@@ -31,14 +31,15 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 usage() {
-    echo "usage: prepare_docker_build.sh <DST_DIR> <TIVA_LIB_VER>"
+    echo "usage: prepare_docker_build.sh <DST_DIR> <TIVA_LIB_VER> <RPMSG_LIB_VER>"
     echo "  <DST_DIR>  destination path"
     exit 1
 }
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 3 ]; then
     DST_DIR=$1
     TIVA_LIB_VER=$2
+    RPMSG_LIB_VER=$3
 else
     usage
 fi
@@ -65,9 +66,11 @@ cp -p ${SDK_DIR}/docker/entrypoint_*.sh ${DST_DIR}
 cp -rp ${SDK_DIR}/docker/proxy ${DST_DIR}
 if [[ "$ARCH" == "aarch64" ]]; then
     cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
+    cp -p /opt/edge_ai_apps/scripts/install_dl_inferer.sh ${DST_DIR}
     cp -p /opt/edge_ai_apps/scripts/install_tiovx_modules.sh ${DST_DIR}
     cp -p /opt/edge_ai_apps/scripts/install_gst_plugins.sh ${DST_DIR}
     cp -p /opt/edge_ai_apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
+    cp -p /opt/edgeai-dl-inferer/scripts/install_dlpack.sh ${DST_DIR}
 fi
 
 # Copy library files to the temporary folder
@@ -77,7 +80,7 @@ if [[ "$ARCH" == "aarch64" ]]; then
         # Processor SDK libraries
         /usr/lib/libtivision_apps.so.${TIVA_LIB_VER}
         /usr/lib/libion.so
-        /usr/lib/libti_rpmsg_char.so.0.4.1
+        /usr/lib/libti_rpmsg_char.so.${RPMSG_LIB_VER}
         /usr/lib/libtidl_tfl_delegate.so
         /usr/lib/libvx_tidl_rt.so.1.0
     )

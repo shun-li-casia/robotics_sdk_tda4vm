@@ -71,23 +71,17 @@
 #include <TI/tivx_debug.h>
 #include <TI/tivx_stereo.h>
 
-#include <perception/perception.h>
-
-#include <sde_ldc_applib.h>
-#include <sde_singlelayer_applib.h>
-#include <sde_multilayer_applib.h>
-#include <ss_sde_detection_applib.h>
+#include <sde_ldc.h>
+#include <sde_singlelayer.h>
+#include <sde_multilayer.h>
+#include <ss_sde_detection.h>
 
 #include <cm_scaler_node_cntxt.h>
 #include <cm_preproc_node_cntxt.h>
 #include <cm_profile.h>
-#include <cm_common.h>
 #include <cm_pre_process_image.h>
 #include <cm_post_process_image.h>
-#include <dl_inferer/include/ti_dl_inferer.h>
-#include <common/include/edgeai_utils.h>
 #include <ti_queue.h>
-
 
 /**
  * \defgroup group_ticore_estop 3D obstacle detection (e-Stop) processing
@@ -125,14 +119,15 @@
 
 using namespace std;
 using namespace ti_core_common;
-using namespace ti::dl;
-using namespace ti::edgeai::common;
+using namespace ti::dl_inferer;
+
+#include <utils/app_init/include/app_init.h>
+#include <utils/perf_stats/include/app_perf_stats.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <utils/perf_stats/include/app_perf_stats.h>
 #include <tivx_utils_graph_perf.h>
 
 #ifdef __cplusplus
@@ -531,28 +526,28 @@ struct ESTOP_APP_Context
     uint8_t                                 is_interactive;
 
     /** LDC applib create params */
-    SDELDCAPPLIB_createParams               sdeLdcCreateParams;
+    SDELDC_createParams               sdeLdcCreateParams;
 
     /** LDC applib handler */
-    SDELDCAPPLIB_Handle                     sdeLdcHdl;
+    SDELDC_Handle                     sdeLdcHdl;
 
     /** Single-layer SDE applib create params */
-    SL_SDEAPPLIB_createParams               slSdeCreateParams;
+    SL_SDE_createParams               slSdeCreateParams;
 
     /** Single-layer SDE applib handler */
-    SL_SDEAPPLIB_Handle                     slSdeHdl;
+    SL_SDE_Handle                     slSdeHdl;
 
     /** Multi-layer SDE applib create params */
-    ML_SDEAPPLIB_createParams               mlSdeCreateParams;
+    ML_SDE_createParams               mlSdeCreateParams;
 
     /** Multi-layer SDE applib handler */
-    ML_SDEAPPLIB_Handle                     mlSdeHdl;
+    ML_SDE_Handle                     mlSdeHdl;
 
     /** OG Map based detector applib create params */
-    SS_DETECT_APPLIB_createParams           ssDetectCreateParams;
+    SS_DETECT_createParams           ssDetectCreateParams;
 
     /** OG Map based detector applib handler */
-    SS_DETECT_APPLIB_Handle                 ssDetectHdl;
+    SS_DETECT_Handle                 ssDetectHdl;
 
     /** Number of graph params */
     uint8_t                                 numGraphParams;
@@ -935,7 +930,7 @@ vx_status ESTOP_APP_createOutTensor(ESTOP_APP_Context  *appCntxt,
 
 /**
  * \brief Function to process the events programmed to be handled by the
- *        APPLIB. Currently only VX_EVENT_GRAPH_COMPLETED event is handled.
+ *        . Currently only VX_EVENT_GRAPH_COMPLETED event is handled.
  *
  * \param [in] appCntxt APP context
  *

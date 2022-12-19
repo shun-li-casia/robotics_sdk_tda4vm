@@ -78,22 +78,22 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
     if (poseVizObj == NULL)
     {
-        PTK_printf("Parameter 'poseVizObj' NULL.");
+        LOG_ERROR("Parameter 'poseVizObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (createParams == NULL)
     {
-        PTK_printf("Parameter 'createParams' NULL.");
+        LOG_ERROR("Parameter 'createParams' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (poseVizObj->state != CM_POSEVIZ_NODE_CNTXT_STATE_INVALID)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }    
 
@@ -119,9 +119,9 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
     {
         config_type         = vxRegisterUserStruct(context, sizeof(tivxPoseVizParams));
 
-        if(config_type < VX_TYPE_USER_STRUCT_START || config_type > VX_TYPE_USER_STRUCT_END)
+        if (config_type < VX_TYPE_USER_STRUCT_START || config_type > VX_TYPE_USER_STRUCT_END)
         {
-            PTK_printf("vxRegisterUserStruct() failed");
+            LOG_ERROR("vxRegisterUserStruct() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -131,7 +131,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
         poseVizObj->config = vxCreateArray(context, config_type, 1);
         if (poseVizObj->config == NULL)
         { 
-            PTK_printf("vxCreateArray() failed");
+            LOG_ERROR("vxCreateArray() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -145,7 +145,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxAddArrayItems() failed");
+            LOG_ERROR("vxAddArrayItems() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -161,7 +161,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
         if (poseVizObj->outputImage == NULL)
         {
-            PTK_printf("Failed to allocate output image array");
+            LOG_ERROR("Failed to allocate output image array");
             vxStatus = VX_FAILURE;
         }
     }
@@ -173,7 +173,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
         if (poseVizObj->bgImage == NULL)
         { 
-            PTK_printf("vxCreateImage() failed");
+            LOG_ERROR("vxCreateImage() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -194,7 +194,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
             if (poseVizObj->outputImage[i] == NULL)
             { 
-                PTK_printf("vxCreateImage() failed");
+                LOG_ERROR("vxCreateImage() failed");
                 vxStatus = VX_FAILURE;
             }
             else
@@ -213,7 +213,7 @@ vx_status CM_poseVizNodeCntxtInit(CM_PoseVizNodeCntxt           *poseVizObj,
 
              if (vxStatus != (vx_status)VX_SUCCESS)
              {
-                PTK_printf("CM_copyImage2Image() failed");
+                LOG_ERROR("CM_copyImage2Image() failed");
                 vxStatus = VX_FAILURE;
                 break;
              }
@@ -239,27 +239,27 @@ vx_status CM_poseVizNodeCntxtSetup(CM_PoseVizNodeCntxt    *poseVizObj,
 
     if (poseVizObj == NULL)
     {
-        PTK_printf("Parameter 'poseVizObj' NULL.");
+        LOG_ERROR("Parameter 'poseVizObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (graph == NULL)
     {
-        PTK_printf("Parameter 'graph' NULL.");
+        LOG_ERROR("Parameter 'graph' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (pose == NULL)
     {
-        PTK_printf("Parameter 'pose' NULL.");
+        LOG_ERROR("Parameter 'pose' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (poseVizObj->state != CM_POSEVIZ_NODE_CNTXT_STATE_INIT)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -273,7 +273,7 @@ vx_status CM_poseVizNodeCntxtSetup(CM_PoseVizNodeCntxt    *poseVizObj,
         
         if (poseVizObj->node == NULL)
         {
-            PTK_printf("tivxPoseVizNode() failed\n");
+            LOG_ERROR("tivxPoseVizNode() failed\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -286,7 +286,7 @@ vx_status CM_poseVizNodeCntxtSetup(CM_PoseVizNodeCntxt    *poseVizObj,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxSetNodeTarget() failed\n");
+            LOG_ERROR("vxSetNodeTarget() failed\n");
             vxStatus = VX_FAILURE;
         }
         else
@@ -312,14 +312,14 @@ vx_status CM_poseVizNodeCntxtDeInit(CM_PoseVizNodeCntxt *poseVizObj)
 
     if (poseVizObj == NULL)
     {
-        PTK_printf("Parameter 'poseVizObj' NULL.");
+        LOG_ERROR("Parameter 'poseVizObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else
     {
         if (poseVizObj->state == CM_POSEVIZ_NODE_CNTXT_STATE_INVALID)
         {
-            PTK_printf("Invalid state.");
+            LOG_ERROR("Invalid state.");
             vxStatus = VX_FAILURE;
         }
         else
@@ -371,13 +371,13 @@ vx_status writePoseVizOutput(char* file_name, vx_image out_img)
 
     status = vxGetStatus((vx_reference)out_img);
 
-    if(status == VX_SUCCESS)
+    if (status == VX_SUCCESS)
     {
         FILE * fp = fopen(file_name,"wb");
 
-        if(fp == NULL)
+        if (fp == NULL)
         {
-            printf("Unable to open file %s \n", file_name);
+            LOG_ERROR("Unable to open file %s \n", file_name);
             return (VX_FAILURE);
         }
 
@@ -409,8 +409,8 @@ vx_status writePoseVizOutput(char* file_name, vx_image out_img)
         //Copy Luma
         num_bytes = fwrite(data_ptr,1,img_width*img_height, fp);
 
-        if(num_bytes != (img_width*img_height))
-            printf("Luma bytes written = %d, expected = %d", num_bytes, img_width*img_height);
+        if (num_bytes != (img_width*img_height))
+            LOG_ERROR("Luma bytes written = %d, expected = %d", num_bytes, img_width*img_height);
 
         vxUnmapImagePatch(out_img, map_id);
 
@@ -428,8 +428,8 @@ vx_status writePoseVizOutput(char* file_name, vx_image out_img)
         //Copy CbCr
         num_bytes = fwrite(data_ptr,1,img_width*img_height/2, fp);
 
-        if(num_bytes != (img_width*img_height/2))
-            printf("CbCr bytes written = %d, expected = %d", num_bytes, img_width*img_height/2);
+        if (num_bytes != (img_width*img_height/2))
+            LOG_ERROR("CbCr bytes written = %d, expected = %d", num_bytes, img_width*img_height/2);
 
         vxUnmapImagePatch(out_img, map_id);
 

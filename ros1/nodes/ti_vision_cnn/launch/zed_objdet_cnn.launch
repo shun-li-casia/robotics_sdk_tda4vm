@@ -2,12 +2,14 @@
 
     <arg name="zed_sn" default="SN18059"/>
     <arg name="exportPerfStats" default="0"/>
+    <arg name="detVizThreshold" default="0.5"/>
 
     <!-- ti_vision_cnn -->
     <include file="$(find ti_vision_cnn)/launch/objdet_cnn.launch">
         <arg name="image_format" value="2"/>
         <arg name="lut_file_path" value="$(find zed_capture)/config/$(arg zed_sn)_HD_LUT_right.bin" />
         <arg name="exportPerfStats" value="$(arg exportPerfStats)"/>
+        <arg name="detVizThreshold" value="$(arg detVizThreshold)"/>
     </include>
 
     <!-- zed_capture -->

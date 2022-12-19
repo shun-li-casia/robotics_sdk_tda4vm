@@ -61,25 +61,28 @@
  *
  */
 
-
 #if !defined(_CM_COMMON_CNTXT_H_)
 #define _CM_COMMON_CNTXT_H_
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <cassert>
 
 #include <TI/tivx.h>
 #include <TI/j7_tidl.h>
 
 #include <perception/perception.h>
-#include <dl_inferer/include/ti_dl_inferer.h>
-#include <common/include/edgeai_utils.h>
-
+#include <edgeai_dl_inferer/ti_dl_inferer.h>
+#include <edgeai_dl_inferer/ti_pre_process_config.h>
+#include <edgeai_dl_inferer/ti_post_process_config.h>
+#include <utils/include/ti_logger.h>
 
 using namespace std;
-using namespace ti::dl;
-using namespace ti::edgeai::common;
+using namespace ti::utils;
+using namespace ti::dl_inferer;
+using namespace ti::pre_process;
+using namespace ti::post_process;
 
 #define clip3(x, min, max) ((x) > (max)?(max):((x) < (min)?(min):(x)))
 #define CM_normalize(x, mean, scale) (((x) - (mean))*(scale))

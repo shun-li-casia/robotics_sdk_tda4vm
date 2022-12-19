@@ -74,17 +74,12 @@
 #include <TI/j7_tidl.h>
 #include <TI/tivx_img_proc.h>
 
-#include <perception/perception.h>
-
 #include <cm_scaler_node_cntxt.h>
 #include <cm_preproc_node_cntxt.h>
 #include <cm_ldc_node_cntxt.h>
-#include <cm_common.h>
 #include <cm_profile.h>
 #include <cm_pre_process_image.h>
 #include <cm_post_process_image.h>
-#include <dl_inferer/include/ti_dl_inferer.h>
-#include <common/include/edgeai_utils.h>
 #include <ti_queue.h>
 
 /**
@@ -106,9 +101,8 @@
  */
 
 using namespace ti_core_common;
-using namespace ti::dl;
-using namespace ti::edgeai::common;
 using namespace ti::utils;
+using namespace ti::dl_inferer;
 
 #ifdef __cplusplus
 extern "C" {
@@ -478,6 +472,9 @@ struct VISION_CNN_Context
      */
     uint8_t                 exportPerfStats;
 
+    /** Vilualization thteshold for object detection. */
+    float                   detVizThreshold{0.5f};
+
     /** Real-time logging enable.
      * 0 - disable
      * 1 - enable
@@ -613,7 +610,7 @@ vx_status VISION_CNN_waitGraph(VISION_CNN_Context * appCntxt);
 
 /**
  * \brief Function to process the events programmed to be handled by the
- *        APPLIB. Currently VX_EVENT_NODE_COMPLETED event is handled.
+ *        . Currently VX_EVENT_NODE_COMPLETED event is handled.
  *
  * \param [in] appCntxt APP context
  *

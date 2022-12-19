@@ -59,7 +59,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,8 +85,6 @@ static char menu[] = {
 vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
 {
     const string   &modelPath = appCntxt->dlModelPath;
-    const string   &configFile = modelPath + "/param.yaml";
-    YAML::Node      yaml;
     int32_t         status;
     vx_status       vxStatus = VX_SUCCESS;
 
@@ -99,60 +96,49 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
         vxStatus = VX_FAILURE;
     }
 
-    // Check if the specified configuration file exists
-    if (!std::filesystem::exists(configFile))
-    {
-        LOG_ERROR("The file [%s] does not exist.\n",
-                  configFile.c_str());
-        vxStatus = VX_FAILURE;
-    }
-
+    // Populate pre-process config
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        yaml = YAML::LoadFile(configFile.c_str());
-    }
-
-    // Populate pre-process config from yaml
-    if (vxStatus == (vx_status)VX_SUCCESS)
-    {
-        status = getPreprocessImageConfig(yaml, appCntxt->preProcCfg);
+        status = appCntxt->preProcCfg.getConfig(modelPath);
 
         //==> DEBUG
         //appCntxt->preProcCfg.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("getPreprocessImageConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
 
-    // Populate post-process config from yaml
+    // Populate post-process config
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        status = getPostprocessImageConfig(yaml, appCntxt->postProcCfg);
+        status = appCntxt->postProcCfg.getConfig(modelPath);
 
         //==> DEBUG
         //appCntxt->postProcCfg.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("getPostprocessImageConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
+
+        appCntxt->postProcCfg.vizThreshold = appCntxt->detVizThreshold;
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        // Populate infConfig from yaml
-        status = getInfererConfig(yaml, modelPath, appCntxt->dlInferConfig);
+        // Populate infConfig
+        status = appCntxt->dlInferConfig.getConfig(modelPath, true);
 
         //==> DEBUG
         //appCntxt->dlInferConfig.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("VISION_CNN_getInfererConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -197,7 +183,7 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
          */
         DLInferer          *inferer      = appCntxt->dlInferer;
         const VecDlTensor  *dlInfOutputs = inferer->getOutputInfo();
-        const DlTensor     *ifInfo = &dlInfOutputs->at(0);
+        const DlTensor     *ifInfo       = &dlInfOutputs->at(0);
 
         /* For segmentation only. */
         if (appCntxt->postProcCfg.taskType == "segmentation")
@@ -252,7 +238,8 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
         {
             LOG_ERROR("vxCreateGraph() failed\n");
             vxStatus = VX_FAILURE;
-        } else
+        }
+        else
         {
             vxSetReferenceName((vx_reference)appCntxt->vxGraph,
                                "CNN Semantic Segmentation Graph");
@@ -327,7 +314,7 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
         appCntxt->exitPreprocThread    = false;
 
         appCntxt->dlDataReadySem       = new Semaphore(0);
-        appCntxt->exitDlInferrThread        = false;
+        appCntxt->exitDlInferrThread   = false;
 
         appCntxt->postProcSem          = new Semaphore(0);
         appCntxt->exitPostprocThread   = false;
@@ -540,7 +527,7 @@ static void VISION_CNN_dumpStats(VISION_CNN_Context *appCntxt)
         }
         else
         {
-            PTK_printf("Could not open [%s] for exporting "
+            LOG_ERROR("Could not open [%s] for exporting "
                        "performance data\n", name.c_str());
         }
     }
@@ -558,11 +545,11 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
     /* Wait for the threads to exit. */
     VISION_CNN_exitProcThreads(appCntxt);
 
-    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    LOG_INFO("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     VISION_CNN_dumpStats(appCntxt);
     VISION_CNN_printStats(appCntxt);
 
-    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
+    LOG_INFO("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
@@ -575,7 +562,7 @@ void VISION_CNN_cleanupHdlr(VISION_CNN_Context *appCntxt)
 
     VISION_CNN_deInit(appCntxt);
 
-    PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
+    LOG_INFO("Clean-up complete.\n");
 }
 
 void VISION_CNN_reset(VISION_CNN_Context * appCntxt)
@@ -590,7 +577,7 @@ static void VISION_CNN_evtHdlrThread(VISION_CNN_Context *appCntxt)
 
     vxStatus = VX_SUCCESS;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     /* Clear any pending events. The third argument is do_not_block = true. */
     while (vxStatus == (vx_status)VX_SUCCESS)
@@ -636,7 +623,7 @@ static void VISION_CNN_evtHdlrThread(VISION_CNN_Context *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static int32_t VISION_CNN_userControlThread(VISION_CNN_Context *appCntxt)
@@ -648,9 +635,9 @@ static int32_t VISION_CNN_userControlThread(VISION_CNN_Context *appCntxt)
     {
         char ch;
 
-        PTK_printf(menu);
+        LOG_INFO_RAW("%s", menu);
         ch = getchar();
-        PTK_printf("\n");
+        LOG_INFO_RAW("\n");
 
         switch (ch)
         {
@@ -679,8 +666,7 @@ static int32_t VISION_CNN_userControlThread(VISION_CNN_Context *appCntxt)
     } // while (!done)
 
     appCntxt->state = VISION_CNN_STATE_SHUTDOWN;
-    PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
-                __FUNCTION__, __LINE__);
+    LOG_INFO("Waiting for the graph to finish.\n");
 
     vxStatus = VISION_CNN_waitGraph(appCntxt);
 
@@ -691,7 +677,7 @@ static int32_t VISION_CNN_userControlThread(VISION_CNN_Context *appCntxt)
 
     VISION_CNN_cleanupHdlr(appCntxt);
 
-    PTK_printf("\nDEMO FINISHED!\n");
+    LOG_INFO("\nDEMO FINISHED!\n");
 
     return vxStatus;
 }
@@ -702,7 +688,7 @@ static void VISION_CNN_preProcThread(VISION_CNN_Context  *appCntxt)
     chrono::time_point<chrono::system_clock> start, end;
     float diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -751,7 +737,7 @@ static void VISION_CNN_preProcThread(VISION_CNN_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static void VISION_CNN_dlInferThread(VISION_CNN_Context  *appCntxt)
@@ -761,7 +747,7 @@ static void VISION_CNN_dlInferThread(VISION_CNN_Context  *appCntxt)
     TimePoint   end;
     float       diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -810,7 +796,7 @@ static void VISION_CNN_dlInferThread(VISION_CNN_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static void VISION_CNN_postProcThread(VISION_CNN_Context  *appCntxt)
@@ -819,7 +805,7 @@ static void VISION_CNN_postProcThread(VISION_CNN_Context  *appCntxt)
     chrono::time_point<chrono::system_clock> start, end;
     float diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -879,7 +865,7 @@ static void VISION_CNN_postProcThread(VISION_CNN_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 void VISION_CNN_launchProcThreads(VISION_CNN_Context *appCntxt)
@@ -930,7 +916,7 @@ void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
         vx_status   vxStatus = VX_SUCCESS;
 
         appCntxt->state = VISION_CNN_STATE_SHUTDOWN;
-        PTK_printf("Waiting for the graph to finish.\n");
+        LOG_INFO("Waiting for the graph to finish.\n");
 
         vxStatus = VISION_CNN_waitGraph(appCntxt);
 
@@ -940,6 +926,6 @@ void VISION_CNN_intSigHandler(VISION_CNN_Context *appCntxt)
         }
 
         VISION_CNN_cleanupHdlr(appCntxt);
-        PTK_printf("\nDEMO FINISHED!\n");
+        LOG_INFO("\nDEMO FINISHED!\n");
     }
 }

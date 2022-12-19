@@ -8,6 +8,11 @@ cd $HOME
 if [ ! -d required_libs ];then
     mkdir required_libs
 fi
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/required_libs
+export DEVICE=j7
+export TIDL_TOOLS_PATH=
+#For libdlr.so showing error 
+export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 if [ ! -d u_20_pywhl ];then
     mkdir u_20_pywhl
@@ -17,34 +22,34 @@ cd u_20_pywhl
 STR=`pip3 list | grep dlr`
 SUB='dlr'
 if [[ "$STR" != *"$SUB"* ]]; then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/pywhl/dlr-1.10.0-py3-none-any.whl
+    wget https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/pywhl/dlr-1.10.0-py3-none-any.whl
     pip3 install --upgrade --force-reinstall dlr-1.10.0-py3-none-any.whl
 fi
 
 STR=`pip3 list | grep onnxruntime-tidl`
 SUB='onnxruntime-tidl'
 if [[ "$STR" != *"$SUB"* ]]; then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/pywhl/onnxruntime_tidl-1.7.0-cp38-cp38-linux_aarch64.whl
+    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/pywhl/onnxruntime_tidl-1.7.0-cp38-cp38-linux_aarch64.whl
     pip3 install onnxruntime_tidl-1.7.0-cp38-cp38-linux_aarch64.whl
 fi
 
 STR=`pip3 list | grep tflite-runtime`
 SUB='tflite-runtime'
 if [[ "$STR" != *"$SUB"* ]]; then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/pywhl/tflite_runtime-2.8.2-cp38-cp38-linux_aarch64.whl
+    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/pywhl/tflite_runtime-2.8.2-cp38-cp38-linux_aarch64.whl
     pip3 install --upgrade --force-reinstall tflite_runtime-2.8.2-cp38-cp38-linux_aarch64.whl
 fi
 
 cd $HOME
 rm -r u_20_pywhl
 if [  ! -d /usr/include/tensorflow ];then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/tflite_2.8_aragoj7.tar.gz
-    tar xf tflite_2.8_aragoj7.tar.gz
-    rm tflite_2.8_aragoj7.tar.gz
-    mv tflite_2.8_aragoj7/tensorflow /usr/include
-    mv tflite_2.8_aragoj7/tflite_2.8 /usr/lib/
-    cp ~/tflite_2.8_aragoj7/libtensorflow-lite.a $HOME/required_libs/
-    rm -r tflite_2.8_aragoj7
+    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/tflite_2.8_u20.tar.gz
+    tar xf tflite_2.8_u20.tar.gz
+    rm tflite_2.8_u20.tar.gz
+    mv tflite_2.8_u20/tensorflow /usr/include
+    mv tflite_2.8_u20/tflite_2.8 /usr/lib/
+    cp ~/tflite_2.8_u20/libtensorflow-lite.a $HOME/required_libs/
+    rm -r tflite_2.8_u20
     cd $HOME
 else
     echo "skipping tensorflow setup: found /usr/include/tensorflow"
@@ -52,7 +57,7 @@ else
 fi
 
 if [  ! -d /usr/include/onnxruntime ];then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/onnx_1.7.0_u20.tar.gz
+    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/onnx_1.7.0_u20.tar.gz
     tar xf onnx_1.7.0_u20.tar.gz
     rm onnx_1.7.0_u20.tar.gz
     cp -r  onnx_1.7.0_u20/libonnxruntime.so* $HOME/required_libs/
@@ -66,7 +71,7 @@ else
 fi
 
 if [  ! -d /usr/include/neo-ai-dlr ];then
-    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_04_00_00/ubuntu20_04/dlr_1.10.0_u20.tar.gz
+    wget -q https://software-dl.ti.com/jacinto7/esd/tidl-tools/08_05_00_00/ubuntu20_04/dlr_1.10.0_u20.tar.gz
     tar xf dlr_1.10.0_u20.tar.gz
     rm dlr_1.10.0_u20.tar.gz
     cp -r  /usr/local/lib/python3.8/dist-packages/dlr/libdlr.so $HOME/required_libs/

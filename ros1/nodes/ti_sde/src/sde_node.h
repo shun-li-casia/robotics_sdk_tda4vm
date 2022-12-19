@@ -79,7 +79,6 @@ using namespace sensor_msgs;
 using namespace message_filters;
 using namespace common_msgs;
 
-
 class SDEAppNode
 {
     using ImgSub     = message_filters::Subscriber<Image>;
@@ -163,7 +162,7 @@ class SDEAppNode
         ros::Publisher          m_pcPub;
 
         /** Initialize control semaphore */
-        UTILS::Semaphore       *initCtrlSem;
+        Semaphore              *initCtrlSem;
 };
 
 #endif /* _APP_SDE_NODE_H_ */

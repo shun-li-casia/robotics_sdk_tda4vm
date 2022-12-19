@@ -78,6 +78,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
     int32_t             numInputs;
     int32_t             numOutputs;
     vx_image            scalerInput;
+    vx_enum             tensorDataType;
     vx_status           vxStatus;
     int32_t             i;
 
@@ -133,34 +134,81 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
         }
     }
 
+    if (vxStatus == (vx_status)VX_SUCCESS)
+    {
+        switch (ifInfo->type)
+        {
+            case DlInferType_Int8:
+                tensorDataType = VX_TYPE_INT8;
+                break;
+
+            case DlInferType_UInt8:
+                tensorDataType = VX_TYPE_UINT8;
+                break;
+
+            case DlInferType_Int16:
+                tensorDataType = VX_TYPE_INT16;
+                break;
+
+            case DlInferType_UInt16:
+                tensorDataType = VX_TYPE_UINT16;
+                break;
+
+            case DlInferType_Int32:
+                tensorDataType = VX_TYPE_INT32;
+                break;
+
+            case DlInferType_UInt32:
+                tensorDataType = VX_TYPE_UINT32;
+                break;
+
+            case DlInferType_Int64:
+                tensorDataType = VX_TYPE_INT64;
+                break;
+
+            case DlInferType_Float32:
+                tensorDataType = VX_TYPE_FLOAT32;
+                break;
+
+            default:
+                LOG_ERROR("Unsupported tensor data type.\n");
+                vxStatus = VX_FAILURE;
+                break;
+        }
+    }
+
     // Generalized to support segmentation and detection
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
         const std::string   taskType = appCntxt->postProcObj->getTaskType();
-        vx_enum             tensorDataType;
-        int32_t             elementSize = 1;
+        int32_t             elementSize;
 
-        if (taskType == "segmentation")
+        appCntxt->outTensorNumDim = ifInfo->dim;
+        elementSize               = getTypeSize(ifInfo->type);
+
+        for (int32_t i = 0; i < appCntxt->outTensorNumDim; i++)
         {
-            appCntxt->outTensorNumDim = ifInfo->dim;
-            tensorDataType            = VX_TYPE_UINT8;
-
-            for (int32_t i = 0; i < appCntxt->outTensorNumDim; i++)
-            {
-                appCntxt->outTensorDims[i] = ifInfo->shape[i];
-            }
+            appCntxt->outTensorDims[i] = ifInfo->shape[i];
         }
-        else if (taskType == "detection")
+
+        if (taskType == "detection")
         {
-            appCntxt->outTensorNumDim = CM_POST_PROCESS_DETECT_OUTTENSOR_DIM;
-            tensorDataType = VX_TYPE_FLOAT32;
-            elementSize = sizeof(float);
             //==> TODO: get this from the model interface info
             //==> one more for storing a field for the number of objects
-            appCntxt->outTensorDims[0] = CM_POST_PROCESS_DETECT_MAX_OBJECTS + 1;
-            appCntxt->outTensorDims[1] = CM_POST_PROCESS_DETECT_NUM_FIELDS;
+            /* For ONNX models, the dimensions are negative. Detect this condition
+             * and set default max values.
+             */
+            if (ifInfo->shape[0] < 0)
+            {
+                appCntxt->outTensorDims[0] = CM_POST_PROCESS_DETECT_MAX_OBJECTS + 1;
+            }
+
+            if (ifInfo->shape[1] < 0)
+            {
+                appCntxt->outTensorDims[1] = CM_POST_PROCESS_DETECT_NUM_FIELDS;
+            }
         }
-        else
+        else if (taskType != "segmentation")
         {
             LOG_ERROR("Unsupported taskType");
             vxStatus = VX_FAILURE;
@@ -224,7 +272,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
                 if (vxStatus != (vx_status)VX_SUCCESS)
                 {
-                    PTK_printf("[%s:%d] Failed to allocate input (%d)\n",
+                    LOG_ERROR("Failed to allocate input (%d)\n",
                                 __FUNCTION__, __LINE__, i);
                     break;
                 }
@@ -246,7 +294,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
                     if (vxStatus != (vx_status)VX_SUCCESS)
                     {
-                        PTK_printf("[%s:%d] Failed to allocate output (%d)\n",
+                        LOG_ERROR("Failed to allocate output (%d)\n",
                                     __FUNCTION__, __LINE__, i);
                         break;
                     }
@@ -279,8 +327,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_ldcNodeCntxtInit() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_ldcNodeCntxtInit() failed\n");
         }
         else
         {
@@ -292,8 +339,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] CM_ldcNodeCntxtSetup() failed\n",
-                            __FUNCTION__, __LINE__);
+                LOG_ERROR("CM_ldcNodeCntxtSetup() failed\n");
 
                 vxStatus = VX_FAILURE;
             }
@@ -324,8 +370,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_scalerNodeCntxtInit() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_scalerNodeCntxtInit() failed\n");
         }
         else
         {
@@ -336,8 +381,7 @@ vx_status VISION_CNN_init_SS(VISION_CNN_Context *appCntxt)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] CM_scalerNodeCntxtSetup() failed\n",
-                            __FUNCTION__, __LINE__);
+                LOG_ERROR("CM_scalerNodeCntxtSetup() failed\n");
 
                 vxStatus = VX_FAILURE;
             }
@@ -421,8 +465,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -438,8 +481,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                            __FUNCTION__, __LINE__);
+                LOG_ERROR("CM_addParamByNodeIndex() failed\n");
             }
             else
             {
@@ -456,8 +498,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -474,8 +515,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -519,8 +559,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxSetGraphScheduleConfig() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxSetGraphScheduleConfig() failed\n");
         }
     }
 
@@ -532,8 +571,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetGraphPipelineDepth() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetGraphPipelineDepth() failed\n");
         }
     }
 
@@ -548,8 +586,7 @@ vx_status  VISION_CNN_setupPipeline(VISION_CNN_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxRegisterEvent() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxRegisterEvent() failed\n");
         }
     }
 
@@ -561,11 +598,11 @@ void VISION_CNN_printStats(VISION_CNN_Context * appCntxt)
     tivx_utils_graph_perf_print(appCntxt->vxGraph);
 
     appPerfPointPrint(&appCntxt->visonPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     appPerfPointPrintFPS(&appCntxt->visonPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     CM_printProctime(stdout);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
 }
 
 vx_status VISION_CNN_exportStats(VISION_CNN_Context * appCntxt, FILE *fp, bool exportAll)
@@ -574,8 +611,7 @@ vx_status VISION_CNN_exportStats(VISION_CNN_Context * appCntxt, FILE *fp, bool e
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] tivx_utils_graph_perf_export() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("tivx_utils_graph_perf_export() failed\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -598,8 +634,7 @@ vx_status VISION_CNN_waitGraph(VISION_CNN_Context * appCntxt)
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] vxWaitGraph() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("vxWaitGraph() failed\n");
 
         vxStatus = VX_FAILURE;
     }
@@ -609,7 +644,7 @@ vx_status VISION_CNN_waitGraph(VISION_CNN_Context * appCntxt)
         /* Wait for the output queue to get flushed. */
         while (appCntxt->freeQ.size() != appCntxt->pipelineDepth)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for (std::chrono::milliseconds(50));
         }
     }
 
@@ -646,7 +681,7 @@ vx_status  VISION_CNN_process(VISION_CNN_Context     * appCntxt,
                                                    1);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxGraphParameterEnqueueReadyRef(%d) "
+            LOG_ERROR("vxGraphParameterEnqueueReadyRef(%d) "
                        "failed\n", __FUNCTION__, __LINE__, i);
             break;
         }
@@ -690,8 +725,7 @@ vx_status VISION_CNN_preProcess(VISION_CNN_Context *appCntxt,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxMapImagePatch() failed.",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxMapImagePatch() failed.");
         }
         else
         {
@@ -718,8 +752,7 @@ vx_status VISION_CNN_preProcess(VISION_CNN_Context *appCntxt,
 
         if (status < 0)
         {
-            PTK_printf("[%s:%d] Data pre-processing failed.",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("Data pre-processing failed.");
 
             vxStatus = VX_FAILURE;
         }
@@ -919,7 +952,7 @@ vx_status VISION_CNN_processEvent(VISION_CNN_Context * appCntxt, vx_event_t * ev
     ref      = NULL;
     vxStatus = (vx_status)VX_SUCCESS;
 
-    if(event->type == VX_EVENT_NODE_COMPLETED)
+    if (event->type == VX_EVENT_NODE_COMPLETED)
     {
         uint32_t appValue = appCntxt->vxEvtAppValBase + 
                             VISION_CNN_SCALER_NODE_COMPLETE_EVENT;
@@ -927,7 +960,7 @@ vx_status VISION_CNN_processEvent(VISION_CNN_Context * appCntxt, vx_event_t * ev
         if (event->app_value != appValue)
         {
             /* Something wrong. We did not register for this event. */
-            PTK_printf("[%s:%d] Unknown App Value [%d].\n",
+            LOG_ERROR("Unknown App Value [%d].\n",
                        __FUNCTION__, __LINE__, event->app_value);
 
             vxStatus = VX_FAILURE;
@@ -963,8 +996,7 @@ vx_status VISION_CNN_processEvent(VISION_CNN_Context * appCntxt, vx_event_t * ev
                                                           &numRefs);
                 if (vxStatus != (vx_status)VX_SUCCESS)
                 {
-                    PTK_printf("[%s:%d] vxGraphParameterDequeueDoneRef() failed\n",
-                               __FUNCTION__, __LINE__);
+                    LOG_ERROR("vxGraphParameterDequeueDoneRef() failed\n");
 
                     break;
                 }
@@ -1014,8 +1046,7 @@ vx_status VISION_CNN_getOutBuff(VISION_CNN_Context   * appCntxt,
         }
         else
         {
-            PTK_printf("[%s:%d] VISION_CNN_getOutputDesc() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("VISION_CNN_getOutputDesc() failed\n");
         }
     }
 

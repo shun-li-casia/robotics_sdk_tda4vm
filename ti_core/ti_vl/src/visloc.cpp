@@ -83,12 +83,9 @@ static char menu[] = {
     "\n Enter Choice: "
 };
 
-
 vx_status VISLOC_init(VISLOC_Context *appCntxt)
 {
     const string   &modelPath = appCntxt->dlModelPath;
-    const string   &configFile = modelPath + "/param.yaml";
-    YAML::Node      yaml;
     int32_t         status;
     vx_status       vxStatus = VX_SUCCESS;
 
@@ -101,39 +98,26 @@ vx_status VISLOC_init(VISLOC_Context *appCntxt)
         vxStatus = VX_FAILURE;
     }
 
-    // Check if the specified configuration file exists
-    if (!std::filesystem::exists(configFile))
-    {
-        LOG_ERROR("The file [%s] does not exist.\n",
-                  configFile.c_str());
-        vxStatus = VX_FAILURE;
-    }
-
+    // Populate pre-process config
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        yaml = YAML::LoadFile(configFile.c_str());
-    }
-
-    // Populate pre-process config from yaml
-    if (vxStatus == (vx_status)VX_SUCCESS)
-    {
-        status = getPreprocessImageConfig(yaml, appCntxt->preProcCfg);
+        status = appCntxt->preProcCfg.getConfig(modelPath);
 
         if (status < 0)
         {
-            LOG_ERROR("getPreprocessImageConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        // Populate infConfig from yaml
-        status = getInfererConfig(yaml, modelPath, appCntxt->dlInferConfig);
+        // Populate infConfig
+        status = appCntxt->dlInferConfig.getConfig(modelPath, true);
 
         if (status < 0)
         {
-            LOG_ERROR("getInfererConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -494,11 +478,11 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
     /* Wait for the threads to exit. */
     VISLOC_exitProcThreads(appCntxt);
 
-    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    LOG_INFO("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     VISLOC_dumpStats(appCntxt);
     VISLOC_printStats(appCntxt);
 
-    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
+    LOG_INFO("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
@@ -513,7 +497,7 @@ void VISLOC_cleanupHdlr(VISLOC_Context *appCntxt)
 
     VISLOC_deInit(appCntxt);
 
-    PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
+    LOG_INFO("Clean-up complete.\n");
 }
 
 
@@ -530,7 +514,7 @@ static void VISLOC_evtHdlrThread(VISLOC_Context *appCntxt)
 
     vxStatus = VX_SUCCESS;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     /* Clear any pending events. The third argument is do_not_block = true. */
     while (vxStatus == (vx_status)VX_SUCCESS)
@@ -568,7 +552,7 @@ static void VISLOC_evtHdlrThread(VISLOC_Context *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static int32_t VISLOC_userControlThread(VISLOC_Context *appCntxt)
@@ -580,9 +564,9 @@ static int32_t VISLOC_userControlThread(VISLOC_Context *appCntxt)
     {
         char ch;
 
-        PTK_printf(menu);
+        LOG_INFO_RAW("%s", menu);
         ch = getchar();
-        PTK_printf("\n");
+        LOG_INFO_RAW("\n");
 
         switch (ch)
         {
@@ -611,7 +595,7 @@ static int32_t VISLOC_userControlThread(VISLOC_Context *appCntxt)
     } // while (!done)
 
     appCntxt->state = VISLOC_STATE_SHUTDOWN;
-    PTK_printf("Waiting for the graph to finish.\n");
+    LOG_INFO("Waiting for the graph to finish.\n");
 
     vxStatus = VISLOC_waitGraph(appCntxt);
 
@@ -622,7 +606,7 @@ static int32_t VISLOC_userControlThread(VISLOC_Context *appCntxt)
 
     VISLOC_cleanupHdlr(appCntxt);
 
-    PTK_printf("\nDEMO FINISHED!\n");
+    LOG_INFO("\nDEMO FINISHED!\n");
 
     return vxStatus;
 }
@@ -633,7 +617,7 @@ static void VISLOC_preProcThread(VISLOC_Context  *appCntxt)
     chrono::time_point<chrono::system_clock> start, end;
     float diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -685,7 +669,7 @@ static void VISLOC_preProcThread(VISLOC_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static void VISLOC_dlInferThread(VISLOC_Context  *appCntxt)
@@ -695,7 +679,7 @@ static void VISLOC_dlInferThread(VISLOC_Context  *appCntxt)
     TimePoint   end;
     float       diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -747,7 +731,7 @@ static void VISLOC_dlInferThread(VISLOC_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
@@ -760,7 +744,7 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
     uint8_t       cnt, startCnt;
     int32_t       i;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -859,7 +843,7 @@ static void VISLOC_visLocThread(VISLOC_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 
@@ -911,7 +895,7 @@ void VISLOC_intSigHandler(VISLOC_Context *appCntxt)
         vx_status   vxStatus = VX_SUCCESS;
 
         appCntxt->state = VISLOC_STATE_SHUTDOWN;
-        PTK_printf("Waiting for the graph to finish.\n");
+        LOG_INFO("Waiting for the graph to finish.\n");
 
         vxStatus = VISLOC_waitGraph(appCntxt);
 
@@ -921,7 +905,7 @@ void VISLOC_intSigHandler(VISLOC_Context *appCntxt)
         }
 
         VISLOC_cleanupHdlr(appCntxt);
-        PTK_printf("\nDEMO FINISHED!\n");
+        LOG_INFO("\nDEMO FINISHED!\n");
     }
 }
 

@@ -87,7 +87,7 @@ index 0000000..ef5de60
 +2. Build the ROS node:
 +    ```
 +    cd $ROS_WS
-+    catkin_make --source /opt/robotics_sdk/ros1
++    catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
 +    source devel/setup.bash
 +    ```
 +

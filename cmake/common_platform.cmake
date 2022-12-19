@@ -42,6 +42,11 @@ set(TI_EXTERNAL_INCLUDE_DIRS
     ${TI_CORE_ROOT_DIR}/ti_sde/include
     ${TI_CORE_ROOT_DIR}/ti_estop/include
     ${TI_CORE_ROOT_DIR}/ti_vl/include
+    ${TI_CORE_ROOT_DIR}/subgraphs/sde_ldc/include
+    ${TI_CORE_ROOT_DIR}/subgraphs/sde_singlelayer/include
+    ${TI_CORE_ROOT_DIR}/subgraphs/sde_multilayer/include
+    ${TI_CORE_ROOT_DIR}/subgraphs/sde_triangulate/include
+    ${TI_CORE_ROOT_DIR}/subgraphs/ss_sde_detection/include
     ${TI_EDGEAI_ROOT_DIR}
    )
 
@@ -132,7 +137,6 @@ set(TENSORFLOW_RT_LIBS
 if (${BUILD_CORE_NODES})
     set(TI_EXTERNAL_LIBS
         ti_core
-        ti_dl_inferer
         edgeai_utils
         ncurses
         dlr
@@ -167,7 +171,7 @@ set(TIOVX_INCLUDE_DIRS
 )
 
 set(PTK_INCLUDE_DIRS
-    ${PSDK_DIR}/perception/include
+    ${PSDK_DIR}/ti-perception-toolkit/include
 )
 
 set(MMALIB_INCLUDE_DIRS
@@ -184,13 +188,6 @@ set(TIADALG_INCLUDE_DIRS
 
 set(VISION_APP_INCLUDE_DIRS
     ${PSDK_DIR}/vision_apps
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/app_common
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_ldc_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_multilayer_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_singlelayer_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_triangulate_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/sde_obstacle_detection_applib
-    ${PSDK_DIR}/vision_apps/apps/ptk_demos/applibs/ss_sde_detection_applib
     ${PSDK_DIR}/vision_apps/kernels/img_proc/include
     ${PSDK_DIR}/vision_apps/kernels/img_proc/host
     ${PSDK_DIR}/vision_apps/kernels/stereo/include
@@ -220,6 +217,7 @@ include_directories(
     ${TIDL_INCLUDE_DIRS}
     ${TIADALG_INCLUDE_DIRS}
     ${OTHER_INCLUDE_DIRS}
+    /usr/include/edgeai_dl_inferer
     /usr/include/opencv4
 )
 
@@ -249,7 +247,12 @@ if (${TARGET_PLATFORM} STREQUAL J7)
         )
 
     set(TARGET_LINK_LIBS
-        tivision_apps dlr)
+        tivision_apps
+        edgeai_dl_inferer
+        edgeai_pre_process
+        edgeai_post_process
+        dlr)
+
 endif()
 
 link_directories(${TARGET_LINK_DIRECTORIES})

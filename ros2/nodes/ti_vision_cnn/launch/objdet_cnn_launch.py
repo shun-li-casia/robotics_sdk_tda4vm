@@ -13,7 +13,7 @@ def finalize_node(context, *args, **kwargs):
     lut_file_path   = LaunchConfiguration("lut_file_path").perform(context)
     dl_model_path   = LaunchConfiguration("dl_model_path").perform(context)
     exportPerfStats = int(LaunchConfiguration("exportPerfStats").perform(context))
-    print(f"exportPerfStats = {exportPerfStats}")
+    detVizThreshold = float(LaunchConfiguration("detVizThreshold").perform(context))
 
     params = [
         os.path.join(get_package_share_directory('ti_vision_cnn'),'config','params.yaml'),
@@ -27,6 +27,7 @@ def finalize_node(context, *args, **kwargs):
             "rectified_image_frame_id": "right_frame",
             "vision_cnn_tensor_topic":  "vision_cnn/tensor",
             "exportPerfStats":           exportPerfStats,
+            "detVizThreshold":           detVizThreshold,
         },
     ]
 
@@ -69,7 +70,7 @@ def generate_launch_description():
     # DL model path
     dl_model_path = DeclareLaunchArgument(
         name="dl_model_path",
-        default_value=TextSubstitution(text="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"),
+        default_value=TextSubstitution(text="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"),
         # default_value=TextSubstitution(text="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"),
         description='DL model path'
     )
@@ -81,11 +82,19 @@ def generate_launch_description():
         description='flag for exporting the performance data'
     )
 
+    # Threshold for object detection visualization
+    detVizThreshold = DeclareLaunchArgument(
+        name="detVizThreshold",
+        default_value=TextSubstitution(text="0.5"),
+        description='Threshold for object detection visualization'
+    )
+
     ld.add_action(image_format)
     ld.add_action(enable_ldc_node)
     ld.add_action(lut_file_path)
     ld.add_action(dl_model_path)
     ld.add_action(exportPerfStats)
+    ld.add_action(detVizThreshold)
     ld.add_action(OpaqueFunction(function=finalize_node))
 
     return ld

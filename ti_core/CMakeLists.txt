@@ -19,7 +19,9 @@ if(${BUILD_CORE_NODES})
         common/src/cm_pre_process_image.cpp
         common/src/cm_post_process_image.cpp
         common/src/cm_post_process_image_segmentation.cpp
-        common/src/cm_post_process_image_object_detect.cpp)
+        common/src/cm_post_process_image_object_detect.cpp
+        common/src/cm_displarity_utils.cpp
+        )
 
     set(VISION_CNN_CORE_SRCS
         ti_vision_cnn/src/vision_cnn.cpp
@@ -37,10 +39,17 @@ if(${BUILD_CORE_NODES})
         ti_vl/src/visloc.cpp
         ti_vl/src/visloc_manage_graph.cpp)
 
+    set(SUBGRAPH_SRCS
+        subgraphs/sde_ldc/src/sde_ldc.cpp
+        subgraphs/sde_ldc/src/sde_ldc_module.cpp
+        subgraphs/sde_singlelayer/src/sde_singlelayer.cpp
+        subgraphs/sde_multilayer/src/sde_multilayer.cpp
+        subgraphs/sde_triangulate/src/sde_triangulate.cpp
+        subgraphs/ss_sde_detection/src/ss_sde_detection.cpp
+        )
+
     set(EDGEAI_COMMON_SRC
-        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_utils.cpp
-        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_debug.cpp
-        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_classnames.cpp)
+        ${TI_EDGEAI_ROOT_DIR}/common/src/edgeai_debug.cpp)
 
     set(ALL_CORE_SRCS
         ${COMMON_SRCS}
@@ -48,6 +57,7 @@ if(${BUILD_CORE_NODES})
         ${SDE_CORE_SRCS}
         ${ESTOP_CORE_SRCS}
         ${VL_CORE_SRCS}
+        ${SUBGRAPH_SRCS}
         ${EDGEAI_COMMON_SRC}
         )
 
@@ -57,9 +67,8 @@ if(${BUILD_CORE_NODES})
     # Add the EdgeAI libraries
     set(TI_EDGEAI_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-    add_subdirectory(${TI_EDGEAI_ROOT_DIR}/dl_inferer ${TI_EDGEAI_BUILD_DIR}/dl_inferer)
     add_subdirectory(${TI_EDGEAI_ROOT_DIR}/utils ${TI_EDGEAI_BUILD_DIR}/utils)
-    set_target_properties(ti_dl_inferer edgeai_utils
+    set_target_properties(edgeai_utils
                           PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 endif()

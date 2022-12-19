@@ -35,10 +35,10 @@ This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture AP
     ```
     cd $ROS_WS
     # ROS1
-    catkin_make --source /opt/robotics_sdk/ros1
+    catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     source devel/setup.bash
     # ROS2
-    colcon build --base-paths /opt/robotics_sdk/ros2
+    colcon build --base-paths /opt/robotics_sdk/ros2 --cmake-force-configure
     source install/setup.bash
     ```
 

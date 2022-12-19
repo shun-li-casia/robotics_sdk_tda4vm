@@ -70,7 +70,6 @@
 void ESTOP_APP_setPcParams(ESTOP_APP_Context *appCntxt);
 void ESTOP_APP_setOgParams(ESTOP_APP_Context *appCntxt);
 
-
 static char menu[] = {
     "\n"
     "\n ======================================================"
@@ -89,7 +88,7 @@ static char menu[] = {
 
 void ESTOP_APP_setLDCCreateParams(ESTOP_APP_Context *appCntxt)
 {
-    SDELDCAPPLIB_createParams * createParams = &appCntxt->sdeLdcCreateParams;
+    SDELDC_createParams * createParams = &appCntxt->sdeLdcCreateParams;
 
     createParams->leftLutFileName  = appCntxt->left_LUT_file_name;
     createParams->rightLutFileName = appCntxt->right_LUT_file_name;
@@ -102,7 +101,7 @@ void ESTOP_APP_setLDCCreateParams(ESTOP_APP_Context *appCntxt)
 
 void ESTOP_APP_setSLSdeCreateParams(ESTOP_APP_Context *appCntxt)
 {
-    SL_SDEAPPLIB_createParams * createParams = &appCntxt->slSdeCreateParams;
+    SL_SDE_createParams * createParams = &appCntxt->slSdeCreateParams;
     createParams->sdeCfg = appCntxt->sde_params;
 
      if (appCntxt->sde_params.disparity_min == 0)
@@ -135,7 +134,7 @@ void ESTOP_APP_setSLSdeCreateParams(ESTOP_APP_Context *appCntxt)
 
 void ESTOP_APP_setMLSdeCreateParams(ESTOP_APP_Context *appCntxt)
 {
-    ML_SDEAPPLIB_createParams * createParams = &appCntxt->mlSdeCreateParams;
+    ML_SDE_createParams * createParams = &appCntxt->mlSdeCreateParams;
     createParams->sdeCfg = appCntxt->sde_params;
 
     if (appCntxt->sde_params.disparity_min == 0)
@@ -170,7 +169,7 @@ void ESTOP_APP_setMLSdeCreateParams(ESTOP_APP_Context *appCntxt)
 
 void ESTOP_APP_setSSDetectCreateParams(ESTOP_APP_Context *appCntxt)
 {
-    SS_DETECT_APPLIB_createParams * createParams = &appCntxt->ssDetectCreateParams;
+    SS_DETECT_createParams * createParams = &appCntxt->ssDetectCreateParams;
 
     createParams->width            = appCntxt->width;
     createParams->height           = appCntxt->height;
@@ -271,8 +270,6 @@ void ESTOP_APP_setAllParams(ESTOP_APP_Context *appCntxt)
 vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
 {
     const string   &modelPath = appCntxt->dlModelPath;
-    const string   &configFile = modelPath + "/param.yaml";
-    YAML::Node      yaml;
     int32_t         status;
     vx_status       vxStatus = VX_SUCCESS;
 
@@ -284,60 +281,47 @@ vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
         vxStatus = VX_FAILURE;
     }
 
-    // Check if the specified configuration file exists
-    if (!std::filesystem::exists(configFile))
-    {
-        LOG_ERROR("The file [%s] does not exist.\n",
-                  configFile.c_str());
-        vxStatus = VX_FAILURE;
-    }
-
+    // Populate pre-process config
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        yaml = YAML::LoadFile(configFile.c_str());
-    }
-
-    // Populate pre-process config from yaml
-    if (vxStatus == (vx_status)VX_SUCCESS)
-    {
-        status = getPreprocessImageConfig(yaml, appCntxt->preProcCfg);
+        status = appCntxt->preProcCfg.getConfig(modelPath);
 
         //==> DEBUG
         //appCntxt->preProcCfg.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("getPreprocessImageConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
 
-    // Populate post-process config from yaml
+    // Populate post-process config
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        status = getPostprocessImageConfig(yaml, appCntxt->postProcCfg);
+        status = appCntxt->postProcCfg.getConfig(modelPath);
 
         //==> DEBUG
         //appCntxt->postProcCfg.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("getPostprocessImageConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        // Populate infConfig from yaml
-        status = getInfererConfig(yaml, modelPath, appCntxt->dlInferConfig);
+        // Populate infConfig from
+        status = appCntxt->dlInferConfig.getConfig(modelPath, true);
 
         //==> DEBUG
         //appCntxt->dlInferConfig.dumpInfo();
 
         if (status < 0)
         {
-            LOG_ERROR("VISION_CNN_getInfererConfig() failed.\n");
+            LOG_ERROR("getConfig() failed.\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -445,7 +429,8 @@ vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
             vxStatus = VX_FAILURE;
         } else 
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxGraph, "AMR E-Stop Graph");
+            vxSetReferenceName((vx_reference)appCntxt->vxGraph,
+                               "AMR E-Stop Graph");
         }
     }
 
@@ -526,7 +511,7 @@ vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                LOG_ERROR("VISION_CNN_APPLIB_setCoeff() failed\n");
+                LOG_ERROR("CM_scalerNodeCntxtSetCoeff() failed\n");
             }
         }
     }
@@ -536,7 +521,7 @@ vx_status ESTOP_APP_init(ESTOP_APP_Context *appCntxt)
         // init sacler for ML SDE
         if (appCntxt->sdeAlgoType == 1)
         {
-            ML_SDEAPPLIB_initScaler(appCntxt->mlSdeHdl);
+            ML_SDE_initScaler(appCntxt->mlSdeHdl);
         }
 
         if (appCntxt->exportGraph == 1)
@@ -877,11 +862,11 @@ void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
     /* Wait for the threads to exit. */
     ESTOP_APP_exitProcThreads(appCntxt);
 
-    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    LOG_INFO("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     ESTOP_APP_dumpStats(appCntxt);
     ESTOP_APP_printStats(appCntxt);
 
-    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
+    LOG_INFO("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
@@ -892,31 +877,31 @@ void ESTOP_APP_cleanupHdlr(ESTOP_APP_Context *appCntxt)
     }
 
     /* Release the objects. */
-    SDELDCAPPLIB_delete(&appCntxt->sdeLdcHdl);
+    SDELDC_delete(&appCntxt->sdeLdcHdl);
 
     if (appCntxt->sdeAlgoType == 0)
     {
-        SL_SDEAPPLIB_delete(&appCntxt->slSdeHdl);
+        SL_SDE_delete(&appCntxt->slSdeHdl);
     }
     else if (appCntxt->sdeAlgoType == 1)
     {
-        ML_SDEAPPLIB_delete(&appCntxt->mlSdeHdl);
+        ML_SDE_delete(&appCntxt->mlSdeHdl);
     }
 
-    SS_DETECT_APPLIB_delete(&appCntxt->ssDetectHdl);
+    SS_DETECT_delete(&appCntxt->ssDetectHdl);
 
     ESTOP_APP_deinit_SS(appCntxt);
 
     ESTOP_APP_deInit(appCntxt);
 
-    PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
+    LOG_INFO("Clean-up complete.\n");
 }
 
 void ESTOP_APP_reset(ESTOP_APP_Context * appCntxt)
 {
     vx_status vxStatus;
 
-    vx_node ogNode = SS_DETECT_APPLIB_getOGNode(appCntxt->ssDetectHdl);
+    vx_node ogNode = SS_DETECT_getOGNode(appCntxt->ssDetectHdl);
     vxStatus = tivxNodeSendCommand(ogNode,
                                    0,
                                    TIVX_KERNEL_OCCUPANCY_GRID_DETECTION_RESET,
@@ -936,7 +921,7 @@ static void ESTOP_APP_evtHdlrThread(ESTOP_APP_Context *appCntxt)
     vx_event_t evt;
     vx_status vxStatus = VX_SUCCESS;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     /* Clear any pending events. The third argument is do_not_block = true. */
     while (vxStatus == VX_SUCCESS)
@@ -997,7 +982,7 @@ static void ESTOP_APP_evtHdlrThread(ESTOP_APP_Context *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 static int32_t ESTOP_APP_userControlThread(ESTOP_APP_Context *appCntxt)
@@ -1011,9 +996,9 @@ static int32_t ESTOP_APP_userControlThread(ESTOP_APP_Context *appCntxt)
     {
         char ch;
 
-        PTK_printf(menu);
+        LOG_INFO_RAW("%s", menu);
         ch = getchar();
-        PTK_printf("\n");
+        LOG_INFO_RAW("\n");
 
         switch (ch)
         {
@@ -1041,8 +1026,7 @@ static int32_t ESTOP_APP_userControlThread(ESTOP_APP_Context *appCntxt)
     } // while (!done)
 
     appCntxt->state = ESTOP_APP_STATE_SHUTDOWN;
-    PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
-                __FUNCTION__, __LINE__);
+    LOG_INFO("Waiting for the graph to finish.\n");
 
     vxStatus = ESTOP_APP_waitGraph(appCntxt);
 
@@ -1053,7 +1037,7 @@ static int32_t ESTOP_APP_userControlThread(ESTOP_APP_Context *appCntxt)
 
     ESTOP_APP_cleanupHdlr(appCntxt);
 
-    PTK_printf("\nDEMO FINISHED!\n");
+    LOG_INFO("\nDEMO FINISHED!\n");
 
     return vxStatus;
 }
@@ -1064,7 +1048,7 @@ static void ESTOP_APP_preProcThread(ESTOP_APP_Context  *appCntxt)
     chrono::time_point<chrono::system_clock> start, end;
     float diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -1113,7 +1097,7 @@ static void ESTOP_APP_preProcThread(ESTOP_APP_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 
@@ -1124,7 +1108,7 @@ static void ESTOP_APP_dlInferThread(ESTOP_APP_Context *appCntxt)
     TimePoint   end;
     float       diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -1172,7 +1156,7 @@ static void ESTOP_APP_dlInferThread(ESTOP_APP_Context *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 
 }
 
@@ -1182,7 +1166,7 @@ static void ESTOP_APP_postProcThread(ESTOP_APP_Context  *appCntxt)
     chrono::time_point<chrono::system_clock> start, end;
     float diff;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     while (true)
     {
@@ -1236,7 +1220,7 @@ static void ESTOP_APP_postProcThread(ESTOP_APP_Context  *appCntxt)
 
     } // while (true)
 
-    PTK_printf("[%s] Exiting.\n", __FUNCTION__);
+    LOG_INFO("Exiting.\n");
 }
 
 void ESTOP_APP_launchProcThreads(ESTOP_APP_Context *appCntxt)
@@ -1287,8 +1271,7 @@ void ESTOP_APP_intSigHandler(ESTOP_APP_Context *appCntxt)
         vx_status   vxStatus = VX_SUCCESS;
 
         appCntxt->state = ESTOP_APP_STATE_SHUTDOWN;
-        PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
-                    __FUNCTION__, __LINE__);
+        LOG_INFO("Waiting for the graph to finish.\n");
 
         vxStatus = ESTOP_APP_waitGraph(appCntxt);
 
@@ -1298,6 +1281,6 @@ void ESTOP_APP_intSigHandler(ESTOP_APP_Context *appCntxt)
         }
 
         ESTOP_APP_cleanupHdlr(appCntxt);
-        PTK_printf("\nDEMO FINISHED!\n");
+        LOG_INFO("\nDEMO FINISHED!\n");
     }
 }

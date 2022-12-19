@@ -153,7 +153,7 @@ class SDEAppNode: public rclcpp::Node
         rclcpp::Publisher<PointCloud2>::SharedPtr   m_pcPub;
 
         /** Initialize control semaphore */
-        UTILS::Semaphore       *initCtrlSem;
+        Semaphore              *initCtrlSem;
 };
 
 #endif /* _APP_SDE_NODE_H_ */

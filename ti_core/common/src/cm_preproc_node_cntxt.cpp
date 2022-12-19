@@ -122,22 +122,22 @@ vx_status CM_preProcNodeCntxtInit(
 
     if (preProcObj == NULL)
     {
-        PTK_printf("Parameter 'preProcObj' NULL.");
+        LOG_ERROR("Parameter 'preProcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (createParams == NULL)
     {
-        PTK_printf("Parameter 'createParams' NULL.");
+        LOG_ERROR("Parameter 'createParams' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (preProcObj->state != CM_PREPROC_NODE_CNTXT_STATE_INVALID)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -148,10 +148,10 @@ vx_status CM_preProcNodeCntxtInit(
         configType = vxRegisterUserStruct(context,
                                            sizeof(tivxImgPreProcParams));
 
-        if(!((configType >= VX_TYPE_USER_STRUCT_START) &&
+        if (!((configType >= VX_TYPE_USER_STRUCT_START) &&
              (configType <= VX_TYPE_USER_STRUCT_END)))
         {
-            PTK_printf("vxRegisterUserStruct() failed.");
+            LOG_ERROR("vxRegisterUserStruct() failed.");
             vxStatus = VX_FAILURE;
         }
     }
@@ -162,7 +162,7 @@ vx_status CM_preProcNodeCntxtInit(
 
         if (preProcObj->vxConfig == NULL)
         {
-            PTK_printf("vxCreateArray() failed");
+            LOG_ERROR("vxCreateArray() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -176,7 +176,7 @@ vx_status CM_preProcNodeCntxtInit(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxAddArrayItems() failed");
+            LOG_ERROR("vxAddArrayItems() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -194,7 +194,7 @@ vx_status CM_preProcNodeCntxtInit(
 
         if (preProcObj->vxOutputTensor == NULL)
         {
-            PTK_printf("Failed to allocate output tensor array");
+            LOG_ERROR("Failed to allocate output tensor array");
             vxStatus = VX_FAILURE;
         }
     }
@@ -224,7 +224,7 @@ vx_status CM_preProcNodeCntxtInit(
 
             if (preProcObj->vxOutputTensor[i] == NULL)
             {
-                PTK_printf("vxCreateTensor() failed");
+                LOG_ERROR("vxCreateTensor() failed");
                 vxStatus = VX_FAILURE;
                 break;
             }
@@ -254,27 +254,27 @@ vx_status CM_preProcNodeCntxtSetup(
 
     if (preProcObj == NULL)
     {
-        PTK_printf("Parameter 'preProcObj' NULL.");
+        LOG_ERROR("Parameter 'preProcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (graph == NULL)
     {
-        PTK_printf("Parameter 'graph' NULL.");
+        LOG_ERROR("Parameter 'graph' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (inputImage == NULL)
     {
-        PTK_printf("Parameter 'inputImage' NULL.");
+        LOG_ERROR("Parameter 'inputImage' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (preProcObj->state != CM_PREPROC_NODE_CNTXT_STATE_INIT)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -288,7 +288,7 @@ vx_status CM_preProcNodeCntxtSetup(
 
         if (preProcObj->vxNode == NULL)
         {
-            PTK_printf("tivxImgPreProcNode() failed");
+            LOG_ERROR("tivxImgPreProcNode() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -301,7 +301,7 @@ vx_status CM_preProcNodeCntxtSetup(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxSetNodeTarget() failed");
+            LOG_ERROR("vxSetNodeTarget() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -326,14 +326,14 @@ vx_status CM_preProcNodeCntxtDeInit(
 
     if (preProcObj == NULL)
     {
-        PTK_printf("Parameter 'preProcObj' NULL.");
+        LOG_ERROR("Parameter 'preProcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else
     {
         if (preProcObj->state == CM_PREPROC_NODE_CNTXT_STATE_INVALID)
         {
-            PTK_printf("Invalid state.");
+            LOG_ERROR("Invalid state.");
             vxStatus = VX_FAILURE;
         }
         else

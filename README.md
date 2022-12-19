@@ -60,6 +60,8 @@ Following ROS nodes for cameras are tested and supported by the SDK.
 
 ### [mmWave Radar Driver Node](docs/radar_driver_node.md)
 
+### [RealSense Camera Node](docs/realsense_driver_node.md)
+
 ## Demo Applications
 
 The SDK supports following out-of-box demo applications.
@@ -75,6 +77,10 @@ The SDK supports following out-of-box demo applications.
 ### [Vision Object Detection with 3D Spatial Information](ros1/nodes/ti_objdet_range/README.md)
 
 ### [Visual Localization Accelerated on C7x/MMA](ros1/nodes/ti_vl/README.md)
+
+### [2D Lidar SLAM (open-source)](ros1/slam/README.md)
+
+### [AprilTag Detection (open-source)](docs/april_tag.md)
 
 ![](ros1/nodes/ti_vision_cnn/docs/objdet_rviz.png)
 ![](ros1/nodes/ti_estop/docs/estop_rviz.png)

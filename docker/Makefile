@@ -3,13 +3,14 @@ MAKEFLAGS += --no-print-directory
 
 # Defaults. These can be changed from command line
 ROS_VER          ?= 1
-TIVA_LIB_VER     ?= 8.4.0
 
 # GPUS: if 'y', '--gpus all' argument is added in 'docker run' command
 GPUS             ?= n
 
 # Robotics SDK version
-RSDK_VER          = 8.4
+RSDK_VER          = 8.5
+TIVA_LIB_VER     ?= ${RSDK_VER}.0
+RPMSG_LIB_VER    ?= 0.5.1
 
 # Set the operating variables based on the ROS version specified
 ROS_DISTRO        = foxy
@@ -52,10 +53,10 @@ DOCKER_DIR        = $(ROS_SRC_DIR)/docker
 SCRIPTS_DIR       = $(ROS_SRC_DIR)/docker/scripts
 DLRT_DIR          = /opt/dl_runtime
 
-# artifactory URL in TI network
-REPO_LOC_TI       = artifactory.itg.ti.com/docker-public-arm
-ifeq ($(PLATFORM), pc)
-REPO_LOC_TI       = artifactory.itg.ti.com/docker-public/library/
+ifeq ($(DOCKER_REPO_INTERNAL),)
+USE_PROXY = 0
+else
+USE_PROXY = 1
 endif
 
 REPO_LOC          = arm64v8
@@ -72,7 +73,7 @@ ENV_FILE_PATH     = $(DOCKER_DIR)/$(ENV_FILE)
 ROSBAG_FILE       = ros-bag_2020_1109.tar.gz
 DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
 VISLOC_DATA_FILE  = visual-localization-data_2022_0908.tar.gz
-VISLOC_MODEL_FILE = visual-localization-model_8.4.tar.gz
+VISLOC_MODEL_FILE = visual-localization-model_8.5.tar.gz
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 
@@ -119,21 +120,20 @@ docker_build:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
+	@echo "USE_PROXY=$(USE_PROXY)"                            >> $(TGT_NAME)
 	@echo "# modify the server and proxy URLs as requied"     >> $(TGT_NAME)
-	@echo "ping bitbucket.itg.ti.com -c 1 > /dev/null 2>&1"   >> $(TGT_NAME)
-	@echo "if [ \"\$$?\" -eq \"0\" ]; then"                   >> $(TGT_NAME)
-	@echo "    USE_PROXY=1"                                   >> $(TGT_NAME)
-	@echo "    REPO_LOCATION=$(REPO_LOC_TI)"                  >> $(TGT_NAME)
+	@echo "if [ \"\$${USE_PROXY}\" -ne \"0\" ]; then"         >> $(TGT_NAME)
+	@echo "    REPO_LOCATION=$(DOCKER_REPO_INTERNAL)"         >> $(TGT_NAME)
 	@echo "    HTTP_PROXY=http://webproxy.ext.ti.com:80"      >> $(TGT_NAME)
 	@echo "else"                                              >> $(TGT_NAME)
-	@echo "    USE_PROXY=0"                                   >> $(TGT_NAME)
 	@echo "    REPO_LOCATION=$(REPO_LOC)"                     >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
 	@echo "echo \"USE_PROXY = \$$USE_PROXY\""                 >> $(TGT_NAME)
 	@echo "echo \"REPO_LOCATION = \$$REPO_LOCATION\""         >> $(TGT_NAME)
 	@echo "DST_DIR=$(WORK_PATH_HOST)/docker_src"              >> $(TGT_NAME)
 	@echo "TIVA_LIB_VER=$(TIVA_LIB_VER)"                      >> $(TGT_NAME)
-	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DST_DIR \$$TIVA_LIB_VER" >> $(TGT_NAME)
+	@echo "RPMSG_LIB_VER=$(RPMSG_LIB_VER)"                    >> $(TGT_NAME)
+	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DST_DIR \$$TIVA_LIB_VER \$$RPMSG_LIB_VER" >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
 	@echo "    -t \$$DOCKER_TAG \\"                           >> $(TGT_NAME)
@@ -142,6 +142,7 @@ docker_build:
 	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
 	@echo "    --build-arg TIVA_LIB_VER=\$$TIVA_LIB_VER \\"   >> $(TGT_NAME)
+	@echo "    --build-arg RPMSG_LIB_VER=\$$RPMSG_LIB_VER \\" >> $(TGT_NAME)
 endif
 	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./docker_src"  >> $(TGT_NAME)
 	@echo "rm -r \$$DST_DIR"	                              >> $(TGT_NAME)
@@ -152,6 +153,7 @@ endif
 docker_run:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
 	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
+	@echo "USE_PROXY=$(USE_PROXY)"                            >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
 	@echo "IP_ADDR=\$$(ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print \$$2}')"       >> $(TGT_NAME)
@@ -164,15 +166,8 @@ endif
 	@echo "else"                                              >> $(TGT_NAME)
 	@echo "    CMD=\"\$$@\""                                  >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
-	@echo "# modify the server and proxy URLs as requied"     >> $(TGT_NAME)
-	@echo "ping bitbucket.itg.ti.com -c 1 > /dev/null 2>&1"   >> $(TGT_NAME)
-	@echo "if [ \"\$$?\" -eq \"0\" ]; then"                   >> $(TGT_NAME)
-	@echo "    USE_PROXY=1"                                   >> $(TGT_NAME)
-	@echo "else"                                              >> $(TGT_NAME)
-	@echo "    USE_PROXY=0"                                   >> $(TGT_NAME)
-	@echo "fi"                                                >> $(TGT_NAME)
 ifeq ($(PLATFORM), pc)
-	@echo "xhost +local:\$$USER"                               >> $(TGT_NAME)
+	@echo "xhost +local:\$$USER"                              >> $(TGT_NAME)
 endif
 	@echo "docker run -it --rm \\"                            >> $(TGT_NAME)
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)

@@ -82,22 +82,22 @@ vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
 
     if (poseCalcObj == NULL)
     {
-        PTK_printf("Parameter 'poseCalcObj' NULL.");
+        LOG_ERROR("Parameter 'poseCalcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (createParams == NULL)
     {
-        PTK_printf("Parameter 'createParams' NULL.");
+        LOG_ERROR("Parameter 'createParams' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (poseCalcObj->state != CM_POSECALC_NODE_CNTXT_STATE_INVALID)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }    
 
@@ -161,9 +161,9 @@ vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
     {
         config_type         = vxRegisterUserStruct(context, sizeof(tivxVisualLocalizationParams));
 
-        if( config_type < VX_TYPE_USER_STRUCT_START || config_type > VX_TYPE_USER_STRUCT_END)
+        if ( config_type < VX_TYPE_USER_STRUCT_START || config_type > VX_TYPE_USER_STRUCT_END)
         {
-            PTK_printf("vxRegisterUserStruct() failed");
+            LOG_ERROR("vxRegisterUserStruct() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -173,7 +173,7 @@ vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
         poseCalcObj->config = vxCreateArray(context, config_type, 1);
         if (poseCalcObj->config == NULL)
         { 
-            PTK_printf("vxCreateArray() failed");
+            LOG_ERROR("vxCreateArray() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -187,7 +187,7 @@ vx_status CM_poseCalcNodeCntxtInit(CM_PoseCalcNodeCntxt           *poseCalcObj,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxAddArrayItems() failed");
+            LOG_ERROR("vxAddArrayItems() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -221,32 +221,32 @@ vx_status CM_poseCalcNodeCntxtSetup(CM_PoseCalcNodeCntxt    *poseCalcObj,
 
     if (poseCalcObj == NULL)
     {
-        PTK_printf("Parameter 'poseCalcObj' NULL.");
+        LOG_ERROR("Parameter 'poseCalcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (graph == NULL)
     {
-        PTK_printf("Parameter 'graph' NULL.");
+        LOG_ERROR("Parameter 'graph' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (curFeatTensor == NULL)
     {
-        PTK_printf("Parameter 'curFeatTensor' NULL.");
+        LOG_ERROR("Parameter 'curFeatTensor' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (curDescTensor == NULL)
     {
-        PTK_printf("Parameter 'curDescTensor' NULL.");
+        LOG_ERROR("Parameter 'curDescTensor' NULL.");
         vxStatus = VX_FAILURE;
     }    
     else if (poseCalcObj->state != CM_POSECALC_NODE_CNTXT_STATE_INIT)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -266,7 +266,7 @@ vx_status CM_poseCalcNodeCntxtSetup(CM_PoseCalcNodeCntxt    *poseCalcObj,
         
         if (poseCalcObj->node == NULL)
         {
-            PTK_printf("tivxVisualLocalizationNode() failed");
+            LOG_ERROR("tivxVisualLocalizationNode() failed");
             vxStatus = VX_FAILURE;
         }
 
@@ -280,7 +280,7 @@ vx_status CM_poseCalcNodeCntxtSetup(CM_PoseCalcNodeCntxt    *poseCalcObj,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxSetNodeTarget() failed");
+            LOG_ERROR("vxSetNodeTarget() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -310,14 +310,14 @@ vx_status CM_poseCalcNodeCntxtDeInit(CM_PoseCalcNodeCntxt *poseCalcObj)
 
     if (poseCalcObj == NULL)
     {
-        PTK_printf("Parameter 'poseCalcObj' NULL.");
+        LOG_ERROR("Parameter 'poseCalcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else
     {
         if (poseCalcObj->state == CM_POSECALC_NODE_CNTXT_STATE_INVALID)
         {
-            PTK_printf("Invalid state.");
+            LOG_ERROR("Invalid state.");
             vxStatus = VX_FAILURE;
         }
         else
@@ -450,7 +450,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
     if (poseCalcObj->poseMatrix == NULL)
     {
-        PTK_printf("Failed to allocate output pose matrix array");
+        LOG_ERROR("Failed to allocate output pose matrix array");
         vxStatus = VX_FAILURE;
     }
 
@@ -462,7 +462,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
             if (poseCalcObj->poseMatrix[i] == NULL)
             {
-                PTK_printf("vxCreateMatrix() failed");
+                LOG_ERROR("vxCreateMatrix() failed");
                 vxStatus = VX_FAILURE;
                 break;
             }
@@ -483,7 +483,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
         if (poseCalcObj->voxelInfo == NULL)
         {
-            PTK_printf("vxCreateTensor() failed");
+            LOG_ERROR("vxCreateTensor() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -501,7 +501,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
         if (poseCalcObj->mapFeat == NULL)
         {
-            PTK_printf("vxCreateTensor() failed");
+            LOG_ERROR("vxCreateTensor() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -519,7 +519,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
         if (poseCalcObj->mapDesc == NULL)
         {
-            PTK_printf("vxCreateTensor() failed");
+            LOG_ERROR("vxCreateTensor() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -531,13 +531,13 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        /* Even if upsampling weight is not needed in external feat flow, but passing it to avoid null reference //if(obj->is_feat_comp_ext == 0x0) */
+        /* Even if upsampling weight is not needed in external feat flow, but passing it to avoid null reference //if (obj->is_feat_comp_ext == 0x0) */
         output_sizes[0] = 7*7*64+2*64; /*size in elements, each element is int8. 7x7 filter for 64 plane and 64 biases*/
         poseCalcObj->wtTable = vxCreateTensor(context, 1, output_sizes, VX_TYPE_INT8, 0);
 
         if (poseCalcObj->wtTable == NULL)
         {
-            PTK_printf("vxCreateTensor() failed");
+            LOG_ERROR("vxCreateTensor() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -554,7 +554,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
 
         if (poseCalcObj->lensTable == NULL)
         {
-            PTK_printf("vxCreateTensor() failed");
+            LOG_ERROR("vxCreateTensor() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -580,19 +580,19 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
         vxMapUserDataObject(poseCalcObj->outArgs, 0, capacity, &map_id,
                             (void **)&outArgs_buffer, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
-        if(outArgs_buffer)
+        if (outArgs_buffer)
         {
             TIDL_outArgs *prms = (TIDL_outArgs*) outArgs_buffer;
             prms->iVisionOutArgs.size  = sizeof(TIDL_outArgs);
 
-            for(i = 0; i < TIDL_NUM_OUT_BUFS; i++)
+            for (i = 0; i < TIDL_NUM_OUT_BUFS; i++)
             {
                 prms->scale[i] = 1.0;
             }
         }
         else
         {
-            printf("Unable to allocate memory for outArgs! %d bytes\n", capacity);
+            LOG_ERROR("Unable to allocate memory for outArgs! %d bytes\n", capacity);
             vxStatus = VX_FAILURE;
         }
 
@@ -611,7 +611,7 @@ static vx_status CM_createInputOutputTensors(vx_context context, CM_PoseCalcNode
                                 poseCalcObj->inputUpsampleWtPath,
                                 poseCalcObj->inputUpsampleBiasPath);
 
-        if(poseCalcObj->vlParams.is_ip_fe == 0x1)
+        if (poseCalcObj->vlParams.is_ip_fe == 0x1)
         {
             CM_fill1DTensor(poseCalcObj->lensTable, poseCalcObj->inputLensDistTablePath);
         }

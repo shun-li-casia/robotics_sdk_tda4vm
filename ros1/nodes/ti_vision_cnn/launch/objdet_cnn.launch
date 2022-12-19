@@ -11,11 +11,12 @@
     <!-- LDC LUT definition file path -->
     <arg name="lut_file_path" default="$(find zed_capture)/config/SN5867575_HD_LUT_right.bin" />
     <!-- DL model path -->
-    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"/>
     <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
-    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8220-yolox-s-lite-mmdet-coco-640x640"/> -->
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"/> -->
     <!-- Flag for exporting the performance data to a file: 0 - disable, 1 - enable -->
     <arg name="exportPerfStats" default="0"/>
+    <arg name="detVizThreshold" default="0.5"/>
 
     <!-- ti_vision_cnn -->
     <node pkg = "ti_vision_cnn" type = "vision_cnn" name = "vision_cnn" output = "screen" args = "" required = "true">
@@ -43,6 +44,7 @@
         <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
         <!-- Flag for exporting the performance data to a file: 0 - disable, 1 - enable -->
         <param name = "exportPerfStats" value = "$(arg exportPerfStats)"/>
+        <param name = "detVizThreshold" value = "$(arg detVizThreshold)"/>
     </node>
 
 </launch>

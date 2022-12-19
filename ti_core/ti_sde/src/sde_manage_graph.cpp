@@ -68,7 +68,7 @@
 
 vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
 {
-    SDELDCAPPLIB_createParams * createParams;
+    SDELDC_createParams * createParams;
     int32_t                     i;
     vx_status                   vxStatus = VX_SUCCESS;
 
@@ -86,11 +86,17 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
         // input left image
         if (appCntxt->inputFormat == CM_IMG_FORMAT_Y)
         {
-            appCntxt->vxInputLeftImage[i]  = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_U8);
-        } else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
+            appCntxt->vxInputLeftImage[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width, appCntxt->height, VX_DF_IMAGE_U8);
+        }
+        else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
         {
-            appCntxt->vxInputLeftImage[i] = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_UYVY);
-        } else
+            appCntxt->vxInputLeftImage[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width, appCntxt->height, VX_DF_IMAGE_UYVY);
+        }
+        else
         {
             LOG_ERROR("Input image format NOT supported\n");
             vxStatus = VX_FAILURE;
@@ -99,24 +105,37 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
 
         if (appCntxt->vxInputLeftImage[i] == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+            LOG_ERROR("vxCreateImage() failed\n");
             vxStatus = VX_FAILURE;
             break;
-        } else
+        }
+        else
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxInputLeftImage[i], "InputLeftImage");
+            vxSetReferenceName((vx_reference)appCntxt->vxInputLeftImage[i],
+                               "InputLeftImage");
+
             // pass to LDC Applib createParams
-            createParams->vxInputLeftImage[i]  = appCntxt->vxInputLeftImage[i];
+            createParams->vxInputLeftImage[i] = appCntxt->vxInputLeftImage[i];
         }
 
         // input right image
         if (appCntxt->inputFormat == CM_IMG_FORMAT_Y)
         {
-            appCntxt->vxInputRightImage[i] = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_U8);
-        } else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
+            appCntxt->vxInputRightImage[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_U8);
+        }
+        else if (appCntxt->inputFormat == CM_IMG_FORMAT_UYVY)
         {
-            appCntxt->vxInputRightImage[i] = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_UYVY);
-        }  else
+            appCntxt->vxInputRightImage[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_UYVY);
+        }
+        else
         {
             LOG_ERROR("Input image format NOT supported\n");
             vxStatus = VX_FAILURE;
@@ -125,12 +144,14 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
 
         if (appCntxt->vxInputRightImage[i] == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+            LOG_ERROR("vxCreateImage() failed\n");
             vxStatus = VX_FAILURE;
             break;
-        } else
+        }
+        else
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxInputRightImage[i], "InputRightImage");
+            vxSetReferenceName((vx_reference)appCntxt->vxInputRightImage[i],
+                               "InputRightImage");
             // pass to LDC Applib createParams
             createParams->vxInputRightImage[i] = appCntxt->vxInputRightImage[i];
         }
@@ -147,21 +168,32 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
         // output left image
         if (appCntxt->inputFormat == CM_IMG_FORMAT_Y)
         {
-            appCntxt->vxLeftRectImage = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_U8);
-        } else 
+            appCntxt->vxLeftRectImage =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_U8);
+        }
+        else 
         {
-            appCntxt->vxLeftRectImage = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_NV12);
+            appCntxt->vxLeftRectImage =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_NV12);
         }
 
         if (appCntxt->vxLeftRectImage == NULL)
         {
-            PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+            LOG_ERROR("vxCreateImage() failed\n");
             vxStatus = VX_FAILURE;
-        } else
+        }
+        else
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxLeftRectImage, "LeftRectifiedImage");
+            vxSetReferenceName((vx_reference)appCntxt->vxLeftRectImage,
+                               "LeftRectifiedImage");
             // pass to LDC Applib createParams
-            createParams->vxOutputLeftImage[0]  = appCntxt->vxLeftRectImage;
+            createParams->vxOutputLeftImage[0] = appCntxt->vxLeftRectImage;
         }
     }
 
@@ -173,20 +205,30 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
         {
             if (appCntxt->inputFormat == CM_IMG_FORMAT_Y)
             {
-                appCntxt->vxRightRectImage[i]  = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_U8);
+                appCntxt->vxRightRectImage[i] =
+                    vxCreateImage(appCntxt->vxContext,
+                                  appCntxt->width,
+                                  appCntxt->height,
+                                  VX_DF_IMAGE_U8);
             } else 
             {
-                appCntxt->vxRightRectImage[i]  = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_NV12);
+                appCntxt->vxRightRectImage[i] =
+                    vxCreateImage(appCntxt->vxContext,
+                                  appCntxt->width,
+                                  appCntxt->height,
+                                  VX_DF_IMAGE_NV12);
             }
 
             if (appCntxt->vxRightRectImage[i] == NULL)
             {
-                PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+                LOG_ERROR("vxCreateImage() failed\n");
                 vxStatus = VX_FAILURE;
                 break;
-            } else
+            }
+            else
             {
-                vxSetReferenceName((vx_reference)appCntxt->vxRightRectImage[i], "RightRectifiedImage");
+                vxSetReferenceName((vx_reference)appCntxt->vxRightRectImage[i],
+                                   "RightRectifiedImage");
                 // pass to LDC Applib createParams
                 createParams->vxOutputRightImage[i] = appCntxt->vxRightRectImage[i];
             }
@@ -195,11 +237,10 @@ vx_status SDEAPP_init_LDC(SDEAPP_Context *appCntxt)
 
     if (vxStatus == (vx_status) VX_SUCCESS)
     {
-        appCntxt->sdeLdcHdl = SDELDCAPPLIB_create(createParams);
+        appCntxt->sdeLdcHdl = SDELDC_create(createParams);
         if (appCntxt->sdeLdcHdl == NULL)
         {
-            PTK_printf("[%s:%d] SDELDCAPPLIB_create() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("SDELDC_create() failed\n");
             vxStatus = VX_FAILURE;
         }
     }
@@ -214,7 +255,7 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
 
     if (appCntxt->sdeAlgoType == 0)
     {
-        SL_SDEAPPLIB_createParams   * slSdeCreateParams;
+        SL_SDE_createParams   * slSdeCreateParams;
 
         slSdeCreateParams            = &appCntxt->slSdeCreateParams;
         slSdeCreateParams->vxContext = appCntxt->vxContext;
@@ -226,6 +267,7 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
         slSdeCreateParams->createInputFlag     = 0;
         slSdeCreateParams->inputPipelineDepth  = 1;
         slSdeCreateParams->vxLeftRectImage[0]  = appCntxt->vxLeftRectImage;
+
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
             slSdeCreateParams->vxRightRectImage[i] = appCntxt->vxRightRectImage[i];
@@ -237,32 +279,39 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
         slSdeCreateParams->createOutputFlag    = 0;
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
-            appCntxt->vxSde16BitOutput[i]  = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_S16);
+            appCntxt->vxSde16BitOutput[i]  =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_S16);
+
             if (appCntxt->vxSde16BitOutput[i] == NULL)
             {
-                PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+                LOG_ERROR("vxCreateImage() failed\n");
                 vxStatus = VX_FAILURE;
                 break;
-            } else
+            }
+            else
             {
-                vxSetReferenceName((vx_reference)appCntxt->vxSde16BitOutput[i], "RawDisparityMap");
+                vxSetReferenceName((vx_reference)appCntxt->vxSde16BitOutput[i],
+                                   "RawDisparityMap");
                 slSdeCreateParams->vxSde16BitOutput[i]  = appCntxt->vxSde16BitOutput[i];
             }
         }
 
         if (vxStatus == (vx_status) VX_SUCCESS)
         {
-            appCntxt->slSdeHdl = SL_SDEAPPLIB_create(slSdeCreateParams);
+            appCntxt->slSdeHdl = SL_SDE_create(slSdeCreateParams);
             if (appCntxt->slSdeHdl == NULL)
             {
-                PTK_printf("[%s:%d] SL_SDEAPPLIB_create() failed\n", __FUNCTION__, __LINE__);
+                LOG_ERROR("SL_SDE_create() failed\n");
                 vxStatus = VX_FAILURE;
             }
         }
     }
     else if (appCntxt->sdeAlgoType == 1)
     {
-        ML_SDEAPPLIB_createParams   * mlSdeCreateParams;
+        ML_SDE_createParams   * mlSdeCreateParams;
 
         mlSdeCreateParams            = &appCntxt->mlSdeCreateParams;
         mlSdeCreateParams->vxContext = appCntxt->vxContext;
@@ -274,6 +323,7 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
         mlSdeCreateParams->createInputFlag    = 0;
         mlSdeCreateParams->inputPipelineDepth = 1;
         mlSdeCreateParams->vxLeftRectImageL0[0]  = appCntxt->vxLeftRectImage;
+
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
             mlSdeCreateParams->vxRightRectImageL0[i] = appCntxt->vxRightRectImage[i];
@@ -287,39 +337,53 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
         {
             for (i = 0; i < appCntxt->pipelineDepth; i++)
             {
-                appCntxt->vxMedianFilteredDisparity[i] = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_S16);
+                appCntxt->vxMedianFilteredDisparity[i] =
+                    vxCreateImage(appCntxt->vxContext,
+                                  appCntxt->width,
+                                  appCntxt->height,
+                                  VX_DF_IMAGE_S16);
+
                 if (appCntxt->vxMedianFilteredDisparity[i] == NULL)
                 {
-                    PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+                    LOG_ERROR("vxCreateImage() failed\n");
                     vxStatus = VX_FAILURE;
                     break;
-                } else 
+                }
+                else 
                 {
-                    mlSdeCreateParams->vxMedianFilteredDisparity[i]  = appCntxt->vxMedianFilteredDisparity[i];
+                    mlSdeCreateParams->vxMedianFilteredDisparity[i] =
+                        appCntxt->vxMedianFilteredDisparity[i];
                 }
             }
         }
 
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
-            appCntxt->vxMergeDisparityL0[i] = vxCreateImage(appCntxt->vxContext, appCntxt->width, appCntxt->height, VX_DF_IMAGE_S16);
+            appCntxt->vxMergeDisparityL0[i] =
+                vxCreateImage(appCntxt->vxContext,
+                              appCntxt->width,
+                              appCntxt->height,
+                              VX_DF_IMAGE_S16);
+
             if (appCntxt->vxMergeDisparityL0[i] == NULL)
             {
-                PTK_printf("[%s:%d] vxCreateImage() failed\n", __FUNCTION__, __LINE__);
+                LOG_ERROR("vxCreateImage() failed\n");
                 vxStatus = VX_FAILURE;
                 break;
-            } else
+            }
+            else
             {
-                mlSdeCreateParams->vxMergeDisparityL0[i]  = appCntxt->vxMergeDisparityL0[i];
+                mlSdeCreateParams->vxMergeDisparityL0[i] =
+                    appCntxt->vxMergeDisparityL0[i];
             }
         }
 
         if (vxStatus == (vx_status) VX_SUCCESS)
         {
-            appCntxt->mlSdeHdl = ML_SDEAPPLIB_create(mlSdeCreateParams);
+            appCntxt->mlSdeHdl = ML_SDE_create(mlSdeCreateParams);
             if (appCntxt->mlSdeHdl == NULL)
             {
-                PTK_printf("[%s:%d] ML_SDEAPPLIB_create() failed\n", __FUNCTION__, __LINE__);
+                LOG_ERROR("ML_SDE_create() failed\n");
                 vxStatus = VX_FAILURE;
             }
         }
@@ -332,7 +396,7 @@ vx_status SDEAPP_init_SDE(SDEAPP_Context *appCntxt)
 
 vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt)
 {
-    SDE_TRIANG_APPLIB_createParams  * sdeTriangCreateParams;
+    SDE_TRIANG_createParams  * sdeTriangCreateParams;
     
     int32_t                           i;
     vx_status                         vxStatus = VX_SUCCESS;
@@ -353,20 +417,25 @@ vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt)
     for (i = 0; i < appCntxt->pipelineDepth; i++)
     {
         // input rectified image
-        sdeTriangCreateParams->vxInputRectImage[i] = appCntxt->vxRightRectImage[i];
+        sdeTriangCreateParams->vxInputRectImage[i] =
+            appCntxt->vxRightRectImage[i];
 
         // raw disparity image
         if (appCntxt->sdeAlgoType == 0)
         {
-            sdeTriangCreateParams->vxInputSde16Bit[i] = appCntxt->vxSde16BitOutput[i];
+            sdeTriangCreateParams->vxInputSde16Bit[i] =
+                appCntxt->vxSde16BitOutput[i];
         } else
         {
             if (appCntxt->ppMedianFilterEnable)
             {
-                sdeTriangCreateParams->vxInputSde16Bit[i] = appCntxt->vxMedianFilteredDisparity[i];
-            } else
+                sdeTriangCreateParams->vxInputSde16Bit[i] =
+                    appCntxt->vxMedianFilteredDisparity[i];
+            }
+            else
             {
-                sdeTriangCreateParams->vxInputSde16Bit[i] = appCntxt->vxMergeDisparityL0[i];
+                sdeTriangCreateParams->vxInputSde16Bit[i] =
+                    appCntxt->vxMergeDisparityL0[i];
             }
         }
     }
@@ -385,8 +454,7 @@ vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt)
         cloudMem        = new uint8_t[pcSize];
         if (cloudMem == NULL)
         {
-            PTK_printf("[%s:%d] Memory allocation failed.\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("Memory allocation failed.\n");
 
             vxStatus = VX_FAILURE;
             break;
@@ -405,25 +473,26 @@ vx_status SDEAPP_init_SDE_Triang(SDEAPP_Context *appCntxt)
 
             if (appCntxt->vxOutputTriangPC[i] == NULL)
             {
-                PTK_printf("[%s:%d] vxCreateUserDataObject() failed\n",
-                        __FUNCTION__, __LINE__);
+                LOG_ERROR("vxCreateUserDataObject() failed\n");
                 vxStatus = VX_FAILURE;
                 break;
-            } else
+            }
+            else
             {
-                vxSetReferenceName((vx_reference)appCntxt->vxOutputTriangPC[i], "StereoPointCloud");
-                sdeTriangCreateParams->vxOutputTriangPC[i] = appCntxt->vxOutputTriangPC[i];
+                vxSetReferenceName((vx_reference)appCntxt->vxOutputTriangPC[i],
+                                   "StereoPointCloud");
+                sdeTriangCreateParams->vxOutputTriangPC[i] =
+                    appCntxt->vxOutputTriangPC[i];
             }
         }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        appCntxt->sdeTriangHdl = SDE_TRIANG_APPLIB_create(sdeTriangCreateParams);
+        appCntxt->sdeTriangHdl = SDE_TRIANG_create(sdeTriangCreateParams);
         if (appCntxt->sdeTriangHdl == NULL)
         {
-            PTK_printf("[%s:%d] SDE_TRIANG_APPLIB_create() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("SDE_TRIANG_create() failed\n");
             vxStatus = VX_SUCCESS;
         }
     }
@@ -458,8 +527,7 @@ vx_status  SDEAPP_setupPipeline(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxRegisterEvent() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxRegisterEvent() failed\n");
         }
     }
 
@@ -474,16 +542,16 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
     uint32_t                            cnt = 0;
     vx_status                           vxStatus;
 
-    vx_node leftLdcNode   = SDELCDAPPLIB_getLeftLDCNode(appCntxt->sdeLdcHdl);
-    vx_node rightLdcNode  = SDELCDAPPLIB_getRightLDCNode(appCntxt->sdeLdcHdl);
-    vx_node sdeNode       = SL_SDEAPPLIB_getSDENode(appCntxt->slSdeHdl);
+    vx_node leftLdcNode   = SDELCD_getLeftLDCNode(appCntxt->sdeLdcHdl);
+    vx_node rightLdcNode  = SDELCD_getRightLDCNode(appCntxt->sdeLdcHdl);
+    vx_node sdeNode       = SL_SDE_getSDENode(appCntxt->slSdeHdl);
     vx_node colorConvNode;
     vx_node triangNode;
 
     if (appCntxt->enablePC)
     {
-        colorConvNode = SDE_TRIANG_APPLIB_getColorConvNode(appCntxt->sdeTriangHdl);
-        triangNode    = SDE_TRIANG_APPLIB_getTriangNode(appCntxt->sdeTriangHdl);
+        colorConvNode = SDE_TRIANG_getColorConvNode(appCntxt->sdeTriangHdl);
+        triangNode    = SDE_TRIANG_getTriangNode(appCntxt->sdeTriangHdl);
     }
 
     /* Five graph parameters in total */
@@ -495,8 +563,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
                                       6);
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("CM_addParamByNodeIndex() failed\n");
     }
     else
     {
@@ -511,8 +578,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
                                           6);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -528,8 +594,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
                                           7);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -545,8 +610,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
                                           3);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -566,8 +630,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -586,18 +649,17 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
         // allocate free Q
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
-            paramDesc                      = &appCntxt->paramDesc[i];
-            paramDesc->vxInputLeftImage    = appCntxt->vxInputLeftImage[i];
-            paramDesc->vxInputRightImage   = appCntxt->vxInputRightImage[i];
-            paramDesc->vxRightRectImage    = appCntxt->vxRightRectImage[i];
-            paramDesc->vxSde16BitOutput    = appCntxt->vxSde16BitOutput[i];
+            paramDesc                    = &appCntxt->paramDesc[i];
+            paramDesc->vxInputLeftImage  = appCntxt->vxInputLeftImage[i];
+            paramDesc->vxInputRightImage = appCntxt->vxInputRightImage[i];
+            paramDesc->vxRightRectImage  = appCntxt->vxRightRectImage[i];
+            paramDesc->vxSde16BitOutput  = appCntxt->vxSde16BitOutput[i];
+            paramDesc->timestamp         = &appCntxt->timestamp[i];
 
             if (appCntxt->enablePC)
             {
                 paramDesc->vxOutputTriangPC    = appCntxt->vxOutputTriangPC[i];
             }
-
-            paramDesc->timestamp           = &appCntxt->timestamp[i];
 
             appCntxt->freeQ.push(paramDesc);
         }
@@ -616,14 +678,12 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetGraphPipelineDepth() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetGraphPipelineDepth() failed\n");
         }
     }
     else
     {
-        PTK_printf("[%s:%d] vxSetGraphScheduleConfig() failed\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("vxSetGraphScheduleConfig() failed\n");
     }
 
     if (vxStatus == VX_SUCCESS)
@@ -635,8 +695,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
         }
     }
 
@@ -649,8 +708,7 @@ vx_status SDEAPP_setupPipeline_SL(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
         }
     }
 
@@ -666,27 +724,27 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
     uint32_t                            cnt = 0;
     vx_status                           vxStatus;
 
-    vx_node leftLdcNode    = SDELCDAPPLIB_getLeftLDCNode(appCntxt->sdeLdcHdl);
-    vx_node rightLdcNode   = SDELCDAPPLIB_getRightLDCNode(appCntxt->sdeLdcHdl);
+    vx_node leftLdcNode    = SDELCD_getLeftLDCNode(appCntxt->sdeLdcHdl);
+    vx_node rightLdcNode   = SDELCD_getRightLDCNode(appCntxt->sdeLdcHdl);
 
-    vx_node sdeNodeL0      = ML_SDEAPPLIB_getSDENodeL0(appCntxt->mlSdeHdl);
-    vx_node sdeNodeL1      = ML_SDEAPPLIB_getSDENodeL1(appCntxt->mlSdeHdl);
-    vx_node sdeNodeL2      = ML_SDEAPPLIB_getSDENodeL2(appCntxt->mlSdeHdl);
-    vx_node medFilterNode  = ML_SDEAPPLIB_getMedFilterNode(appCntxt->mlSdeHdl);
-    vx_node mergeNodeL1    = ML_SDEAPPLIB_getMergeNodeL1(appCntxt->mlSdeHdl);
-    vx_node mergeNodeL2    = ML_SDEAPPLIB_getMergeNodeL2(appCntxt->mlSdeHdl);
-    vx_node leftMscNodeL1  = ML_SDEAPPLIB_getLeftMSCNodeL1(appCntxt->mlSdeHdl);
-    vx_node rightMscNodeL1 = ML_SDEAPPLIB_getRightMSCNodeL1(appCntxt->mlSdeHdl);
-    vx_node leftMscNodeL2  = ML_SDEAPPLIB_getLeftMSCNodeL2(appCntxt->mlSdeHdl);
-    vx_node rightMscNodeL2 = ML_SDEAPPLIB_getRightMSCNodeL2(appCntxt->mlSdeHdl);
+    vx_node sdeNodeL0      = ML_SDE_getSDENodeL0(appCntxt->mlSdeHdl);
+    vx_node sdeNodeL1      = ML_SDE_getSDENodeL1(appCntxt->mlSdeHdl);
+    vx_node sdeNodeL2      = ML_SDE_getSDENodeL2(appCntxt->mlSdeHdl);
+    vx_node medFilterNode  = ML_SDE_getMedFilterNode(appCntxt->mlSdeHdl);
+    vx_node mergeNodeL1    = ML_SDE_getMergeNodeL1(appCntxt->mlSdeHdl);
+    vx_node mergeNodeL2    = ML_SDE_getMergeNodeL2(appCntxt->mlSdeHdl);
+    vx_node leftMscNodeL1  = ML_SDE_getLeftMSCNodeL1(appCntxt->mlSdeHdl);
+    vx_node rightMscNodeL1 = ML_SDE_getRightMSCNodeL1(appCntxt->mlSdeHdl);
+    vx_node leftMscNodeL2  = ML_SDE_getLeftMSCNodeL2(appCntxt->mlSdeHdl);
+    vx_node rightMscNodeL2 = ML_SDE_getRightMSCNodeL2(appCntxt->mlSdeHdl);
 
     vx_node colorConvNode;
     vx_node triangNode;
 
     if (appCntxt->enablePC)
     {
-        colorConvNode = SDE_TRIANG_APPLIB_getColorConvNode(appCntxt->sdeTriangHdl);
-        triangNode    = SDE_TRIANG_APPLIB_getTriangNode(appCntxt->sdeTriangHdl);
+        colorConvNode = SDE_TRIANG_getColorConvNode(appCntxt->sdeTriangHdl);
+        triangNode    = SDE_TRIANG_getTriangNode(appCntxt->sdeTriangHdl);
     }
 
     appCntxt->numGraphParams = 4;
@@ -698,8 +756,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                       6);
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("CM_addParamByNodeIndex() failed\n");
     }
     else
     {
@@ -714,8 +771,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                           6);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -729,10 +785,10 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
         vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
                                           rightLdcNode,
                                           7);
+
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -748,8 +804,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                           3);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -768,10 +823,10 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
             vxStatus = CM_addParamByNodeIndex(appCntxt->vxGraph,
                                               medFilterNode,
                                               2);
+
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                            __FUNCTION__, __LINE__);
+                LOG_ERROR("CM_addParamByNodeIndex() failed\n");
             }
             else
             {
@@ -792,8 +847,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] CM_addParamByNodeIndex() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("CM_addParamByNodeIndex() failed\n");
         }
         else
         {
@@ -812,16 +866,17 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
         // allocate free Q
         for (i = 0; i < appCntxt->pipelineDepth; i++)
         {
-            paramDesc                       = &appCntxt->paramDesc[i];
-            paramDesc->vxInputLeftImage     = appCntxt->vxInputLeftImage[i];
-            paramDesc->vxInputRightImage    = appCntxt->vxInputRightImage[i];
-            paramDesc->vxRightRectImage     = appCntxt->vxRightRectImage[i];
-            paramDesc->vxMergeDisparityL0   = appCntxt->vxMergeDisparityL0[i];
+            paramDesc                     = &appCntxt->paramDesc[i];
+            paramDesc->vxInputLeftImage   = appCntxt->vxInputLeftImage[i];
+            paramDesc->vxInputRightImage  = appCntxt->vxInputRightImage[i];
+            paramDesc->vxRightRectImage   = appCntxt->vxRightRectImage[i];
+            paramDesc->vxMergeDisparityL0 = appCntxt->vxMergeDisparityL0[i];
+            paramDesc->timestamp          = &appCntxt->timestamp[i];
+
             if (appCntxt->enablePC)
             {
                 paramDesc->vxOutputTriangPC = appCntxt->vxOutputTriangPC[i];
             }
-            paramDesc->timestamp            = &appCntxt->timestamp[i];
 
             if (appCntxt->ppMedianFilterEnable)
             {
@@ -845,14 +900,12 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetGraphPipelineDepth() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetGraphPipelineDepth() failed\n");
         }
     }
     else
     {
-        PTK_printf("[%s:%d] vxSetGraphScheduleConfig() failed\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("vxSetGraphScheduleConfig() failed\n");
     }
 
     if (vxStatus == VX_SUCCESS)
@@ -863,8 +916,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                      appCntxt->pipelineDepth);
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
         }
     }
 
@@ -876,11 +928,9 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                      appCntxt->pipelineDepth);
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
         }
     }
-
 
     if (appCntxt->numLayers > 1)
     {
@@ -892,8 +942,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
 
@@ -905,8 +954,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
 
@@ -918,8 +966,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
     }
@@ -934,8 +981,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
 
@@ -948,8 +994,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
 
@@ -961,8 +1006,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
 
@@ -974,8 +1018,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
                                                          appCntxt->pipelineDepth);
             if (vxStatus != VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
             }
         }
     }
@@ -990,8 +1033,7 @@ vx_status SDEAPP_setupPipeline_ML(SDEAPP_Context * appCntxt)
 
         if (vxStatus != VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] tivxSetNodeParameterNumBufByIndex() failed\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("tivxSetNodeParameterNumBufByIndex() failed\n");
         }
     }
 
@@ -1002,11 +1044,11 @@ void SDEAPP_printStats(SDEAPP_Context * appCntxt)
 {
     tivx_utils_graph_perf_print(appCntxt->vxGraph);
     appPerfPointPrint(&appCntxt->sdePclPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     appPerfPointPrintFPS(&appCntxt->sdePclPerf);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
     CM_printProctime(stdout);
-    PTK_printf("\n");
+    LOG_INFO_RAW("\n");
 }
 
 vx_status SDEAPP_exportStats(SDEAPP_Context * appCntxt, FILE *fp, bool exportAll)
@@ -1015,8 +1057,7 @@ vx_status SDEAPP_exportStats(SDEAPP_Context * appCntxt, FILE *fp, bool exportAll
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] tivx_utils_graph_perf_export() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("tivx_utils_graph_perf_export() failed\n");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -1040,7 +1081,7 @@ vx_status SDEAPP_waitGraph(SDEAPP_Context * appCntxt)
     /* Wait for the output queue to get flushed. */
     while (appCntxt->freeQ.size() != appCntxt->pipelineDepth)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for (std::chrono::milliseconds(50));
     }
 
     return vxStatus;
@@ -1110,7 +1151,7 @@ vx_status  SDEAPP_process(SDEAPP_Context * appCntxt, SDEAPP_graphParams * gpDesc
                                                    1);
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxGraphParameterEnqueueReadyRef(%d) "
+            LOG_ERROR("vxGraphParameterEnqueueReadyRef(%d) "
                        "failed\n", __FUNCTION__, __LINE__, i);
             break;
         }
@@ -1132,14 +1173,14 @@ vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event)
     // For profiling
     float                   diff;
 
-    if(event->type == VX_EVENT_GRAPH_COMPLETED)
+    if (event->type == VX_EVENT_GRAPH_COMPLETED)
     {
         uint32_t appValue = appCntxt->vxEvtAppValBase + SDEAPP_GRAPH_COMPLETE_EVENT;
 
         if (event->app_value != appValue)
         {
             /* Something wrong. We did not register for this event. */
-            PTK_printf("[%s:%d] Unknown App Value [%d].\n",
+            LOG_ERROR("Unknown App Value [%d].\n",
                        __FUNCTION__, __LINE__, event->app_value);
 
             vxStatus = VX_FAILURE;
@@ -1175,8 +1216,7 @@ vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event)
                                                           &numRefs);
                 if (vxStatus != VX_SUCCESS)
                 {
-                    PTK_printf("[%s:%d] vxGraphParameterDequeueDoneRef() failed\n",
-                               __FUNCTION__, __LINE__);
+                    LOG_ERROR("vxGraphParameterDequeueDoneRef() failed\n");
 
                     break;
                 }
@@ -1219,8 +1259,7 @@ vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event)
 
             if (index >= appCntxt->pipelineDepth)
             {
-                PTK_printf("[%s:%d] Resource look up failed\n",
-                           __FUNCTION__, __LINE__);
+                LOG_ERROR("Resource look up failed\n");
     
                 vxStatus = VX_FAILURE;
             }
@@ -1233,7 +1272,7 @@ vx_status SDEAPP_processEvent(SDEAPP_Context * appCntxt, vx_event_t * event)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("[%s:%d] SDEAPP_releaseParamRsrc() failed.\n",
+                LOG_ERROR("SDEAPP_releaseParamRsrc() failed.\n",
                            __FUNCTION__,
                            __LINE__);
             }
@@ -1270,8 +1309,7 @@ vx_status SDEAPP_getOutBuff(SDEAPP_Context      *appCntxt,
 
     if (appCntxt->outputQ.empty())
     {
-        PTK_printf("[%s:%d] Output queue empty.\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("Output queue empty.\n");
 
         vxStatus = VX_FAILURE;
     }
@@ -1315,8 +1353,7 @@ vx_status SDEAPP_releaseOutBuff(SDEAPP_Context * appCntxt)
 
     if (appCntxt->outputQ.empty())
     {
-        PTK_printf("[%s:%d] No output buffers available.\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("No output buffers available.\n");
 
         vxStatus = VX_FAILURE;
     }

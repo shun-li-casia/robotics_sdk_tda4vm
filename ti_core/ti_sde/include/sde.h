@@ -72,19 +72,17 @@
 #include <TI/tivx_stereo.h>
 #include <TI/tivx_img_proc.h>
 
-#include <perception/perception.h>
-#include <perception/utils/ipc_chan.h>
-#include <perception/utils/ptk_semaphore.h>
+#include <utils/app_init/include/app_init.h>
+#include <utils/perf_stats/include/app_perf_stats.h>
 
+#include <ti_semaphore.h>
 #include <cm_profile.h>
-#include <cm_common.h>
 #include <cm_remote_service.h>
 
-#include <sde_ldc_applib.h>
-#include <sde_singlelayer_applib.h>
-#include <sde_multilayer_applib.h>
-#include <sde_triangulate_applib.h>
-
+#include <sde_ldc.h>
+#include <sde_singlelayer.h>
+#include <sde_multilayer.h>
+#include <sde_triangulate.h>
 
 /**
  * \defgroup group_ticore_sde Stereo disparity map processing
@@ -117,11 +115,9 @@
  *
  */
 
-
 using namespace std;
 using namespace ti_core_common;
-
-#include <utils/perf_stats/include/app_perf_stats.h>
+using namespace ti::utils;
 
 /**
  * \brief Maximum file name length
@@ -210,7 +206,7 @@ struct SDEAPP_graphParams
 };
 
 using SDEAPP_graphParamQ = std::queue<SDEAPP_graphParams*>;
-
+using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
 /**
  * \brief Application context parameters
@@ -370,28 +366,28 @@ struct SDEAPP_Context
     uint8_t                                is_interactive;
 
     /** LDC applib create params */
-    SDELDCAPPLIB_createParams              sdeLdcCreateParams;
+    SDELDC_createParams              sdeLdcCreateParams;
 
     /** LDC applib handler */
-    SDELDCAPPLIB_Handle                    sdeLdcHdl;
+    SDELDC_Handle                    sdeLdcHdl;
 
     /** Single-layer SDE applib create params */
-    SL_SDEAPPLIB_createParams              slSdeCreateParams;
+    SL_SDE_createParams              slSdeCreateParams;
 
     /** Single-layer SDE applib handler */
-    SL_SDEAPPLIB_Handle                    slSdeHdl;
+    SL_SDE_Handle                    slSdeHdl;
 
     /** Multi-layer SDE applib create params */
-    ML_SDEAPPLIB_createParams              mlSdeCreateParams;
+    ML_SDE_createParams              mlSdeCreateParams;
 
     /** Multi-layer SDE applib handler */
-    ML_SDEAPPLIB_Handle                    mlSdeHdl;
+    ML_SDE_Handle                    mlSdeHdl;
 
     /** Semantic segmentation applib create params */
-    SDE_TRIANG_APPLIB_createParams         sdeTriangCreateParams;
+    SDE_TRIANG_createParams         sdeTriangCreateParams;
 
     /** Semantic segmentation applib handler */
-    SDE_TRIANG_APPLIB_Handle               sdeTriangHdl;
+    SDE_TRIANG_Handle               sdeTriangHdl;
 
     /** Number of graph params */
     uint8_t                                numGraphParams;
@@ -416,13 +412,13 @@ struct SDEAPP_Context
     std::thread                            evtHdlrThread;
 
     /** Semaphore to synchronize the output and display threads. */
-    UTILS::Semaphore                     * outputCtrlSem;
+    Semaphore                     * outputCtrlSem;
 
     /** For graph profiling: graph start time */
-    chrono::time_point<chrono::system_clock> profileStart;
+    TimePoint profileStart;
 
     /** For OpenVX graph profiling: graph end time */
-    chrono::time_point<chrono::system_clock> profileEnd;
+    TimePoint profileEnd;
 
     /** Flag to indicate if the graph should be exported
      * 0 - disable
@@ -715,7 +711,7 @@ vx_status SDEAPP_process(SDEAPP_Context * appCntxt, SDEAPP_graphParams * gpDesc)
 
 /**
  * \brief Function to process the events programmed to be handled by the
- *        APPLIB. Currently only VX_EVENT_GRAPH_COMPLETED event is handled.
+ *        . Currently only VX_EVENT_GRAPH_COMPLETED event is handled.
  *
  * \param [in] appCntxt APP context
  *

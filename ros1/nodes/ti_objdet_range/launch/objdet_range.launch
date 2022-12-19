@@ -2,8 +2,9 @@
 
     <arg name="zed_sn" default="SN5867575"/>
     <arg name="exportPerfStats" default="0"/>
+    <arg name="detVizThreshold" default="0.5"/>
 
-    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"/>
     <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
 
     <!-- ti_sde -->
@@ -37,6 +38,7 @@
         <param name="rectified_image_frame_id" value="right_frame"/>
         <param name="vision_cnn_tensor_topic"  value="vision_cnn/tensor"/>
         <param name="exportPerfStats"          value="$(arg exportPerfStats)"/>
+        <param name="detVizThreshold"          value="$(arg detVizThreshold)"/>
     </node>
 
     <!-- ti_objdet_range  -->

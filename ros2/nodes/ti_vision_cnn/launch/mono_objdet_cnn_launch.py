@@ -12,7 +12,7 @@ from launch.substitutions import LaunchConfiguration
 image_format = 2
 enable_ldc_node = 1
 lut_file_path = "/opt/robotics_sdk/ros1/drivers/mono_capture/config/C920_HD_LUT.bin"
-dl_model_path = "/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"
+dl_model_path = "/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"
 # dl_model_path = "/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"
 
 def get_launch_file(pkg, file_name):
@@ -30,6 +30,14 @@ def generate_launch_description():
         "exportPerfStats_str", default_value=[LaunchConfiguration('exportPerfStats')]
     )
 
+    detVizThreshold_arg = DeclareLaunchArgument(
+        "detVizThreshold", default_value=TextSubstitution(text="0.5")
+    )
+
+    detVizThreshold_str_arg = DeclareLaunchArgument(
+        "detVizThreshold_str", default_value=[LaunchConfiguration('detVizThreshold')]
+    )
+
     # ti_vision_cnn node
     params = [
         os.path.join(get_package_share_directory('ti_vision_cnn'), 'config', 'params.yaml'),
@@ -43,6 +51,7 @@ def generate_launch_description():
             "rectified_image_frame_id": "right_frame",
             "vision_cnn_tensor_topic":  "vision_cnn/tensor",
             "exportPerfStats":           LaunchConfiguration('exportPerfStats_str'),
+            "detVizThreshold":           LaunchConfiguration('detVizThreshold_str'),
         },
     ]
     cnn_node = Node(
@@ -65,6 +74,8 @@ def generate_launch_description():
 
     ld.add_action(exportPerfStats_arg)
     ld.add_action(exportPerfStats_str_arg)
+    ld.add_action(detVizThreshold_arg)
+    ld.add_action(detVizThreshold_str_arg)
     ld.add_action(cnn_node)
     ld.add_action(cam_launch)
 

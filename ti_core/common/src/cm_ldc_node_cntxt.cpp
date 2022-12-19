@@ -85,22 +85,22 @@ vx_status CM_ldcNodeCntxtInit(
 
     if (ldcObj == NULL)
     {
-        PTK_printf("Parameter 'ldcObj' NULL.");
+        LOG_ERROR("Parameter 'ldcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (createParams == NULL)
     {
-        PTK_printf("Parameter 'createParams' NULL.");
+        LOG_ERROR("Parameter 'createParams' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (ldcObj->state != CM_LDC_NODE_CNTXT_STATE_INVALID)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -116,7 +116,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (lut == NULL)
         {
-            PTK_printf("Failed to allocate LUT.");
+            LOG_ERROR("Failed to allocate LUT.");
             vxStatus = VX_FAILURE;
         }
         else
@@ -128,7 +128,7 @@ vx_status CM_ldcNodeCntxtInit(
 
             if (fp == NULL)
             {
-                PTK_printf("Failed to open LUT file [%s] for reading.",
+                LOG_ERROR("Failed to open LUT file [%s] for reading.",
                          createParams->lutFilePath);
                 vxStatus = VX_FAILURE;
             }
@@ -140,7 +140,7 @@ vx_status CM_ldcNodeCntxtInit(
 
                 if (size != lutSize)
                 {
-                    PTK_printf("Error reading LUT data. "
+                    LOG_ERROR("Error reading LUT data. "
                              "Expecting [%d] bytes but read [%d] bytes ",
                              lutSize, size);
                     vxStatus = VX_FAILURE;
@@ -161,7 +161,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (ldcObj->vxMeshImage == NULL)
         {
-            PTK_printf("vxCreateImage() failed");
+            LOG_ERROR("vxCreateImage() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -197,7 +197,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (VX_SUCCESS != vxStatus)
         {
-            PTK_printf("vxCopyImagePatch() failed");
+            LOG_ERROR("vxCopyImagePatch() failed");
         }
     }
 
@@ -216,7 +216,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (ldcObj->outImage == NULL)
         {
-            PTK_printf("vxCreateImage() failed");
+            LOG_ERROR("vxCreateImage() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -245,7 +245,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (ldcObj->vxParamConfig == NULL)
         {
-            PTK_printf("vxCreateUserDataObject() failed");
+            LOG_ERROR("vxCreateUserDataObject() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -274,7 +274,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (ldcObj->vxMeshConfig == NULL)
         {
-            PTK_printf("vxCreateUserDataObject() failed");
+            LOG_ERROR("vxCreateUserDataObject() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -303,7 +303,7 @@ vx_status CM_ldcNodeCntxtInit(
 
         if (ldcObj->vxRegionConfig == NULL)
         {
-            PTK_printf("vxCreateUserDataObject() failed");
+            LOG_ERROR("vxCreateUserDataObject() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -337,27 +337,27 @@ vx_status CM_ldcNodeCntxtSetup(
 
     if (ldcObj == NULL)
     {
-        PTK_printf("Parameter 'ldcObj' NULL.");
+        LOG_ERROR("Parameter 'ldcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (graph == NULL)
     {
-        PTK_printf("Parameter 'graph' NULL.");
+        LOG_ERROR("Parameter 'graph' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (inputImage == NULL)
     {
-        PTK_printf("Parameter 'inputImage' NULL.");
+        LOG_ERROR("Parameter 'inputImage' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (ldcObj->state != CM_LDC_NODE_CNTXT_STATE_INIT)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -376,7 +376,7 @@ vx_status CM_ldcNodeCntxtSetup(
 
         if (ldcObj->vxNode == NULL)
         {
-            PTK_printf("tivxVpacLdcNode() failed");
+            LOG_ERROR("tivxVpacLdcNode() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -389,7 +389,7 @@ vx_status CM_ldcNodeCntxtSetup(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxSetNodeTarget() failed");
+            LOG_ERROR("vxSetNodeTarget() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -414,17 +414,17 @@ vx_status CM_ldcNodeCntxtSaveOutImage(
 
     if (ldcObj == NULL)
     {
-        PTK_printf("Parameter 'ldcObj' NULL.");
+        LOG_ERROR("Parameter 'ldcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (fileName == NULL)
     {
-        PTK_printf("Parameter 'fileName' NULL.");
+        LOG_ERROR("Parameter 'fileName' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (ldcObj->outImage == NULL)
     {
-        PTK_printf("No valid Image handle to save.");
+        LOG_ERROR("No valid Image handle to save.");
         vxStatus = VX_FAILURE;
     }
 
@@ -434,7 +434,7 @@ vx_status CM_ldcNodeCntxtSaveOutImage(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("CM_saveImage() failed");
+            LOG_ERROR("CM_saveImage() failed");
 
         }
     }
@@ -449,14 +449,14 @@ vx_status CM_ldcNodeCntxtDeInit(
 
     if (ldcObj == NULL)
     {
-        PTK_printf("Parameter 'ldcObj' NULL.");
+        LOG_ERROR("Parameter 'ldcObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else
     {
         if (ldcObj->state == CM_LDC_NODE_CNTXT_STATE_INVALID)
         {
-            PTK_printf("Invalid state.");
+            LOG_ERROR("Invalid state.");
             vxStatus = VX_FAILURE;
         }
         else

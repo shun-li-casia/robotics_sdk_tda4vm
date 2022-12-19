@@ -120,8 +120,7 @@ vx_status CM_addParamByNodeIndex(vx_graph  graph,
 
     if (param == NULL)
     {
-        PTK_printf("[%s:%d] vxGetParameterByIndex() failed\n",
-                    __FUNCTION__, __LINE__);
+        LOG_ERROR("vxGetParameterByIndex() failed\n");
 
         vxStatus = VX_FAILURE;
     }
@@ -132,8 +131,7 @@ vx_status CM_addParamByNodeIndex(vx_graph  graph,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxAddParameterToGraph() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxAddParameterToGraph() failed\n");
         }
     }
 
@@ -143,8 +141,7 @@ vx_status CM_addParamByNodeIndex(vx_graph  graph,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxReleaseParameter() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxReleaseParameter() failed\n");
         }
     }
 
@@ -169,8 +166,7 @@ void * CM_getUserObjDataPayload(vx_user_data_object   obj)
 
     if ((vxStatus != (vx_status)VX_SUCCESS) || (data == NULL))
     {
-        PTK_printf("[%s:%d] vxMapUserDataObject() failed.\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("vxMapUserDataObject() failed.\n");
 
         return NULL;
     }
@@ -180,8 +176,7 @@ void * CM_getUserObjDataPayload(vx_user_data_object   obj)
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("[%s:%d] vxUnmapUserDataObject() failed.\n",
-                   __FUNCTION__, __LINE__);
+        LOG_ERROR("vxUnmapUserDataObject() failed.\n");
 
         return NULL;
     }
@@ -192,7 +187,7 @@ void * CM_getUserObjDataPayload(vx_user_data_object   obj)
 
 vx_status CM_loadImage(char *fname, vx_image image)
 {
-    vx_status  vxStatus = (vx_status)VX_SUCCESS;
+    vx_status  vxStatus = VX_SUCCESS;
 
     vx_rectangle_t             rect;
     vx_imagepatch_addressing_t image_addr;
@@ -205,37 +200,40 @@ vx_status CM_loadImage(char *fname, vx_image image)
     vx_int32                   data_read;
 
     FILE *fp= fopen(fname, "rb");
-    if(fp==NULL)
+
+    if (fp == NULL)
     {
-        PTK_printf("Unable to open input file [%s]\n",
-                    __FUNCTION__, __LINE__, fname);
-        return(VX_FAILURE);
+        LOG_ERROR("Unable to open input file [%s]\n", fname);
+
+        vxStatus = VX_FAILURE;
     }
 
-    vxQueryImage(image, VX_IMAGE_WIDTH, &img_width, sizeof(vx_uint32));
-    vxQueryImage(image, VX_IMAGE_HEIGHT, &img_height, sizeof(vx_uint32));
-    vxQueryImage(image, VX_IMAGE_FORMAT, &img_format, sizeof(vx_df_image));
-
-    rect.start_x = 0;
-    rect.start_y = 0;
-    rect.end_x = img_width;
-    rect.end_y = img_height;
-
-    // Copy Luma or Luma+Chroma
-    vxStatus = vxMapImagePatch(image,
-                               &rect,
-                               0,
-                               &map_id,
-                               &image_addr,
-                               &data_ptr,
-                               VX_WRITE_ONLY,
-                               VX_MEMORY_TYPE_HOST,
-                               VX_NOGAP_X);
-
-    if (vxStatus != (vx_status)VX_SUCCESS)
+    if (vxStatus == (vx_status)VX_SUCCESS)
     {
-        PTK_printf("vxMapImagePatch() failed\n",
-                    __FUNCTION__, __LINE__);
+        vxQueryImage(image, VX_IMAGE_WIDTH, &img_width, sizeof(vx_uint32));
+        vxQueryImage(image, VX_IMAGE_HEIGHT, &img_height, sizeof(vx_uint32));
+        vxQueryImage(image, VX_IMAGE_FORMAT, &img_format, sizeof(vx_df_image));
+
+        rect.start_x = 0;
+        rect.start_y = 0;
+        rect.end_x = img_width;
+        rect.end_y = img_height;
+
+        // Copy Luma or Luma+Chroma
+        vxStatus = vxMapImagePatch(image,
+                                   &rect,
+                                   0,
+                                   &map_id,
+                                   &image_addr,
+                                   &data_ptr,
+                                   VX_WRITE_ONLY,
+                                   VX_MEMORY_TYPE_HOST,
+                                   VX_NOGAP_X);
+
+        if (vxStatus != (vx_status)VX_SUCCESS)
+        {
+            LOG_ERROR("vxMapImagePatch() failed\n");
+        }
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -264,8 +262,7 @@ vx_status CM_loadImage(char *fname, vx_image image)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxMapImagePatch() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxMapImagePatch() failed\n");
         }
 
         if (vxStatus == (vx_status)VX_SUCCESS)
@@ -302,8 +299,7 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
     if (fp == NULL)
     {
-        PTK_printf("Unable to open input file [%s]\n",
-                    __FUNCTION__, __LINE__, fname);
+        LOG_ERROR("Unable to open input file [%s]\n", fname);
 
         vxStatus = VX_FAILURE;
     }
@@ -329,8 +325,7 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxMapImagePatch() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxMapImagePatch() failed\n");
         }
     }
 
@@ -341,8 +336,7 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
         if (num_bytes != (img_width*img_height))
         {
-            PTK_printf("Luma bytes read = %d, expected = %d\n",
-                        __FUNCTION__, __LINE__,
+            LOG_ERROR("Luma bytes read = %d, expected = %d\n",
                         num_bytes, img_width*img_height);
 
             vxStatus = VX_FAILURE;
@@ -369,8 +363,7 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxMapImagePatch() failed\n",
-                        __FUNCTION__, __LINE__);
+            LOG_ERROR("vxMapImagePatch() failed\n");
         }
     }
 
@@ -381,8 +374,8 @@ vx_status CM_saveImage(const char *fname, vx_image image)
 
         if (num_bytes != (img_width*img_height/2))
         {
-            PTK_printf("CbCr bytes read = %d, expected = %d",
-                      img_width*img_height/2);
+            LOG_ERROR("CbCr bytes read = %d, expected = %d",
+                      num_bytes, img_width*img_height/2);
 
             vxStatus = VX_FAILURE;
         }
@@ -435,7 +428,7 @@ vx_status CM_copyImage2Image(vx_image srcImage, vx_image dstImage)
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("vxMapImagePatch() failed.");
+        LOG_ERROR("vxMapImagePatch() failed.");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -462,7 +455,7 @@ vx_status CM_copyImage2Image(vx_image srcImage, vx_image dstImage)
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("vxMapImagePatch() failed.");
+                LOG_ERROR("vxMapImagePatch() failed.");
             }
         }
 
@@ -515,7 +508,7 @@ vx_status CM_copyData2Image(const uint8_t * data_ptr_src,
 
     if (vxStatus != (vx_status)VX_SUCCESS)
     {
-        PTK_printf("vxMapImagePatch() failed.");
+        LOG_ERROR("vxMapImagePatch() failed.");
     }
 
     if (vxStatus == (vx_status)VX_SUCCESS)
@@ -558,7 +551,7 @@ vx_status CM_copyData2Image(const uint8_t * data_ptr_src,
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("vxMapImagePatch() failed.");
+                LOG_ERROR("vxMapImagePatch() failed.");
             }
             else
             {
@@ -606,27 +599,27 @@ vx_status CM_convertYUV2RGB(uint8_t        *rgbImage,
 
     if (rgbImage == NULL)
     {
-        PTK_printf("Parameter 'rgbImage' is NULL.");
+        LOG_ERROR("Parameter 'rgbImage' is NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (yuvImage[0] == NULL)
     {
-        PTK_printf("Parameter 'yuvImage[0]' is NULL.");
+        LOG_ERROR("Parameter 'yuvImage[0]' is NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (yuvImage[1] == NULL)
     {
-        PTK_printf("Parameter 'yuvImage[1]' is NULL.");
+        LOG_ERROR("Parameter 'yuvImage[1]' is NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (width == 0)
     {
-        PTK_printf("Parameter 'width' cannot be 0.");
+        LOG_ERROR("Parameter 'width' cannot be 0.");
         vxStatus = VX_FAILURE;
     }
     else if (height == 0)
     {
-        PTK_printf("Parameter 'height' cannot be 0.");
+        LOG_ERROR("Parameter 'height' cannot be 0.");
         vxStatus = VX_FAILURE;
     }
 
@@ -683,12 +676,12 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
 
     if (outImageData == NULL)
     {
-        PTK_printf("Parameter 'outImageData' is NULL.");
+        LOG_ERROR("Parameter 'outImageData' is NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (yuvImage == NULL)
     {
-        PTK_printf("Parameter 'yuvImage' is NULL.");
+        LOG_ERROR("Parameter 'yuvImage' is NULL.");
         vxStatus = VX_FAILURE;
     }
 
@@ -703,7 +696,7 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
             (img_format != VX_DF_IMAGE_S16)  &&
             (img_format != VX_DF_IMAGE_RGB)) 
         {
-            PTK_printf("Image format is NOT supported.");
+            LOG_ERROR("Image format is NOT supported.");
             vxStatus = VX_FAILURE;
         }
     }
@@ -733,7 +726,7 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("vxMapImagePatch() failed.");
+                LOG_ERROR("vxMapImagePatch() failed.");
                 break;
             }
 
@@ -780,7 +773,7 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
 
             if (vxStatus != (vx_status)VX_SUCCESS)
             {
-                PTK_printf("CM_convertYUV2RGB() failed.");
+                LOG_ERROR("CM_convertYUV2RGB() failed.");
                 vxStatus = VX_FAILURE;
             }
         }
@@ -807,7 +800,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
 
     if (num_dims > CM_MAX_TENSOR_DIMS)
     {
-        PTK_printf("Invalid number of dims read [%d].", num_dims);
+        LOG_ERROR("Invalid number of dims read [%ld].", num_dims);
         vxStatus = VX_FAILURE;
     }
     else
@@ -819,7 +812,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("tivxMapTensorPatch() failed.");
+            LOG_ERROR("tivxMapTensorPatch() failed.");
         }
     }
 
@@ -830,7 +823,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("tivxUnmapTensorPatch() failed.");
+            LOG_ERROR("tivxUnmapTensorPatch() failed.");
         }
     }
 
@@ -853,7 +846,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
 
     if (outPcData == NULL)
     {
-        PTK_printf("Parameter 'outPcData' is NULL.");
+        LOG_ERROR("Parameter 'outPcData' is NULL.");
         vxStatus = VX_FAILURE;
     }
 
@@ -871,8 +864,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
 
         if ((vxStatus != (vx_status)VX_SUCCESS) || (pc == NULL))
         {
-            PTK_printf("[%s:%d] vxMapUserDataObject() failed.\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxMapUserDataObject() failed.\n");
 
             vxStatus = VX_FAILURE;
         }
@@ -885,8 +877,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("[%s:%d] vxUnmapUserDataObject() failed.\n",
-                       __FUNCTION__, __LINE__);
+            LOG_ERROR("vxUnmapUserDataObject() failed.\n");
         }
     }
 
@@ -938,16 +929,16 @@ vx_int32 CM_fill1DTensor(vx_tensor in_tensor, const vx_char* in_file)
     start[2]         = 0;
 
     vx_int32 tensor_size=1;
-    for(int32_t i=0; i <  num_dims; i++){
+    for (int32_t i=0; i <  num_dims; i++){
         tensor_size *= size[i];
     }
 
-    if((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
+    if ((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
     {
         tensor_size *= sizeof(vx_int32);
     }
 
-    if((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
+    if ((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
     {
         tensor_size *= sizeof(vx_int16);
     }
@@ -959,9 +950,9 @@ vx_int32 CM_fill1DTensor(vx_tensor in_tensor, const vx_char* in_file)
     if (status == VX_SUCCESS)
     {
         fp = fopen(in_file,"rb");
-        if(fp == NULL)
+        if (fp == NULL)
         {
-            printf("input binary file %s could not be opened \n", in_file);
+            LOG_ERROR("input binary file %s could not be opened \n", in_file);
         }
         else
         {
@@ -969,9 +960,9 @@ vx_int32 CM_fill1DTensor(vx_tensor in_tensor, const vx_char* in_file)
             size[0] = ftell(fp);
             fseek(fp,0L,SEEK_SET);
 
-            if(size[0] != tensor_size)
+            if (size[0] != tensor_size)
             {
-                printf("Size of the tensor is lesser than binary file size\n");
+                LOG_ERROR("Size of the tensor is lesser than binary file size\n");
             }
             else
             {
@@ -1013,17 +1004,17 @@ vx_int32 CM_fill1DTensorFrom2Bin(vx_tensor in_tensor, const vx_char* in_file1, c
 
     vx_int32 tensor_size=1;
 
-    for(int32_t i=0; i <  num_dims; i++)
+    for (int32_t i=0; i <  num_dims; i++)
     {
         tensor_size *= size[i];
     }
 
-    if((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
+    if ((data_type == VX_TYPE_FLOAT32) || (data_type == VX_TYPE_UINT32) || ((data_type == VX_TYPE_INT32)))
     {
         tensor_size *= sizeof(vx_int32);
     }
 
-    if((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
+    if ((data_type == VX_TYPE_UINT16) || ((data_type == VX_TYPE_INT16)))
     {
         tensor_size *= sizeof(vx_int16);
     }
@@ -1037,18 +1028,18 @@ vx_int32 CM_fill1DTensorFrom2Bin(vx_tensor in_tensor, const vx_char* in_file1, c
         fp1 = fopen(in_file1,"rb");
         fp2 = fopen(in_file2,"rb");
 
-        if((fp1 == NULL) && (fp2 == NULL))
+        if ((fp1 == NULL) && (fp2 == NULL))
         {
-            printf("input binary file %s and %s could not be opened \n", in_file1, in_file2);
+            LOG_ERROR("input binary file %s and %s could not be opened \n", in_file1, in_file2);
         }
         else if ((fp1 != NULL) && (fp2 == NULL))
         {
-            printf("input binary file %s could not be opened \n", in_file1);
+            LOG_ERROR("input binary file %s could not be opened \n", in_file1);
             fclose(fp1);
         }
         else if ((fp1 == NULL) && (fp2 != NULL))
         {
-            printf("input binary file %s could not be opened \n", in_file2);
+            LOG_ERROR("input binary file %s could not be opened \n", in_file2);
             fclose(fp2);
         }
         else
@@ -1061,9 +1052,9 @@ vx_int32 CM_fill1DTensorFrom2Bin(vx_tensor in_tensor, const vx_char* in_file1, c
             size[1] = ftell(fp2);
             fseek(fp2,0L,SEEK_SET);
 
-            if((size[0] + size[1])  != tensor_size)
+            if ((size[0] + size[1])  != tensor_size)
             {
-                printf("Size of the tensor is lesser than binary file size\n");
+                LOG_ERROR("Size of the tensor is lesser than binary file size\n");
             }
             else
             {

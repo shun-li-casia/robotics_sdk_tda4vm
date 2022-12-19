@@ -129,7 +129,7 @@ For details regarding time synchronization of frames from multiple mmWave device
     ```
     cd $ROS_WS
     # ROS1
-    catkin_make --source /opt/robotics_sdk/ros1
+    catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     source devel/setup.bash
     ```
 

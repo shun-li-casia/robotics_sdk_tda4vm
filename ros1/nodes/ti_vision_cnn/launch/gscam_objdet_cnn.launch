@@ -5,10 +5,11 @@
     <arg name="image_format" default="1"/>
     <arg name="enable_ldc_node" default="1"/>
     <arg name="lut_file_path" default="$(find mono_capture)/config/C920_HD_LUT.bin" />
-    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8080-yolov3-lite-regNetX-1.6gf-bgr-mmdet-coco-512x512"/>
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"/>
     <!-- <arg name="dl_model_path" default="/opt/model_zoo/TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320"/> -->
-    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8220-yolox-s-lite-mmdet-coco-640x640"/> -->
+    <!-- <arg name="dl_model_path" default="/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"/> -->
     <arg name="exportPerfStats" default="0"/>
+    <arg name="detVizThreshold" default="0.5"/>
     <!-- video device ID used in /dev/videoX -->
     <arg name="video_id" default="2"/>
     <!-- camera name-->
@@ -29,6 +30,7 @@
         <param name = "rectified_image_frame_id" value = "right_frame"/>
         <param name = "vision_cnn_tensor_topic" value = "vision_cnn/tensor"/>
         <param name = "exportPerfStats" value = "$(arg exportPerfStats)"/>
+        <param name = "detVizThreshold" value="$(arg detVizThreshold)"/>
     </node>
 
     <!-- gscam -->

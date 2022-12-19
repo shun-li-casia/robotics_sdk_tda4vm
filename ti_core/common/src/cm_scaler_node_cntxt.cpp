@@ -94,7 +94,7 @@ static void CM_setCoeff(
     if (VX_INTERPOLATION_BILINEAR == interpolation)
     {
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             weight = i<<2;
             coeff->multi_phase[0][idx++] = 0;
@@ -104,7 +104,7 @@ static void CM_setCoeff(
             coeff->multi_phase[0][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             weight = (i+32)<<2;
             coeff->multi_phase[1][idx++] = 0;
@@ -114,7 +114,7 @@ static void CM_setCoeff(
             coeff->multi_phase[1][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             weight = i<<2;
             coeff->multi_phase[2][idx++] = 0;
@@ -124,7 +124,7 @@ static void CM_setCoeff(
             coeff->multi_phase[2][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             weight = (i+32)<<2;
             coeff->multi_phase[3][idx++] = 0;
@@ -137,7 +137,7 @@ static void CM_setCoeff(
     else /* STR_VX_INTERPOLATION_NEAREST_NEIGHBOR */
     {
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             coeff->multi_phase[0][idx++] = 0;
             coeff->multi_phase[0][idx++] = 0;
@@ -146,7 +146,7 @@ static void CM_setCoeff(
             coeff->multi_phase[0][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             coeff->multi_phase[1][idx++] = 0;
             coeff->multi_phase[1][idx++] = 0;
@@ -155,7 +155,7 @@ static void CM_setCoeff(
             coeff->multi_phase[1][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             coeff->multi_phase[2][idx++] = 0;
             coeff->multi_phase[2][idx++] = 0;
@@ -164,7 +164,7 @@ static void CM_setCoeff(
             coeff->multi_phase[2][idx++] = 0;
         }
         idx = 0;
-        for(i=0; i<32; i++)
+        for (i=0; i<32; i++)
         {
             coeff->multi_phase[3][idx++] = 0;
             coeff->multi_phase[3][idx++] = 0;
@@ -187,22 +187,22 @@ vx_status CM_scalerNodeCntxtInit(
 
     if (scalerObj == NULL)
     {
-        PTK_printf("Parameter 'scalerObj' NULL.");
+        LOG_ERROR("Parameter 'scalerObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (createParams == NULL)
     {
-        PTK_printf("Parameter 'createParams' NULL.");
+        LOG_ERROR("Parameter 'createParams' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (scalerObj->state != CM_SCALER_NODE_CNTXT_STATE_INVALID)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -216,7 +216,7 @@ vx_status CM_scalerNodeCntxtInit(
 
         if (scalerObj->outImage == NULL)
         {
-            PTK_printf("Failed to allocate output image array");
+            LOG_ERROR("Failed to allocate output image array");
             vxStatus = VX_FAILURE;
         }
     }
@@ -232,7 +232,7 @@ vx_status CM_scalerNodeCntxtInit(
 
             if (scalerObj->outImage[i] == NULL)
             {
-                PTK_printf("vxCreateImage() failed");
+                LOG_ERROR("vxCreateImage() failed");
                 vxStatus = VX_FAILURE;
             }
             else
@@ -261,7 +261,7 @@ vx_status CM_scalerNodeCntxtInit(
 
         if (scalerObj->vxCoeff == NULL)
         {
-            PTK_printf("vxCreateUserDataObject() failed");
+            LOG_ERROR("vxCreateUserDataObject() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -293,27 +293,27 @@ vx_status CM_scalerNodeCntxtSetup(
 
     if (scalerObj == NULL)
     {
-        PTK_printf("Parameter 'scalerObj' NULL.");
+        LOG_ERROR("Parameter 'scalerObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (context == NULL)
     {
-        PTK_printf("Parameter 'context' NULL.");
+        LOG_ERROR("Parameter 'context' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (graph == NULL)
     {
-        PTK_printf("Parameter 'graph' NULL.");
+        LOG_ERROR("Parameter 'graph' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (inputImage == NULL)
     {
-        PTK_printf("Parameter 'inputImage' NULL.");
+        LOG_ERROR("Parameter 'inputImage' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (scalerObj->state != CM_SCALER_NODE_CNTXT_STATE_INIT)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -330,7 +330,7 @@ vx_status CM_scalerNodeCntxtSetup(
 
         if (scalerObj->vxNode == NULL)
         {
-            PTK_printf("tivxVpacMscScaleNode() failed");
+            LOG_ERROR("tivxVpacMscScaleNode() failed");
             vxStatus = VX_FAILURE;
         }
     }
@@ -343,7 +343,7 @@ vx_status CM_scalerNodeCntxtSetup(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("vxSetNodeTarget() failed");
+            LOG_ERROR("vxSetNodeTarget() failed");
             vxStatus = VX_FAILURE;
         }
         else
@@ -369,12 +369,12 @@ vx_status CM_scalerNodeCntxtSetCoeff(
 
     if (scalerObj == NULL)
     {
-        PTK_printf("Parameter 'scalerObj' NULL.");
+        LOG_ERROR("Parameter 'scalerObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else if (scalerObj->state != CM_SCALER_NODE_CNTXT_STATE_SETUP)
     {
-        PTK_printf("Invalid state.");
+        LOG_ERROR("Invalid state.");
         vxStatus = VX_FAILURE;
     }
 
@@ -390,7 +390,7 @@ vx_status CM_scalerNodeCntxtSetCoeff(
 
         if (vxStatus != (vx_status)VX_SUCCESS)
         {
-            PTK_printf("tivxNodeSendCommand() failed");
+            LOG_ERROR("tivxNodeSendCommand() failed");
         }
     }
 
@@ -404,14 +404,14 @@ vx_status CM_scalerNodeCntxtDeInit(
 
     if (scalerObj == NULL)
     {
-        PTK_printf("Parameter 'scalerObj' NULL.");
+        LOG_ERROR("Parameter 'scalerObj' NULL.");
         vxStatus = VX_FAILURE;
     }
     else
     {
         if (scalerObj->state == CM_SCALER_NODE_CNTXT_STATE_INVALID)
         {
-            PTK_printf("Invalid state.");
+            LOG_ERROR("Invalid state.");
             vxStatus = VX_FAILURE;
         }
         else

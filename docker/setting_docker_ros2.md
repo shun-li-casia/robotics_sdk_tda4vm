@@ -49,7 +49,7 @@ In ROS 2 Docker container environment, ROS Foxy and necessary libraries and tool
 
 4. To build the ROS applications, inside the Docker container:
     ```
-    root@j7-docker:~/j7ros_home/ros_ws$ colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential
+    root@j7-docker:~/j7ros_home/ros_ws$ colcon build --base-paths /opt/robotics_sdk/ros2 --executor sequential --cmake-force-configure
     root@j7-docker:~/j7ros_home/ros_ws$ source install/setup.bash
     ```
 

@@ -85,7 +85,7 @@ static char menu[] = {
 
 void SDEAPP_setLDCCreateParams(SDEAPP_Context *appCntxt)
 {
-    SDELDCAPPLIB_createParams * createParams = &appCntxt->sdeLdcCreateParams;
+    SDELDC_createParams * createParams = &appCntxt->sdeLdcCreateParams;
 
     createParams->leftLutFileName  = appCntxt->left_LUT_file_name;
     createParams->rightLutFileName = appCntxt->right_LUT_file_name;
@@ -98,7 +98,7 @@ void SDEAPP_setLDCCreateParams(SDEAPP_Context *appCntxt)
 
 void SDEAPP_setSLSdeCreateParams(SDEAPP_Context *appCntxt)
 {
-    SL_SDEAPPLIB_createParams * createParams = &appCntxt->slSdeCreateParams;
+    SL_SDE_createParams * createParams = &appCntxt->slSdeCreateParams;
     createParams->sdeCfg = appCntxt->sde_params;
 
      if (appCntxt->sde_params.disparity_min == 0)
@@ -131,7 +131,7 @@ void SDEAPP_setSLSdeCreateParams(SDEAPP_Context *appCntxt)
 
 void SDEAPP_setMLSdeCreateParams(SDEAPP_Context *appCntxt)
 {
-    ML_SDEAPPLIB_createParams * createParams = &appCntxt->mlSdeCreateParams;
+    ML_SDE_createParams * createParams = &appCntxt->mlSdeCreateParams;
     createParams->sdeCfg = appCntxt->sde_params;
 
     if (appCntxt->sde_params.disparity_min == 0)
@@ -167,7 +167,7 @@ void SDEAPP_setMLSdeCreateParams(SDEAPP_Context *appCntxt)
 
 void SDEAPP_setSdeTriangCreateParams(SDEAPP_Context *appCntxt)
 {
-    SDE_TRIANG_APPLIB_createParams * createParams = &appCntxt->sdeTriangCreateParams;
+    SDE_TRIANG_createParams * createParams = &appCntxt->sdeTriangCreateParams;
 
     createParams->width                      = appCntxt->width;
     createParams->height                     = appCntxt->height;
@@ -278,7 +278,8 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
             vxStatus = VX_FAILURE;
         } else
         {
-            vxSetReferenceName((vx_reference)appCntxt->vxGraph, "SDE Graph");
+            vxSetReferenceName((vx_reference)appCntxt->vxGraph,
+                               "SDE Graph");
         }
     }
 
@@ -349,7 +350,7 @@ vx_status SDEAPP_init(SDEAPP_Context *appCntxt)
         // init sacler for ML SDE
         if (appCntxt->sdeAlgoType == 1)
         {
-            ML_SDEAPPLIB_initScaler(appCntxt->mlSdeHdl);
+            ML_SDE_initScaler(appCntxt->mlSdeHdl);
         }
 
         if (appCntxt->exportGraph == 1)
@@ -602,8 +603,8 @@ static void SDEAPP_dumpStats(SDEAPP_Context *appCntxt)
         }
         else
         {
-            PTK_printf("Could not open [%s] for exporting "
-                       "performance data\n", name);
+            LOG_ERROR("Could not open [%s] for exporting "
+                       "performance data\n", name.c_str());
         }
     }
 }
@@ -620,11 +621,11 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
     /* Wait for the threads to exit. */
     SDEAPP_exitProcThreads(appCntxt);
 
-    PTK_printf("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
+    LOG_INFO("========= BEGIN:PERFORMANCE STATS SUMMARY =========\n");
     SDEAPP_dumpStats(appCntxt);
     SDEAPP_printStats(appCntxt);
 
-    PTK_printf("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
+    LOG_INFO("========= END:PERFORMANCE STATS SUMMARY ===========\n\n");
 
     if (appCntxt->rtLogEnable == 1)
     {
@@ -633,23 +634,23 @@ void SDEAPP_cleanupHdlr(SDEAPP_Context *appCntxt)
     }
 
     /* Release the Application context. */
-    SDELDCAPPLIB_delete(&appCntxt->sdeLdcHdl);
+    SDELDC_delete(&appCntxt->sdeLdcHdl);
 
     if (appCntxt->sdeAlgoType == 0)
     {
-        SL_SDEAPPLIB_delete(&appCntxt->slSdeHdl);
+        SL_SDE_delete(&appCntxt->slSdeHdl);
     }
     else if (appCntxt->sdeAlgoType == 1)
     {
-        ML_SDEAPPLIB_delete(&appCntxt->mlSdeHdl);
+        ML_SDE_delete(&appCntxt->mlSdeHdl);
     }
 
-    SDE_TRIANG_APPLIB_delete(&appCntxt->sdeTriangHdl);
+    SDE_TRIANG_delete(&appCntxt->sdeTriangHdl);
 
 
     SDEAPP_deInit(appCntxt);
 
-    PTK_printf("[%s] Clean-up complete.\n", __FUNCTION__);
+    LOG_INFO("Clean-up complete.\n");
 }
 
 void SDEAPP_reset(SDEAPP_Context * appCntxt)
@@ -663,7 +664,7 @@ static void SDEAPP_evtHdlrThread(SDEAPP_Context *appCntxt)
     vx_event_t evt;
     vx_status vxStatus = VX_SUCCESS;
 
-    PTK_printf("[%s] Launched.\n", __FUNCTION__);
+    LOG_INFO("Launched.\n");
 
     /* Clear any pending events. The third argument is do_not_block = true. */
     while (vxStatus == VX_SUCCESS)
@@ -714,9 +715,9 @@ static int32_t SDEAPP_userControlThread(SDEAPP_Context *appCntxt)
         {
             char ch;
 
-            PTK_printf(menu);
+            LOG_INFO_RAW("%s", menu);
             ch = getchar();
-            PTK_printf("\n");
+            LOG_INFO_RAW("\n");
 
             switch (ch)
             {
@@ -744,8 +745,7 @@ static int32_t SDEAPP_userControlThread(SDEAPP_Context *appCntxt)
         } // while (!done)
 
         appCntxt->state = SDEAPP_STATE_SHUTDOWN;
-        PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
-                    __FUNCTION__, __LINE__);
+        LOG_INFO("Waiting for the graph to finish.\n");
 
         vxStatus = SDEAPP_waitGraph(appCntxt);
 
@@ -756,7 +756,7 @@ static int32_t SDEAPP_userControlThread(SDEAPP_Context *appCntxt)
 
         SDEAPP_cleanupHdlr(appCntxt);
 
-        PTK_printf("\nDEMO FINISHED!\n");
+        LOG_INFO("\nDEMO FINISHED!\n");
     } // if (appCntxt->is_interactive)
 
     return vxStatus;
@@ -794,8 +794,7 @@ void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
         vx_status   vxStatus = VX_SUCCESS;
 
         appCntxt->state = SDEAPP_STATE_SHUTDOWN;
-        PTK_printf("[%s:%d] Waiting for the graph to finish.\n",
-                    __FUNCTION__, __LINE__);
+        LOG_INFO("Waiting for the graph to finish.\n");
 
         vxStatus = SDEAPP_waitGraph(appCntxt);
 
@@ -805,6 +804,6 @@ void SDEAPP_intSigHandler(SDEAPP_Context *appCntxt)
         }
 
         SDEAPP_cleanupHdlr(appCntxt);
-        PTK_printf("\nDEMO FINISHED!\n");
+        LOG_INFO("\nDEMO FINISHED!\n");
     }
 }
