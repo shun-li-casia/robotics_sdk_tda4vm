@@ -5,7 +5,7 @@ Robotics SDK
 
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
 
-[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_04_00/docs/index.html)
+[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_05_00/docs/index.html)
 
 ## Overview
 
@@ -46,7 +46,7 @@ Figure 2 shows a representative deep-learning and compute-intensive demo applica
 
 This section describes how to set up the Robotics SDK on top of the Processor SDK Linux for Edge AI. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
-**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_04_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
+**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_05_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
 
 ## Sensor Driver Nodes
 
@@ -90,7 +90,7 @@ The SDK supports following out-of-box demo applications.
 
 ## Scope of Robotics SDK
 
-![](docs/scope_of_release_08_04_00.png)
+![](docs/scope_of_release_08_05_00.png)
 
 ## Limitations and Known Issues
 See [known_issues.md](docs/known_issues.md)

@@ -1,12 +1,13 @@
 Change Log
 ==========
 
-## 8.5.0 (2022-12-19)
+## 8.5.0 (2022-12-22)
 
 * Relocated the stereo-processing openVX sub-graphs from the processor SDK vision_apps component into the Robotics SDK.
 * Added a new parameter for controlling the number of bounding boxes overlaid, for vision_cnn object detection ROS node.
 * Updated Open-source runtime libraries (ONNX, TFLite, TVM-DLR) pre-built for the Ubuntu 20.04 Docker container.
 * The default 2D object detection model has been changed to ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512.
+* Added the documents on how to run RealSense camera and AprilTag ROS package.
 
 ## 8.4.0 (2022-09-19)
 
