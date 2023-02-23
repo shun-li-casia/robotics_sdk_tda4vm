@@ -11,7 +11,7 @@ if [[ "$ARCH" == "aarch64" ]]; then
         ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432
     )
     for Model in ${Models[@]}; do
-        bash /opt/edge_ai_apps/download_models.sh -d $Model
+        bash /opt/edgeai-gst-apps/download_models.sh -d $Model
     done
 fi
 cd $CURRENT_DIR

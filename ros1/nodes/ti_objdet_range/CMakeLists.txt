@@ -10,8 +10,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 # find_package(Eigen REQUIRED)
 # include_directories(${EIGEN3_INCLUDE_DIR})
 
-if(${BUILD_CORE_NODES})
-
+if(${BUILD_CORE_NODES} AND ${SDE_AVAILABLE})
     # objdet_range ROS node
     set(OBJDET_RANGE_SRCS src/objdet_disparity_fusion.cpp)
     build_node(objdet_disparity_fusion OBJDET_RANGE_SRCS)

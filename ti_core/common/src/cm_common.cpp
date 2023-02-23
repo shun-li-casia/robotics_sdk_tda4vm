@@ -100,10 +100,12 @@ const char *CM_getCoreName(const char *appCoreName)
     {
         return TIVX_TARGET_IPU1_0;
     }
+#if !defined (SOC_AM62A)
     else if (!strcmp(appCoreName, "TIVX_TARGET_IPU1_1"))
     {
         return TIVX_TARGET_IPU1_1;
     }
+#endif //!defined (SOC_AM62A)
 
     return NULL;
 }

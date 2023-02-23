@@ -1,5 +1,6 @@
 <launch>
 
+    <arg name="video_id" default="2"/>
     <arg name="zed_sn" default="SN18059"/>
 	<arg name="exportPerfStats" default="0"/>
 
@@ -15,7 +16,7 @@
 		<param name="frame_rate"              value="15"/>
 		<param name="frame_id_left"           value="left_frame"/>
 		<param name="frame_id_right"          value="right_frame"/>
-		<param name="device_name"             value="/dev/video2"/>
+		<param name="device_name"             value="/dev/video$(arg video_id)"/>
 		<param name="encoding"                value="yuv422"/>
 		<param name="image_topic_left"        value="camera/left/image_raw" />
 		<param name="image_topic_right"       value="camera/right/image_raw" />

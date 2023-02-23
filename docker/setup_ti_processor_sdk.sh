@@ -31,18 +31,18 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # build & install perf_stats (one-time)
-perf_stats_path=/opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats
+perf_stats_path=/opt/edgeai-gst-apps/scripts/perf_stats/bin/Release/perf_stats
 
 # disable Neo-DLR phone-home feature
 echo '{"enable_phone_home": false}' > /usr/local/lib/python3.8/dist-packages/dlr/counter/ccm_config.json
 
 if [ -f "$perf_stats_path" ]; then
-    ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
+    ln -snf /opt/edgeai-gst-apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 else
     CWD=`pwd`
-    cd /opt/edge_ai_apps/scripts/perf_stats
+    cd /opt/edgeai-gst-apps/scripts/perf_stats
     rm -rf build && mkdir build && cd build && cmake .. && make && cd $CWD
-    ln -snf /opt/edge_ai_apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
+    ln -snf /opt/edgeai-gst-apps/scripts/perf_stats/bin/Release/perf_stats /usr/local/bin/perf_stats
 fi
 
 if [ "$UBUNTU_VER" == "20.04" ]; then

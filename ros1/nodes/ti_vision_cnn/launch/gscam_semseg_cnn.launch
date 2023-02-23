@@ -1,5 +1,7 @@
 <launch>
 
+    <!-- video device ID used in /dev/videoX -->
+    <arg name="video_id" default="2"/>
     <arg name="width" default="1280"/>
     <arg name="height" default="720"/>
     <arg name="image_format" default="1"/>
@@ -25,6 +27,8 @@
     </node>
 
     <!-- gscam -->
-    <include file="$(find gscam)/launch/v4l_mjpg.launch"/>
+    <include file="$(find gscam)/launch/v4l_mjpg.launch">
+        <arg name="device" value="/dev/video$(arg video_id)"/>
+    </include>
 
 </launch>

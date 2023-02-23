@@ -14,7 +14,7 @@ get_filename_component(TI_ROS_ROOT_DIR "${SELF_DIR}/.." ABSOLUTE)
 
 # From the self path, derive and set the ti_core directory
 get_filename_component(TI_CORE_ROOT_DIR   "${TI_ROS_ROOT_DIR}/ti_core" ABSOLUTE)
-get_filename_component(TI_EDGEAI_ROOT_DIR "/opt/edge_ai_apps/apps_cpp" ABSOLUTE)
+get_filename_component(TI_EDGEAI_ROOT_DIR "/opt/edgeai-gst-apps/apps_cpp" ABSOLUTE)
 get_filename_component(INSTALL_DIR        ${CMAKE_INSTALL_PREFIX}/.. ABSOLUTE)
 
 # PSDKRA base folder location
@@ -75,6 +75,8 @@ set(TENSORFLOW_INSTALL_DIR /usr/include/tensorflow)
 set(ONNXRT_INSTALL_DIR     /usr/include/onnxruntime)
 set(TFLITE_INSTALL_DIR     /usr/lib/tflite_2.8)
 
+set(TARGET_SOC_LOWER $ENV{SOC})
+
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     set(BUILD_CORE_NODES          OFF)
     set(BUILD_VISUALIZATION_NODES ON CACHE BOOL "Build Visualization nodes")
@@ -85,10 +87,39 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(BUILD_CORE_NODES          ON CACHE BOOL "Build core nodes")
     set(BUILD_VISUALIZATION_NODES OFF CACHE BOOL "Do not build Visualization nodes")
-    set(TARGET_PLATFORM           J7)
-    set(TARGET_CPU                A72)
     set(BUILD_EMULATION_MODE      no)
     set(TIVISION_APPS_TYPE        shared)
+
+    if ("${TARGET_SOC_LOWER}" STREQUAL "j721e")
+        set(TARGET_PLATFORM     J7)
+        set(TARGET_CPU          A72)
+        set(TARGET_OS           LINUX)
+        set(TARGET_SOC          J721E)
+    elseif ("${TARGET_SOC_LOWER}" STREQUAL "j721s2")
+        set(TARGET_PLATFORM     J7)
+        set(TARGET_CPU          A72)
+        set(TARGET_OS           LINUX)
+        set(TARGET_SOC          J721S2)
+    elseif ("${TARGET_SOC_LOWER}" STREQUAL "j784s4")
+        set(TARGET_PLATFORM     J7)
+        set(TARGET_CPU          A72)
+        set(TARGET_OS           LINUX)
+        set(TARGET_SOC          J784S4)
+    elseif ("${TARGET_SOC_LOWER}" STREQUAL "am62a")
+        set(TARGET_PLATFORM     SITARA)
+        set(TARGET_CPU          A53)
+        set(TARGET_OS           LINUX)
+        set(TARGET_SOC          AM62A)
+    elseif ("${TARGET_SOC_LOWER}" STREQUAL "am62")
+        set(TARGET_PLATFORM     SITARA)
+        set(TARGET_CPU          A53)
+        set(TARGET_OS           LINUX)
+        set(TARGET_SOC          AM62)
+    else()
+        message(FATAL_ERROR "SOC ${TARGET_SOC_LOWER} is not supported.")
+    endif()
+
+    message("SOC=${TARGET_SOC_LOWER}")
 else()
     message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
 endif()
@@ -158,7 +189,7 @@ add_definitions(
     -DTARGET_OS=${TARGET_OS}
     -DPROFILE=${PROFILE}
     -DBUILD_EMULATION_MODE=${BUILD_EMULATION_MODE}
-    -DSOC_J721E
+    -DSOC_${TARGET_SOC}
 )
 
 # TIOVX, VISION_APPS, PTK_DEMOS: include folders
@@ -229,8 +260,19 @@ set(TI_EXTERNAL_LIB_DIRS
     ${INSTALL_DIR}/ti_external/lib
    )
 
+set(TIADALG_AVAILABLE FALSE)
+set(SDE_AVAILABLE FALSE)
+
 # BUILD and LINK
-if (${TARGET_PLATFORM} STREQUAL J7)
+if (NOT ${TARGET_PLATFORM} STREQUAL PC)
+    if (${TARGET_PLATFORM} STREQUAL SITARA)
+        set(SDE_AVAILABLE FALSE)
+        set(TIADALG_AVAILABLE FALSE)
+    else()
+        set(SDE_AVAILABLE TRUE)
+        set(TIADALG_AVAILABLE TRUE)
+    endif()
+
     set(TARGET_LINK_DIRECTORIES
         ${TI_EXTERNAL_LIB_DIRS}
         /usr/local/dlr
@@ -247,11 +289,14 @@ if (${TARGET_PLATFORM} STREQUAL J7)
         )
 
     set(TARGET_LINK_LIBS
-        tivision_apps
         edgeai_dl_inferer
         edgeai_pre_process
         edgeai_post_process
         dlr)
+
+    if(NOT ${TARGET_SOC} STREQUAL "AM62")
+        set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} tivision_apps)
+    endif()
 
 endif()
 

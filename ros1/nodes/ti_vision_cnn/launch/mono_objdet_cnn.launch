@@ -1,5 +1,7 @@
 <launch>
 
+    <!-- video device ID used in /dev/videoX -->
+    <arg name="video_id" default="2"/>
     <arg name="width" default="1280"/>
     <arg name="height" default="720"/>
     <arg name="image_format" default="2"/>
@@ -29,6 +31,7 @@
 
     <!-- mono_capture -->
     <include file="$(find mono_capture)/launch/mono_capture.launch">
+        <arg name="video_id" value="$(arg video_id)"/>
         <arg name="topic_ns" value="camera"/>
     </include>
 

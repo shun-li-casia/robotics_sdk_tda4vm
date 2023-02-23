@@ -3,7 +3,7 @@ project(ti_estop)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/ros2_common.cmake)
 
-if(${BUILD_CORE_NODES})
+if(${BUILD_CORE_NODES} AND ${SDE_AVAILABLE})
     # AMR E-Stop example
     set(APP_ESTOP_SRCS
         src/estop_main.cpp

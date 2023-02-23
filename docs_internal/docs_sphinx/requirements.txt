@@ -1,0 +1,6 @@
+# particular versions below comes from Jesse's debugs in pask_rtos_auto (to enable search feature and etc)
+sphinx==3.4.3
+sphinx-rtd-theme
+recommonmark
+sphinx-markdown-tables
+docutils==0.16

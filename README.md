@@ -5,11 +5,11 @@ Robotics SDK
 
 [Robotics SDK Git Repository](https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/about/)
 
-[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_05_00/docs/index.html)
+[User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_06_00/docs/index.html)
 
 ## Overview
 
-The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.5.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM) (Version **08.05.00.XX**). We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
+The Jacinto Robotics SDK provides software development environment on the latest TDA4 class of SoCs, and also provides software building blocks and example demos that can be leveraged in robotics software development. The SDK runs in Docker container environments on [Processor SDK Linux for Edge AI 8.6.0](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM) (Version **08.06.00.XX**). We provide detailed steps for setting up Docker container environments for ROS Noetic and ROS 2 Foxy on the Processor SDK Linux for Edge AI (see next section). The Robotics SDK allows:
 
 * Optimized software implementation of computation-intensive software blocks (including deep-learning, vision, perception, mapping and localization) on deep-learning core (C7x/MMA), DSP cores, hardware accelerators built-in on the TDA4 processors.
 * Application software development on the target using APIs optimized on the TDA4 cores and hardware accelerators along with many open-source libraries and packages including, for example, OpenCV, Point-Cloud Library (PCL), and many more.
@@ -46,7 +46,7 @@ Figure 2 shows a representative deep-learning and compute-intensive demo applica
 
 This section describes how to set up the Robotics SDK on top of the Processor SDK Linux for Edge AI. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
-**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_05_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
+**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_06_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
 
 ## Sensor Driver Nodes
 
@@ -90,7 +90,7 @@ The SDK supports following out-of-box demo applications.
 
 ## Scope of Robotics SDK
 
-![](docs/scope_of_release_08_05_00.png)
+![](docs/scope_of_release_08_06_00.png)
 
 ## Limitations and Known Issues
 See [known_issues.md](docs/known_issues.md)

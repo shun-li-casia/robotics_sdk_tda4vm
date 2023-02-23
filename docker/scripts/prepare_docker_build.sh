@@ -46,7 +46,7 @@ fi
 
 # Temporary folder to keep the files to be added while building the docker image
 rm -rf $DST_DIR
-mkdir -p ${DST_DIR}
+mkdir -p ${DST_DIR}/proxy
 
 # Copy files to add
 ARCH=`arch`
@@ -63,14 +63,20 @@ fi
 cp -p ${SDK_DIR}/docker/setup_proxy.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/ros_setup.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/entrypoint_*.sh ${DST_DIR}
-cp -rp ${SDK_DIR}/docker/proxy ${DST_DIR}
+
+if [ -d "/opt/proxy" ]; then
+    cp -rp /opt/proxy/* ${DST_DIR}/proxy
+fi
+
+source ${SDK_DIR}/docker/scripts/detect_soc.sh
+
 if [[ "$ARCH" == "aarch64" ]]; then
     cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
-    cp -p /opt/edge_ai_apps/scripts/install_dl_inferer.sh ${DST_DIR}
-    cp -p /opt/edge_ai_apps/scripts/install_tiovx_modules.sh ${DST_DIR}
-    cp -p /opt/edge_ai_apps/scripts/install_gst_plugins.sh ${DST_DIR}
-    cp -p /opt/edge_ai_apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
-    cp -p /opt/edgeai-dl-inferer/scripts/install_dlpack.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_dl_inferer.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_modules.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_kernels.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_gst_plugins.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
 fi
 
 # Copy library files to the temporary folder

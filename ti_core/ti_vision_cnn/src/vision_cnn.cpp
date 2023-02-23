@@ -131,7 +131,7 @@ vx_status VISION_CNN_init(VISION_CNN_Context *appCntxt)
     if (vxStatus == (vx_status)VX_SUCCESS)
     {
         // Populate infConfig
-        status = appCntxt->dlInferConfig.getConfig(modelPath, true);
+        status = appCntxt->dlInferConfig.getConfig(modelPath, true, 0);
 
         //==> DEBUG
         //appCntxt->dlInferConfig.dumpInfo();

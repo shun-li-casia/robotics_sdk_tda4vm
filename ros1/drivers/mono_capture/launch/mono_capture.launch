@@ -8,8 +8,8 @@
 	<!-- string for camera model -->
 	<arg name="model_str"             default="C920"/>
 	<!-- to find your device name, use ls /dev/video* and look for the name begin with video -->
-	<!-- typically camera recoginized as "/dev/video2" on the target with Edge AI base image -->
-	<arg name="device_name"            default="/dev/video2"/>
+    <!-- video device ID used in /dev/videoX -->
+    <arg name="video_id" default="2"/>
 	<!-- camera_mode: 'FHD' - 1920x1080, 'HD' - 1280x720, 'VGA' - 640x480 -->
 	<arg name="camera_mode"            default="HD"/>
 	<!-- frame rate: check the valid frame rates for camera_mode selected -->
@@ -23,7 +23,7 @@
 		<param name="camera_mode"        value="$(arg camera_mode)"/>
 		<param name="frame_rate"         value="$(arg frame_rate)"/>
 		<param name="frame_id"           value="camera_frame"/>
-		<param name="device_name"        value="$(arg device_name)"/>
+		<param name="device_name"        value="/dev/video$(arg video_id)"/>
 		<param name="encoding"           value="$(arg encoding)"/>
 		<param name="image_topic"        value="$(arg topic_ns)/image_raw"/>
 		<param name="camera_info_topic"  value="$(arg topic_ns)/camera_info"/>

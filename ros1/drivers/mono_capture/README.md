@@ -67,7 +67,7 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
  Parameter    | Description                                                               | Value
 --------------|---------------------------------------------------------------------------|-------------------------
  model_str    | Camera model string                                                       | string
- device_name  | camera device name. Typically `/dev/video1` on the target with TI Edge AI | string
+ video_id     | camera device number. Specify X if the device shows up as `/dev/videoX` on the target with TI Edge AI | string
  camera_mode  | Camera mode                                                               | 'FHD' (1920x1080)
  _            | _                                                                         | 'HD' (1280x720)
  _            | _                                                                         | 'VGA' (640x480)

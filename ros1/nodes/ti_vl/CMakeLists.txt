@@ -3,7 +3,7 @@ project(ti_vl)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/ros1_common.cmake)
 
-if(${BUILD_CORE_NODES})
+if(${BUILD_CORE_NODES} AND ${TIADALG_AVAILABLE})
     find_package(Eigen3 3.1.0 REQUIRED)
 
     include_directories(${EIGEN3_INCLUDE_DIR})

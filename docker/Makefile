@@ -8,9 +8,9 @@ ROS_VER          ?= 1
 GPUS             ?= n
 
 # Robotics SDK version
-RSDK_VER          = 8.5
+RSDK_VER          = 8.6
 TIVA_LIB_VER     ?= ${RSDK_VER}.0
-RPMSG_LIB_VER    ?= 0.5.1
+RPMSG_LIB_VER    ?= 0.5.2
 
 # Set the operating variables based on the ROS version specified
 ROS_DISTRO        = foxy
@@ -73,7 +73,7 @@ ENV_FILE_PATH     = $(DOCKER_DIR)/$(ENV_FILE)
 ROSBAG_FILE       = ros-bag_2020_1109.tar.gz
 DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
 VISLOC_DATA_FILE  = visual-localization-data_2022_0908.tar.gz
-VISLOC_MODEL_FILE = visual-localization-model_8.5.tar.gz
+VISLOC_MODEL_FILE = visual-localization-model_8.6.tar.gz
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 
@@ -124,7 +124,7 @@ docker_build:
 	@echo "# modify the server and proxy URLs as requied"     >> $(TGT_NAME)
 	@echo "if [ \"\$${USE_PROXY}\" -ne \"0\" ]; then"         >> $(TGT_NAME)
 	@echo "    REPO_LOCATION=$(DOCKER_REPO_INTERNAL)"         >> $(TGT_NAME)
-	@echo "    HTTP_PROXY=http://webproxy.ext.ti.com:80"      >> $(TGT_NAME)
+	@echo "    HTTP_PROXY=${HTTP_PROXY}"                      >> $(TGT_NAME)
 	@echo "else"                                              >> $(TGT_NAME)
 	@echo "    REPO_LOCATION=$(REPO_LOC)"                     >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
@@ -133,6 +133,7 @@ docker_build:
 	@echo "DST_DIR=$(WORK_PATH_HOST)/docker_src"              >> $(TGT_NAME)
 	@echo "TIVA_LIB_VER=$(TIVA_LIB_VER)"                      >> $(TGT_NAME)
 	@echo "RPMSG_LIB_VER=$(RPMSG_LIB_VER)"                    >> $(TGT_NAME)
+	@echo "SOC_NAME=$(SOC)"                                   >> $(TGT_NAME)
 	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DST_DIR \$$TIVA_LIB_VER \$$RPMSG_LIB_VER" >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
@@ -143,6 +144,7 @@ docker_build:
 ifeq ($(PLATFORM), j7)
 	@echo "    --build-arg TIVA_LIB_VER=\$$TIVA_LIB_VER \\"   >> $(TGT_NAME)
 	@echo "    --build-arg RPMSG_LIB_VER=\$$RPMSG_LIB_VER \\" >> $(TGT_NAME)
+	@echo "    --build-arg SOC_NAME=\$$SOC \\"                >> $(TGT_NAME)
 endif
 	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./docker_src"  >> $(TGT_NAME)
 	@echo "rm -r \$$DST_DIR"	                              >> $(TGT_NAME)
@@ -176,7 +178,7 @@ ifeq ($(PLATFORM), j7)
 endif
 ifeq ($(PLATFORM), j7)
 	@echo "    -v $(WORK_PATH_HOST)/.ros:/root/.ros \\"       >> $(TGT_NAME)
-	@echo "    -v /opt/edge_ai_apps:/opt/edge_ai_apps \\"     >> $(TGT_NAME)
+	@echo "    -v /opt/edgeai-gst-apps:/opt/edgeai-gst-apps \\"     >> $(TGT_NAME)
 	@echo "    -v /opt/imaging:/opt/imaging \\"               >> $(TGT_NAME)
 	@echo "    -v /opt/model_zoo:/opt/model_zoo \\"           >> $(TGT_NAME)
 	@echo "    -v /usr/include/dlpack:/usr/include/dlpack \\" >> $(TGT_NAME)

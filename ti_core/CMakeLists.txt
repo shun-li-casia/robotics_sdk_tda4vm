@@ -10,18 +10,24 @@ if(${BUILD_CORE_NODES})
     set(COMMON_SRCS
         common/src/cm_common.cpp
         common/src/cm_ldc_node_cntxt.cpp
-        common/src/cm_pose_calc_node_cntxt.cpp
-        common/src/cm_pose_viz_node_cntxt.cpp
         common/src/cm_preproc_node_cntxt.cpp
         common/src/cm_profile.cpp
-        common/src/cm_remote_service.cpp
         common/src/cm_scaler_node_cntxt.cpp
         common/src/cm_pre_process_image.cpp
         common/src/cm_post_process_image.cpp
         common/src/cm_post_process_image_segmentation.cpp
         common/src/cm_post_process_image_object_detect.cpp
-        common/src/cm_displarity_utils.cpp
         )
+
+    if (NOT ${TARGET_PLATFORM} STREQUAL SITARA)
+        set(COMMON_SRCS
+            ${COMMON_SRCS}
+            common/src/cm_remote_service.cpp
+            common/src/cm_pose_calc_node_cntxt.cpp
+            common/src/cm_pose_viz_node_cntxt.cpp
+            common/src/cm_displarity_utils.cpp
+           )
+    endif()
 
     set(VISION_CNN_CORE_SRCS
         ti_vision_cnn/src/vision_cnn.cpp
@@ -39,7 +45,7 @@ if(${BUILD_CORE_NODES})
         ti_vl/src/visloc.cpp
         ti_vl/src/visloc_manage_graph.cpp)
 
-    set(SUBGRAPH_SRCS
+    set(SDE_SUBGRAPH_SRCS
         subgraphs/sde_ldc/src/sde_ldc.cpp
         subgraphs/sde_ldc/src/sde_ldc_module.cpp
         subgraphs/sde_singlelayer/src/sde_singlelayer.cpp
@@ -54,12 +60,18 @@ if(${BUILD_CORE_NODES})
     set(ALL_CORE_SRCS
         ${COMMON_SRCS}
         ${VISION_CNN_CORE_SRCS}
-        ${SDE_CORE_SRCS}
-        ${ESTOP_CORE_SRCS}
-        ${VL_CORE_SRCS}
-        ${SUBGRAPH_SRCS}
         ${EDGEAI_COMMON_SRC}
         )
+
+    if (NOT ${TARGET_PLATFORM} STREQUAL SITARA)
+        set(ALL_CORE_SRCS
+            ${ALL_CORE_SRCS}
+            ${SDE_CORE_SRCS}
+            ${SDE_SUBGRAPH_SRCS}
+            ${ESTOP_CORE_SRCS}
+            ${VL_CORE_SRCS}
+           )
+    endif()
 
     # Build library
     build_lib(${PROJECT_NAME} ALL_CORE_SRCS STATIC)
@@ -69,6 +81,7 @@ if(${BUILD_CORE_NODES})
 
     add_subdirectory(${TI_EDGEAI_ROOT_DIR}/utils ${TI_EDGEAI_BUILD_DIR}/utils)
     set_target_properties(edgeai_utils
-                          PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+                          PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
+                          ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 endif()

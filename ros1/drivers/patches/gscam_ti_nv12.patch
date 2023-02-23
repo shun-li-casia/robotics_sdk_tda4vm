@@ -120,7 +120,7 @@ index 0000000..ef5de60
 +
 +Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/getting_started.html).
 +
-+You can check the device ID and subdev ID for the IMX390 camera attached to the hardware setup by running `/opt/edge_ai_apps/scripts/setup_cameras.sh` on the TDA4 target host Linux. Accordingly please update the launch files below, or it's also possible to pass as launch arguments.
++You can check the device ID and subdev ID for the IMX390 camera attached to the hardware setup by running `/opt/edgeai-gst-apps/scripts/setup_cameras.sh` on the TDA4 target host Linux. Accordingly please update the launch files below, or it's also possible to pass as launch arguments.
 +
 +To publish raw images in the native resolution (1936 x 1096),
 +```
@@ -261,7 +261,7 @@ index 0000000..cd28c48
 +<launch>
 +
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
-+    by running /opt/edge_ai_apps/scripts/setup_cameras.sh on the target host Linux.
++    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh on the target host Linux.
 +    Accordingly please update the parameters or pass as arguments -->
 +    <arg name="device" default="/dev/video18"/>
 +    <arg name="subdev" default="/dev/v4l-subdev7"/>
@@ -320,7 +320,7 @@ index 0000000..973b4d0
 @@ -0,0 +1,46 @@
 +<launch>
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
-+    by running /opt/edge_ai_apps/scripts/setup_cameras.sh.
++    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh.
 +    Accordingly please update the parameters pass as arguments -->
 +    <arg name="device" default="/dev/video18"/>
 +    <arg name="subdev" default="/dev/v4l-subdev7"/>
@@ -405,7 +405,7 @@ index 0000000..4dfde20
 +++ b/launch/v4l_ov5640.launch
 @@ -0,0 +1,29 @@
 +<launch>
-+    <!-- Please make sure run "bash /opt/edge_ai_apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
++    <!-- Please make sure run "bash /opt/edgeai-gst-apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->

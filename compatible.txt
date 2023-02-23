@@ -1,0 +1,10 @@
+## vision_apps
+commit ce25fd1d4fae04aeb6f034ff11cd73e684b488fc (tag: REL.PSDK.JACINTO.08.00.00.12)
+Author: Jesse Villarreal <jesse.villarreal@ti.com>
+Date:   Thu Aug 12 23:26:12 2021 -0500
+
+## edgeai-gst-apps
+commit ae885b7c38294d0aaa5b16efa4b915d225fb7c88 (HEAD -> master, origin/master, origin/HEAD)
+Author: Vijay Pothukuchi <vijayp@ti.com>
+Date:   Wed Aug 18 09:15:21 2021 -0500
+

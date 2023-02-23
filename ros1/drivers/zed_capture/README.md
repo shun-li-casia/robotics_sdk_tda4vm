@@ -59,7 +59,7 @@ For the cases where ZED cameras need to be recalibrated, we provides the OpenCV 
  Parameter     | Description                                                               | Value
 ---------------|---------------------------------------------------------------------------|-------------------------
  zed_sn_str    | ZED camera serial number string                                           | string
- device_name   | camera device name. Typically `/dev/video2` on the target                 | string
+ video_id      | camera device number. Specify X if the device shows up as `/dev/videoX` on the target with TI Edge AI | string
  camera_mode   | ZED camera mode                                                           | '2K' (2208x1242)
  _             | _                                                                         | 'FHD' (1920x1080)
  _             | _                                                                         | 'FHD2' (1920x1024)

@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 8.6.0 (2023-02-29)
+* Added a new parameter for controlling the specification of the camera port.
+* Added support for AM68a and AM69a platforms.
+
 ## 8.5.0 (2022-12-22)
 
 * Relocated the stereo-processing openVX sub-graphs from the processor SDK vision_apps component into the Robotics SDK.
