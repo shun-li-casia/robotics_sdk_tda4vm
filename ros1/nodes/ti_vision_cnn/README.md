@@ -37,7 +37,9 @@ roslaunch ti_vision_cnn mono_semseg_cnn.launch
 roslaunch ti_vision_cnn gscam_semseg_cnn.launch
 ```
 
-For IMX390 camera as input, depending on choice of resolution, run one from the following:
+For IMX390 camera as input, depending on choice of resolution, run one from the following.
+
+**NOTE**: Before running, please refer to [gscam/README_TI.md](../../drivers/gscam/README_TI.md) for generating required LUT files for `tiovxldc`.
 ```
 roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch width:=1920 height:=1080
 roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch width:=1280 height:=720

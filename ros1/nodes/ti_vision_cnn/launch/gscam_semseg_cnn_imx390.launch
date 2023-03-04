@@ -2,6 +2,7 @@
 
     <arg name="width" default="1280"/>
     <arg name="height" default="720"/>
+    <arg name="framerate" default="15"/>
     <arg name="image_format" default="1"/>
     <arg name="enable_ldc_node" default="0"/>
     <arg name="lut_file_path" default="$(find mono_capture)/config/IMX390_HD_LUT.bin" />
@@ -10,6 +11,8 @@
     <arg name="exportPerfStats" default="0"/>
     <!-- video device ID used in /dev/videoX -->
     <arg name="video_id" default="18"/>
+    <!-- video subdeve ID used in/dev/v4l-subdevX -->
+    <arg name="subdev_id" default="7"/>
     <!-- camera name-->
     <arg name="camera_name" default="camera"/>
 
@@ -32,8 +35,10 @@
     <!-- gscam -->
     <include file="$(find gscam)/launch/v4l_imx390.launch">
         <arg name="device" value="/dev/video$(arg video_id)" />
+        <arg name="subdev" value="/dev/v4l-subdev$(arg subdev_id)" />
         <arg name="width" value="$(arg width)"/>
         <arg name="height" value="$(arg height)"/>
+        <arg name="framerate" value="$(arg framerate)"/>
         <arg name="node_name" value="gscam$(arg video_id)" />
         <arg name="camera_name" value="$(arg camera_name)" />
     </include>

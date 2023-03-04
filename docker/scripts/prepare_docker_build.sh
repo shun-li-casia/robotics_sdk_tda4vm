@@ -68,9 +68,8 @@ if [ -d "/opt/proxy" ]; then
     cp -rp /opt/proxy/* ${DST_DIR}/proxy
 fi
 
-source ${SDK_DIR}/docker/scripts/detect_soc.sh
-
 if [[ "$ARCH" == "aarch64" ]]; then
+    source ${SDK_DIR}/docker/scripts/detect_soc.sh
     cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_dl_inferer.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_modules.sh ${DST_DIR}

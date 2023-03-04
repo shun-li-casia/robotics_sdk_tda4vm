@@ -61,10 +61,10 @@ index 98166b7..70531c3 100644
 +endif()
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..ef5de60
+index 0000000..9df6cbe
 --- /dev/null
 +++ b/README_TI.md
-@@ -0,0 +1,84 @@
+@@ -0,0 +1,93 @@
 +GStreamer Camera Node for ROS 1
 +===============================
 +This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
@@ -87,7 +87,7 @@ index 0000000..ef5de60
 +2. Build the ROS node:
 +    ```
 +    cd $ROS_WS
-+    catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
++    catkin_make --source /opt/robotics_sdk/ros1
 +    source devel/setup.bash
 +    ```
 +
@@ -128,6 +128,15 @@ index 0000000..ef5de60
 +```
 +
 +We also provide a launch file that includes rectification and resizing in the GStreamer pipeline.
++
++**NOTE**: `v4l_imx390.launch` has `tiovxldc` in the GStreamer pipeline and
++`tiovxldc` requires `lut-file`. The LUT file is specific to the camera.
++As an example, we provide camera calibration data for a fisheye IMX390 camera
++is provided in the form of camera_info YAML file. To generate the LUT files,
++please run the following in the Robotics SDK Docker container on the TDA4 target:
++```
++$ bash /opt/robotics_sdk/tools/mono_camera/imx390_ldc.sh
++```
 +
 +```
 +# 1080p
@@ -254,11 +263,18 @@ index e4b4ee2..dc7e2ff 100644
      image_transport::CameraPublisher camera_pub_;
 diff --git a/launch/v4l_imx390.launch b/launch/v4l_imx390.launch
 new file mode 100644
-index 0000000..cd28c48
+index 0000000..4d13bc1
 --- /dev/null
 +++ b/launch/v4l_imx390.launch
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,61 @@
 +<launch>
++
++    <!-- NOTE: v4l_imx390.launch has tiovxldc in the GStreamer pipeline and
++    tiovxldc requires lut-file. The LUT file is specific to the camera.
++    As an example, we provide camera calibration data for a fisheye IMX390 camera
++    is provided in the form of camera_info YAML file. To generate the LUT files,
++    please run the following in the Robotics SDK Docker container on the TDA4 target:
++    $ bash /opt/robotics_sdk/tools/mono_camera/imx390_ldc.sh -->
 +
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
 +    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh on the target host Linux.
@@ -268,8 +284,8 @@ index 0000000..cd28c48
 +    <!-- output resolution: width and height -->
 +    <arg name="width" default="1280"/>
 +    <arg name="height" default="720"/>
-+    <!-- framerate (integer): inactive, 30 FPS (default, max) -->
-+    <!-- Can be enabled by e.g., adding videorate before tiovxdlcolorconvert, but it creases A72 loading -->
++    <!-- framerate (integer): 30 (default) FPS -->
++    <!-- If 30 FPS has issue, try a pipleline without videorate -->
 +    <arg name="framerate" default="30"/>
 +    <!-- node name -->
 +    <arg name="node_name" default="gscam_node"/>
@@ -282,26 +298,26 @@ index 0000000..cd28c48
 +    <!-- DCC 2A binary file -->
 +    <arg name="dcc_2a_file" default="/opt/imaging/imx390/dcc_2a.bin"/>
 +    <!-- LDC binary file -->
-+    <arg name="ldc_dcc_file" default="/opt/imaging/imx390/dcc_ldc.bin"/>
 +    <!-- camera_info URL: replace with camera_info from camera calibration -->
-+    <arg name="camera_info_url" default="package://gscam/config/IMX390_HD_camera_info.yaml"/>
++    <!-- package://ros_package_name/config/camera_info.yaml -->
++    <!-- file:///full/path/to/local/file.yaml -->
++    <!-- <arg name="camera_info_url" default="package://gscam/config/IMX390_HD_camera_info.yaml"/> -->
 +
 +    <!-- GStreamer pipeline specified in gscam_config was tested with IMX390 camera,
 +        'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are assumed to be already installed in TDA4 ROS container.
 +        Note: GStreamer pipeline also includes the LDC plugin. Raw resolution is 1936 x 1096,
-+        and the LDC plugin (tiovxldc) performs rectification and then cropping to output 1920 x 1080 in NV12.
-+        Followed by MSC plugin (tiovxmultiscaler) to resize to the output resolution.
++        and the LDC plugin (tiovxldc) performs rectification and resizing to have output resolution in NV12.
 +        Note: /dev/v4l-subdev ID can change, depending on the device attached, and at reboot. -->
 +    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
 +        <param name="gscam_config"
-+            value="v4l2src device=$(arg device) do-timestamp=true ! video/x-bayer, width=1936, height=1096, format=rggb12 !
++            value="v4l2src device=$(arg device) do-timestamp=true ! videorate ! video/x-bayer, framerate=$(arg framerate)/1, width=1936, height=1096, format=rggb12 !
 +            tiovxisp sink_0::device=$(arg subdev) sensor-name=$(arg sensor_name) dcc-isp-file=$(arg dcc_isp_file)
 +            sink_0::dcc-2a-file=$(arg dcc_2a_file) format-msb=11 ! video/x-raw, format=NV12 !
-+            tiovxldc dcc-file=$(arg ldc_dcc_file) sensor-name=$(arg sensor_name) ! video/x-raw, format=NV12, width=1920, height=1080 !
-+            tiovxmultiscaler ! video/x-raw, format=NV12, width=$(arg width), height=$(arg height) !
++            tiovxldc sensor-name=$(arg sensor_name) lut-file=/opt/imaging/imx390/imx390_35244_equidistant_$(arg width)x$(arg height)_LUT.bin ldc-ds-factor=2 ldc-table-width=$(arg width) ldc-table-height=$(arg height) out-block-height=32 out-block-width=32 !
++            video/x-raw, format=NV12, width=$(arg width), height=$(arg height) !
 +            tiovxdlcolorconvert target=1 out-pool-size=4"/>
 +        <param name="camera_name"     value="$(arg camera_name)"/>
-+        <param name="camera_info_url" value="$(arg camera_info_url)"/>
++        <param name="camera_info_url" value="file:///opt/imaging/imx390/imx390_35244_equidistant_$(arg width)x$(arg height)_rect.yaml"/>
 +        <param name="width"           value="$(arg width)"/>
 +        <param name="height"          value="$(arg height)"/>
 +        <param name="framerate"       value="$(arg framerate)"/>

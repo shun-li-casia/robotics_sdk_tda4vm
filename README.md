@@ -46,8 +46,6 @@ Figure 2 shows a representative deep-learning and compute-intensive demo applica
 
 This section describes how to set up the Robotics SDK on top of the Processor SDK Linux for Edge AI. Check out our [Setting Up Robotics SDK](docker/README.md) to get started.
 
-**Note**: git.ti.com has some issue in rendering markdown files. We highly recommend to use [the section in the User Guide Documentation](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_06_00/docs/source/docker/README.html#setting-up-robotics-kit-environment)
-
 ## Sensor Driver Nodes
 
 Following ROS nodes for cameras are tested and supported by the SDK.

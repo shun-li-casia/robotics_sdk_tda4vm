@@ -80,7 +80,7 @@ sudo resize2fs /dev/sdX2
 ### 2.3.1 On the TDA4 Target
 You can run the installation script on the TDA4 target as follows:
 ```
-root@tda4vm-sk:~$ cd /opt/robotics_sdk
+root@tda4vm-sk:~$ cd /opt/edgeai-gst-apps/scripts
 root@tda4vm-sk:~$ source ./install_robotics_sdk.sh
 ```
 This script takes care of:

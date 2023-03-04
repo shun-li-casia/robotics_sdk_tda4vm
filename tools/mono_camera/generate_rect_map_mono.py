@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 #  Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
 #
@@ -105,9 +105,29 @@ def save_LDC_lut(map_x, map_y, file_path):
     ldcLUT.tofile(file_path)
     print("LDC LUT saved into {}".format(file_path))
 
-def main(camera_info_file, camera_name):
+def save_camera_info(image_size, camera_name, dist_model, K, D, R, P, file_path):
+    """ save the camera info to given file_path
+    """
+    cv_file = cv2.FileStorage(file_path, cv2.FILE_STORAGE_WRITE)
+    cv_file.write("image_width",             image_size[0])
+    cv_file.write("image_height",            image_size[1])
+    cv_file.write("camera_name",             camera_name)
+    cv_file.write("camera_matrix",           K)
+    cv_file.write("distortion_model",        dist_model)
+    cv_file.write("distortion_coefficients", D)
+    cv_file.write("rectification_matrix",    R)
+    cv_file.write("projection_matrix",       P)
+    cv_file.release()
+    print("camera_info saved into {}".format(file_path))
+
+def main(camera_info_file, camera_mode, camera_name, new_image_size=None):
     """ Parse camera_info YAML file, and generate undistortion and
         rectification look-up-table (aks remap LUT).
+
+        Following two distortion models are supported:
+        1. `plumb_bob`
+        2. `equidistant` for fisheye cameras
+            In this model, this tool also generates camera_info for the rectified images
     """
 
     if not os.path.exists(camera_info_file):
@@ -126,31 +146,63 @@ def main(camera_info_file, camera_name):
     print("camera_info parsed from {}".format(camera_info_file))
     cv_file.release()
 
-    # create remap table for left
     image_size = (width, height)
-    map_x, map_y   = cv2.initUndistortRectifyMap(K, D, R, P, image_size, cv2.CV_32FC1)
+    if dist_model == 'plumb_bob':
+        # create remap table for left
+        map_x, map_y = cv2.initUndistortRectifyMap(K, D, R, P, size=image_size, m1type=cv2.CV_32FC1)
 
-    camera_mode = 'HD'
+        # write LDC undist/rect LUT
+        lut_file_path = os.path.join(os.path.dirname(camera_info_file), camera_name+"_"+camera_mode+"_LUT.bin")
+        save_LDC_lut(map_x, map_y, lut_file_path)
 
-    # # write undist/rect LUT
-    # file_path  = os.path.join(os.path.dirname(camera_info_file),, camera_name+"_"+camera_mode+"_remap_LUT.txt")
-    # save_remap_lut(map_x, map_y, file_path)
+    elif dist_model == 'equidistant':
+        # fisheye distortion model: we also generate camera_info for the rectified images
+        if args.new_height == None:
+            new_image_size = (width, height)
+        alpha = 1.0
+        fov_scale = np.float64(1.0)
+        new_K = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, image_size, R=np.eye(3), balance=alpha, new_size=new_image_size, fov_scale=fov_scale)
+        map_x, map_y = cv2.fisheye.initUndistortRectifyMap(K, D, R=np.eye(3), P=new_K, size=new_image_size, m1type=cv2.CV_32FC1)
 
-    # write LDC undist/rect LUT
-    file_path  = os.path.join(os.path.dirname(camera_info_file), camera_name+"_"+camera_mode+"_LUT.bin")
-    save_LDC_lut(map_x, map_y, file_path)
+        # write LDC undist/rect LUT
+        lut_file_name = "%s_%s_%ix%i_LUT.bin" % (camera_name, dist_model, new_image_size[0], new_image_size[1])
+        lut_file_path = os.path.join(os.path.dirname(camera_info_file), lut_file_name)
+        save_LDC_lut(map_x, map_y, lut_file_path)
+
+        # save camera_info for the rectified images
+        new_D = np.zeros((1,4))
+        rect_matrix = np.eye(3)
+        proj_matrix = np.hstack( (new_K, np.zeros((3,1))) )
+        out_yaml_file_path = os.path.join(os.path.dirname(camera_info_file), lut_file_path.replace('_LUT.bin', '_rect.yaml'))
+        save_camera_info(new_image_size, camera_name, dist_model, new_K,
+                    new_D, rect_matrix, proj_matrix, out_yaml_file_path)
+
+    else:
+        sys.exit('Error: {} is not supported'.format(dist_model))
 
 
 if __name__ == "__main__":
+    """
+    Example for C920 webcam:
+      ./generate_rect_map_mono.py -i c920_camera_info.yaml -n c920
+    Example for IMX390 fisheye camera:
+      ./generate_rect_map_mono.py -i imx390_35244_equidistant_camera_info.yaml -n imx390_35244 --width 1920 --height 1080
+    """
     # input argument parser
     parser = argparse.ArgumentParser(description='LCD LUT generation tool for mono camera')
     parser.add_argument('--input', '-i', type=str, default='',
         help='YAML file name for camera_info.')
     parser.add_argument('--name', '-n', type=str, default='C920',
         help='Camera name')
+    parser.add_argument('--width', dest='new_width',
+        help='LDC output image width (only for IMX390)', type=int)
+    parser.add_argument('--height', dest='new_height',
+        help='LDC output image height (only for IMX390)', type=int)
     args = parser.parse_args()
 
     # main routine
     camera_info_file = args.input
     camera_name = args.name
-    main(camera_info_file, camera_name)
+    camera_mode = 'HD'
+    new_image_size = (args.new_width, args.new_height)
+    main(camera_info_file, camera_mode, camera_name, new_image_size)

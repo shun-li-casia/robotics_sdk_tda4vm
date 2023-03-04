@@ -1,9 +1,11 @@
 Change Log
 ==========
 
-## 8.6.0 (2023-02-29)
+## 8.6.0 (2023-03-03)
+
 * Added a new parameter for controlling the specification of the camera port.
-* Added support for AM68a and AM69a platforms.
+* Added fisheye camera support to the LDC lookup-table generation tool (tools/mono_camera/generate_rect_map_mono.py).
+* The GStreamer pipeline for IMX390 camera in `gscam` node now includes `tiovxldc` in mesh image mode. Example LDC lookup-table files are provided that does resizing as well as rectification.
 
 ## 8.5.0 (2022-12-22)
 
