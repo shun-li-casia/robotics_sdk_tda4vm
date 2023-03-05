@@ -174,6 +174,7 @@ endif
 	@echo "docker run -it --rm \\"                            >> $(TGT_NAME)
 	@echo "    -v $(WORK_PATH_HOST):/root/$(WORK_DIR) \\"     >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
+	@echo "    -v /:/host:ro \\"                              >> $(TGT_NAME)
 	@echo "    -v $(REPO_PATH):$(REPO_PATH) \\"               >> $(TGT_NAME)
 endif
 ifeq ($(PLATFORM), j7)

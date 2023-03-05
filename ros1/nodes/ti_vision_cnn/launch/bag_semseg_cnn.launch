@@ -1,7 +1,7 @@
 <launch>
 
     <arg name="exportPerfStats" default="0"/>
-    <arg name="dl_model_path" default="/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"/>
+    <arg name="dl_model_path" default="/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"/>
 
     <!-- ti_vision_cnn: semseg -->
     <include file="$(find ti_vision_cnn)/launch/semseg_cnn.launch">

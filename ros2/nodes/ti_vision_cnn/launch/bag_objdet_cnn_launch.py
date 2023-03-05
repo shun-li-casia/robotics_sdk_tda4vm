@@ -7,7 +7,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import TextSubstitution
 from launch.substitutions import LaunchConfiguration
 
-dl_model_path = "/opt/model_zoo/ONR-OD-8050-ssd-lite-regNetX-800mf-fpn-bgr-mmdet-coco-512x512"
+dl_model_path = "/opt/model_zoo/ONR-OD-8020-ssd-lite-mobv2-mmdet-coco-512x512"
 
 def generate_launch_description():
     ld = LaunchDescription()

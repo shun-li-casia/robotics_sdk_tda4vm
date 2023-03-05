@@ -9,7 +9,7 @@ from launch.substitutions import LaunchConfiguration
 
 def finalize_node(context, *args, **kwargs):
     zed_sn = LaunchConfiguration("zed_sn").perform(context)
-    dl_model_path = "/opt/model_zoo/TVM-SS-5818-deeplabv3lite-mobv2-qat-robokit-768x432"
+    dl_model_path = "/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"
     # dl_model_path = "/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"
 
     lut_folder = "/opt/robotics_sdk/ros1/drivers/zed_capture/config"

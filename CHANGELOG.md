@@ -6,6 +6,8 @@ Change Log
 * Added a new parameter for controlling the specification of the camera port.
 * Added fisheye camera support to the LDC lookup-table generation tool (tools/mono_camera/generate_rect_map_mono.py).
 * The GStreamer pipeline for IMX390 camera in `gscam` node now includes `tiovxldc` in mesh image mode. Example LDC lookup-table files are provided that does resizing as well as rectification.
+* The default 2D object detection model has been changed to ONR-OD-8020-ssd-lite-mobv2-mmdet-coco-512x512.
+* Replaced the OD model TFL-OD-2020-ssdLite-mobDet-DSP-coco-320x320 with TFL-OD-2010-ssd-mobV2-coco-mlperf-300x300
 
 ## 8.5.0 (2022-12-22)
 
