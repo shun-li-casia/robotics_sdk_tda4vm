@@ -20,7 +20,7 @@ if [[ ! -d "gscam" ]]; then
     cd gscam
     git checkout -b ti_nv12 tags/1.0.1
     git apply $WORK_PATH/patches/gscam_ti_nv12.patch
-    git add -u
+    git add .
     git add config/* launch/*
     git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses TI GStreamer plugins, and added NV12 encoding mode."
 fi
@@ -33,7 +33,7 @@ if [[ ! -d "gscam2" ]]; then
     cd gscam2
     git checkout -b ti_nv12 2c02495167f4fc0afdc88062735b410582a354ce
     git apply $WORK_PATH/patches/gscam2_ti_nv12.patch
-    git add -u
+    git add .
     git add config/* launch/*
     git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses TI GStreamer plugins', and added NV12 encoding mode."
 fi

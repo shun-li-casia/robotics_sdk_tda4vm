@@ -368,7 +368,7 @@ index 0000000..469de8b
 +
 +    return LaunchDescription([node])
 diff --git a/src/gscam_node.cpp b/src/gscam_node.cpp
-index 2385f00..45f69ff 100644
+index 3fef91f..45f69ff 100644
 --- a/src/gscam_node.cpp
 +++ b/src/gscam_node.cpp
 @@ -27,6 +27,9 @@ namespace gscam2
@@ -381,25 +381,7 @@ index 2385f00..45f69ff 100644
    /* End of list */
  
  #undef CXT_MACRO_MEMBER
-@@ -34,7 +37,7 @@ namespace gscam2
- 
-   struct GSCamContext
-   {
--    CXT_MACRO_DEFINE_MEMBERS(GSCAM_ALL_PARAMS)
-+    CXT_MACRO_DEFINE_MEMBERS(GSCAM_ALL_PARAMS)  // NOLINT
-   };
- 
-   //=============================================================================
-@@ -54,7 +57,7 @@ namespace gscam2
-     GstElement *sink_;
- 
-     // We need to poll GStreamer to get data
--    // Move this to it's own thread to avoid blocking or slowing down the rclcpp::spin() thread
-+    // Move this to its own thread to avoid blocking or slowing down the rclcpp::spin() thread
-     std::thread pipeline_thread_;
- 
-     // Used to stop the pipeline thread
-@@ -63,8 +66,11 @@ namespace gscam2
+@@ -63,6 +66,9 @@ namespace gscam2
      // Discover width and height from the incoming data
      int width_, height_;
  
@@ -407,22 +389,9 @@ index 2385f00..45f69ff 100644
 +    std::string app_sink_format_;
 +
      // Calibration between ros::Time and gst timestamps
--    int64_t time_offset_;
-+    GstClockTime time_offset_;
+     GstClockTime time_offset_;
  
-     // Publish images...
-     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr camera_pub_;
-@@ -129,8 +135,7 @@ namespace gscam2
- 
-     RCLCPP_INFO(node_->get_logger(), "Gstreamer version: %s", gst_version_string());
- 
--    GError *error = 0; // Assignment to zero is a gst requirement
--
-+    GError *error = nullptr;
-     pipeline_ = gst_parse_launch(cxt_.gscam_config_.c_str(), &error);
-     if (!pipeline_) {
-       RCLCPP_FATAL(node_->get_logger(), error->message);
-@@ -142,16 +147,17 @@ namespace gscam2
+@@ -141,16 +147,17 @@ namespace gscam2
      GstCaps *caps = gst_app_sink_get_caps(GST_APP_SINK(sink_));
  
      // http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-types-definitions.html
@@ -450,16 +419,7 @@ index 2385f00..45f69ff 100644
      }
  
      gst_app_sink_set_caps(GST_APP_SINK(sink_), caps);
-@@ -309,7 +315,7 @@ namespace gscam2
-     camera_info_manager::CameraInfo cur_cinfo = camera_info_manager_.getCameraInfo();
-     auto cinfo = std::make_unique<sensor_msgs::msg::CameraInfo>(cur_cinfo);
-     if (cxt_.use_gst_timestamps_) {
--      cinfo->header.stamp = rclcpp::Time(buf->pts + bt + time_offset_);
-+      cinfo->header.stamp = rclcpp::Time(static_cast<int64_t>(buf->pts + bt + time_offset_));
-     } else {
-       cinfo->header.stamp = node_->now();
-     }
-@@ -325,10 +331,16 @@ namespace gscam2
+@@ -324,10 +331,16 @@ namespace gscam2
        cinfo_pub_->publish(std::move(cinfo));
      } else {
        // Complain if the returned buffer is smaller than we expect
@@ -480,12 +440,9 @@ index 2385f00..45f69ff 100644
  
        if (buf_size < expected_frame_size) {
          RCLCPP_WARN(node_->get_logger(),
-@@ -348,12 +360,15 @@ namespace gscam2
-       img->is_bigendian = false;
-       img->data.resize(expected_frame_size);
+@@ -349,10 +362,13 @@ namespace gscam2
  
--      // Copy the image so we can free the buffer allocated by gstreamer
-+      // Copy the image, so we can free the buffer allocated by gstreamer
+       // Copy the image, so we can free the buffer allocated by gstreamer
        if (cxt_.image_encoding_ == sensor_msgs::image_encodings::RGB8) {
 -        img->step = width_ * 3;
 +          img->step = width_ * 3;
@@ -499,7 +456,7 @@ index 2385f00..45f69ff 100644
        std::copy(
          buf_data,
          (buf_data) + (buf_size),
-@@ -401,12 +416,23 @@ namespace gscam2
+@@ -400,12 +416,23 @@ namespace gscam2
      }
  
      if (cxt_.image_encoding_ != sensor_msgs::image_encodings::RGB8 &&
@@ -524,75 +481,3 @@ index 2385f00..45f69ff 100644
      camera_info_manager_.setCameraName(cxt_.camera_name_);
  
      if (camera_info_manager_.validateURL(cxt_.camera_info_url_)) {
-@@ -417,19 +443,19 @@ namespace gscam2
-                   cxt_.camera_info_url_.c_str());
-     }
- 
--    // [Re-]start the pipeline in it's own thread
-+    // [Re-]start the pipeline in its own thread
-     if (create_pipeline()) {
-       pipeline_thread_ = std::thread(
-         [this]()
-         {
--          RCLCPP_INFO(node_->get_logger(), "Thread running");
-+          RCLCPP_INFO(node_->get_logger(), "Thread running");  // NOLINT
- 
-           while (!stop_signal_ && rclcpp::ok()) {
-             process_frame();
-           }
- 
-           stop_signal_ = false;
--          RCLCPP_INFO(node_->get_logger(), "Thread stopped");
-+          RCLCPP_INFO(node_->get_logger(), "Thread stopped");  // NOLINT
-         });
-     } else {
-       delete_pipeline();
-@@ -454,7 +480,7 @@ namespace gscam2
-     // Register parameters, if they change validate_parameters() will be called again
- #undef CXT_MACRO_MEMBER
- #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_PARAMETER_CHANGED(n, t)
--    CXT_MACRO_REGISTER_PARAMETERS_CHANGED((*this), pImpl_->cxt_, GSCAM_ALL_PARAMS, validate_parameters)
-+    CXT_MACRO_REGISTER_PARAMETERS_CHANGED((*this), pImpl_->cxt_, GSCAM_ALL_PARAMS, validate_parameters) // NOLINT
-   }
- 
-   GSCamNode::~GSCamNode()
-@@ -475,4 +501,4 @@ namespace gscam2
- 
- #include "rclcpp_components/register_node_macro.hpp"
- 
--RCLCPP_COMPONENTS_REGISTER_NODE(gscam2::GSCamNode)
-+RCLCPP_COMPONENTS_REGISTER_NODE(gscam2::GSCamNode)  // NOLINT
-diff --git a/src/subscriber_node.cpp b/src/subscriber_node.cpp
-index e67587d..aaf4af2 100644
---- a/src/subscriber_node.cpp
-+++ b/src/subscriber_node.cpp
-@@ -6,18 +6,15 @@ namespace gscam2
-   ImageSubscriberNode::ImageSubscriberNode(const rclcpp::NodeOptions &options) :
-     Node("image_subscriber", options)
-   {
-+    (void) sub_;
-+
-     RCLCPP_INFO(get_logger(), "use_intra_process_comms=%d", options.use_intra_process_comms());
- 
-     sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-       "image_raw", 10,
-       [this](sensor_msgs::msg::Image::UniquePtr msg)
-       {
--        static bool receiving = false;
--
--        if (!receiving) {
--          receiving = true;
--          RCLCPP_INFO(get_logger(), "receiving messages");
--        }
-+        RCLCPP_INFO_ONCE(get_logger(), "receiving messages");  // NOLINT
- 
- #undef SHOW_ADDRESS
- #ifdef SHOW_ADDRESS
-@@ -36,4 +33,4 @@ namespace gscam2
- 
- #include "rclcpp_components/register_node_macro.hpp"
- 
--RCLCPP_COMPONENTS_REGISTER_NODE(gscam2::ImageSubscriberNode)
-\ No newline at end of file
-+RCLCPP_COMPONENTS_REGISTER_NODE(gscam2::ImageSubscriberNode)  // NOLINT
-\ No newline at end of file
