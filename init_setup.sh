@@ -62,11 +62,6 @@ else
     exit 1
 fi
 
-# To support previous versions
-if [[ "$GIT_TAG" == "v0.5.0" ]] || [[ "$GIT_TAG" == "v0.4.0" ]]; then
-    export SDK_DIR=$ROS_WS/src/jacinto_ros_perception
-fi
-
 # "git checkout" only if $GIT_TAG does not match with $RECENT_TAG
 function git_checkout_with_tag {
     cd $1
