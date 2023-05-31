@@ -1,5 +1,5 @@
-3D Obstacle Detection Application
-=================================
+3D Obstacle Detection
+=====================
 
 ![](docs/estop_rviz.png)
 <br />
@@ -12,23 +12,25 @@ This demonstrates the 3D obstacle detection application using the disparity map 
 
 * Stereo Vision Processing
   - This is the same process described in [Stereo Vision Application](../ti_sde/README.md) without the point-cloud generation process. The output disparity map is fed to the 3D obstacle detection process as an input.
+
 * Semantic Segmentation Processing
   - This is the same process described in [Semantic Segmentation Application](../ti_vision_cnn/README.md). The output tensor for the CNN network is fed to the 3D obstacle detection process as another input.
+
 * 3D Obstacle Detection Processing
   - This process outputs the 3D bounding box coordinates of the detected obstacles. First, it creates 3D point cloud using the disparity map and the camera parameters. Note that it maps only pixels that belongs to particular classes, e.g., car, pedestrian, bicycle, rider, etc. into the 3D space. Then it projects the 3D point cloud on a 2D occupancy grid map. Finally it detects individual obstacles by grouping closely-located occupied cells with an identical class using a "connected component analysis" algorithm.
 
+## Run the Application in ROS 1
 
-## How to Run the Application in ROS 1
-
-**[TDA4]** For setting up the ROS1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+**[TDA4]** For setting up the ROS 1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following command inside the Docker container on TDA4 target:
 ```
 roslaunch ti_estop bag_estop.launch
 ```
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
 ```
-roslaunch ti_estop zed_estop.launch zed_sn:=SNxxxxx
+roslaunch ti_estop zed_estop.launch video_id:=x zed_sn:=SNxxxxx
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
+
+**[Visualization on Ubuntu PC]** For setting up the ROS 1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
 As shown in the "Launch File Parameters" section below, this application publishes many topics regarding 3D bounding box coordinates, semantic segmentation output tensor and disparity map. Using these information, we can produce color-coded disparity map, color-coded semantic segmentation map and 3D bounding boxes overlaid on image. To visualize them on PC, run
 ```
@@ -40,18 +42,18 @@ The ego-centric occupancy grid map is created based on 3D bounding boxes. To vis
 roslaunch ti_estop rviz_estop_ogmap.launch
 ```
 
-## How to Run the Application in ROS 2
+## Run the Application in ROS 2
 
-**[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera, replace the launch file with `zed_estop.launch`:
+**[TDA4]** For setting up the ROS 2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera:
 ```
-ros2 launch ti_estop zed_estop_launch.py zed_sn:=SNxxxxx
+ros2 launch ti_estop zed_estop_launch.py video_id:=x zed_sn:=SNxxxxx
 ```
 <!-- To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 ros2 launch ti_estop bag_estop_launch.py
 ``` -->
 
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS 2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 
 To visualize outputs on PC, run
 ```
@@ -147,4 +149,6 @@ e-Stop area forms a trapezoid defined by the first four parameters. When obstacl
 To create LDC-format LUT for ZED camera, please refer to [zed_capture/README.md](../../drivers/zed_capture/README.md).
 
 ### Camera Mounting
-For accurate obstacle detection, it is important to mount properly and correct values of `camera_height` and `camera_pitch` should be provided. For example, incorrect values of camera pitch angle result in 3D object boxes being overlaid in front of or behind obstacles on images. It is recommended to install the stereo camera parallel to the ground plane or slightly tilted downward, e.g., between 0° and 10°. In general, camera pitch angle should be close to 0 when a camera's height is low, while camera pitch angle can be larger to some extent when the camera is mounted higher.
+For accurate obstacle detection, it is crucial to properly mount the camera and provide correct values for `camera_height` and `camera_pitch`. Incorrect values of the camera pitch angle can result in 3D object boxes being overlaid in front of or behind obstacles on the images. It is recommended to install the stereo camera parallel to the ground plane or slightly tilted downward, e.g., between 0° and 10°. In general, when the camera is mounted at a low height, the camera pitch angle should be close to 0. On the other hand, if the camera is mounted at a higher position, the camera pitch angle can be larger to some extent.
+
+By ensuring the camera is mounted correctly and providing accurate values for the camera height and pitch angle, you can optimize the obstacle detection process and improve the accuracy of the results.

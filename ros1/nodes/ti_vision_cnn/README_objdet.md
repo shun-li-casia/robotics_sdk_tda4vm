@@ -1,10 +1,11 @@
-Vision CNN: Object Detection
-============================
+Object Detection
+================
 
 ![](docs/objdet_rviz.png)
 <br />
 
-This `ti_vision_cnn` node is versatile deep-learning (DL) inference ROS node that is optimized on DL cores and hardware accelerator of TDA4. The `ti_vision_cnn` node supports compute-intensive DL inference operations including 2D object detection and semantic segmentation. Figure 1 shows the high-level block diagram of the applications around the `ti_vision_cnn` node, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
+This `ti_vision_cnn` node is a versatile deep-learning (DL) inference ROS node that is optimized on DL cores and hardware accelerator of TDA4. The `ti_vision_cnn` node supports compute-intensive DL inference operations, including 2D object detection and semantic segmentation. Figure 1 shows the high-level block diagram of the applications around the `ti_vision_cnn` node, which consists of multiple processing blocks that are deployed on hardware accelerators and DSP processors for pre-processing and post-processing in an optimized manner.
+
 
 ![](docs/objdet_demo_block_diagram.svg)
 <figcaption>Figure 1. Object detection demo: block diagram</figcaption>
@@ -14,22 +15,23 @@ For details of block diagram and parameters of `ti_vision_cnn`, please refer to 
 
 ## Object Detection Demo
 
-### How to Run the Application in ROS 1
+### Run the Application in ROS 1
 
-**[TDA4]** To launch object detection demo with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+**[TDA4]** To launch the object detection demo with playing back a ROSBAG file, run the following command inside the Docker container on TDA4 target:
 ```
 roslaunch ti_vision_cnn bag_objdet_cnn.launch
 ```
+
 To process the image stream from a ZED stereo camera:
 ```
-roslaunch ti_vision_cnn zed_objdet_cnn.launch zed_sn:=SNxxxxx
+roslaunch ti_vision_cnn zed_objdet_cnn.launch video_id:=x zed_sn:=SNxxxxx
 ```
+
 To process the image stream from a USB mono camera:
 ```
-roslaunch ti_vision_cnn mono_objdet_cnn.launch
-# Alternatively
-roslaunch ti_vision_cnn gscam_objdet_cnn.launch
+roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x
 ```
+
 For IMX390 camera as input, depending on choice of resolution, run one from the following.
 
 **NOTE**: Before running, please refer to [gscam/README_TI.md](../../drivers/gscam/README_TI.md) for generating required LUT files for `tiovxldc`.
@@ -53,17 +55,16 @@ roslaunch ti_viz_nodes rviz_objdet_cnn.launch width:=1280 height:=720
 roslaunch ti_viz_nodes rviz_objdet_cnn.launch width:=960 height:=540
 ```
 
-### How to Run the Application in ROS 2
+### Run the Application in ROS 2
 
-**[TDA4]** To launch object detection demo with a ZED stereo camera, run the following inside the Docker container on TDA4 target:
+**[TDA4]** To launch the object detection demo with a ZED stereo camera, run the following command inside the Docker container on TDA4 target:
 ```
-ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py zed_sn:=SNxxxxx
+ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py video_id:=x zed_sn:=SNxxxxx
 ```
+
 To process the image stream from a USB mono camera:
 ```
-roslaunch ti_vision_cnn mono_objdet_cnn.launch
-# Alternatively
-roslaunch ti_vision_cnn gscam_objdet_cnn.launch
+roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x
 ```
 <!-- To launch object detection demo with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```

@@ -1,24 +1,27 @@
-Vision Object Detection with 3D Spatial Information
-===================================================
+3D Perception
+=============
 
 ![](docs/objdet_range_rviz.png)
 <br />
 
-This ROS node processes the outputs from `ti_vision_cnn` (vision CNN for object detection) and `ti_sde` (stereo vision processing), and does the following operations:
+This ROS node processes the outputs from the `ti_vision_cnn` node (vision CNN for object detection) and the `ti_sde` node (stereo vision processing) to provide enhanced spatial information for detected objects. The node performs the following operations:
 
-1. For each of 2D bounding boxes detected by the object detection CNN node, this node extracts spatial information from the stereo disparity map, and attaches the XYZ coordinates (for the center portion of the bounding box).
+1. Extracting Spatial Information: For each of 2D bounding boxes detected by the object detection CNN node, this node extracts spatial information from the stereo disparity map, and attaches the XYZ coordinates (for the center portion of the bounding box), providing 3D spatial information for the detected objects.
 
-2. To provide more spatial information, this node scans the stereo disparity map horizontally, and applies filtering, converts and publishes XYZ point-cloud data. This point-cloud data provides spatial information for potential obstacles that the CNN object detection model may not able to detect (e.g, wall or structure of buildings).
+2. Point-Cloud Generation: To provide additional spatial information, this node scans the stereo disparity map horizontally, and applies filtering and conversion operations to generate and publish XYZ point-cloud data. This point-cloud data provides spatial information for potential obstacles that the CNN object detection model may not able to detect, such as walls or structures of buildings.
+
+By combining the outputs of the object detection CNN and the stereo vision processing, this node enriches the information available for detected objects by providing their 3D spatial coordinates. This enhanced spatial information can be valuable for various applications, including navigation, obstacle avoidance, and scene understanding.
 
 ## Demo: 2D Object Detection with XYZ Information
 
 This demo takes stereo camera raw images either from ROSBAG file or live ZED camera with `zed_capture` node, does stereo vision processing in `ti_sde` node, does CNN 2D object detection (with YOLO, SSD, or any other detection model of choice from the Edge AI model zoo) in `ti_vision_cnn` node, followed by `ti_objdet_range` (this node) taking the outputs from the two nodes and does two operations described above. Figure 1 shows the block diagram of the demo with ZED camera.
 
+
 ![](docs/objdet_range_block_diagram.svg)
 <figcaption>Figure 1. 2D object detection with XYZ information from stereo disparity map: block diagram</figcaption>
 <br />
 
-This demo runs currently in ROS 1 only. Launch the following launch file in the TDA4 ROS1 Docker container.
+This demo runs currently in ROS 1 only. Launch the following launch file in the TDA4 ROS 1 Docker container.
 **[TDA4]**
 With stereo camera images from ROSBAG file:
 ```
@@ -27,11 +30,11 @@ roslaunch ti_objdet_range bag_objdet_range.launch
 
 With a live ZED stereo camera as input:
 ```
-roslaunch ti_objdet_range zed_objdet_range.launch zed_sn:=SNxxxxx
+roslaunch ti_objdet_range zed_objdet_range.launch video_id:=x zed_sn:=SNxxxxx
 ```
 
 **[Visualization on Ubuntu PC]**
-Launch the following launch file in the remote PC ROS1 Docker container.
+Launch the following launch file in the remote PC ROS 1 Docker container.
 ```
 roslaunch ti_viz_nodes rviz_objdet_range.launch
 ```

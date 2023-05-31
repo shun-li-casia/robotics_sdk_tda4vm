@@ -46,22 +46,22 @@ index 63ad29c..edbebfa 100644
 \ No newline at end of file
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..00fdd3a
+index 0000000..2900148
 --- /dev/null
 +++ b/README_TI.md
 @@ -0,0 +1,46 @@
 +GStreamer Camera Node for ROS 2
 +===============================
-+This GStreamer based camera ROS node is from [https://github.com/clydemcqueen/gscam2](https://github.com/clydemcqueen/gscam2). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
++This GStreamer based camera ROS node is from [https://github.com/clydemcqueen/gscam2](https://github.com/clydemcqueen/gscam2). Following changes are made to customize for the use cases in the Robotics SDK:
 +
 +* Added GStreamer piplelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode.
 +* Added an example `camara_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use TI TDA4 LDC hardware accelerator).
-+* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode), and OV5640 (in YUYV mode).
++* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode), and OV5640 (in YUYV mode) with GStreamer pipelines using the plugins optimized on TI devices.
 +* Dependency: following modules are already built and installed in the the Robotics SDK ROS Docker images.
 +    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
 +    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
 +
-+**Note**: The customization are made only for Robotics SDK for TDA4, and some of examples from the original GIT repository may not work with these changes.
++**Note**: The customization are made only for the Robotics SDK. It was not verified that all examples from the original GIT repository still work with these changes.
 +
 +## Usage
 +
@@ -135,51 +135,62 @@ index 0000000..3ce26c2
 +       0. ]
 diff --git a/launch/v4l_mjpg_launch.py b/launch/v4l_mjpg_launch.py
 new file mode 100644
-index 0000000..ab0e567
+index 0000000..e7a5de4
 --- /dev/null
 +++ b/launch/v4l_mjpg_launch.py
-@@ -0,0 +1,96 @@
+@@ -0,0 +1,110 @@
 +"""
-+Launch a Node with parameters and remappings.
++Launch gscam2 node with parameters and remappings.
 +"""
 +import os
 +from ament_index_python.packages import get_package_share_directory
 +from launch import LaunchDescription
 +from launch.actions import DeclareLaunchArgument
-+from launch.actions import OpaqueFunction
-+from launch.substitutions import TextSubstitution
 +from launch.substitutions import LaunchConfiguration
++from launch.actions import OpaqueFunction
 +from launch_ros.actions import Node
 +
-+# Camera calibration file
-+config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
-+camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
-+print(camera_config)
-+
 +def finalize_node(context, *args, **kwargs):
-+    # Camera device
-+    device = "/dev/video" + LaunchConfiguration("video_id").perform(context)
-+    camera_name = LaunchConfiguration("camera_name").perform(context)
++
++    # Device
++    device = "/dev/video" + LaunchConfiguration('video_id').perform(context)
++
++    # Framerate
++    framerate = LaunchConfiguration('framerate')
++
++    # Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++    image_encoding = LaunchConfiguration('image_encoding')
++
++    # Name of the gscam2 node
++    node_name = LaunchConfiguration('node_name')
 +
 +    # GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
 +    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
 +    gscam_config = 'v4l2src device=' + device + ' io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxcolorconvert'
 +
++    # Camera namespace
++    camera_name = LaunchConfiguration('camera_name').perform(context)
++
++    # Camera calibration file
++    config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++    camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++    print(camera_config)
++
 +    node = Node(
 +        package    = 'gscam2',
 +        executable = 'gscam_main',
 +        output     = 'screen',
-+        name       = 'gscam_publisher',
++        name       = node_name,
 +        namespace  = camera_name,
 +        parameters = [
 +            {
 +                'gscam_config':       gscam_config,
-+                'camera_name':        LaunchConfiguration("camera_name"),
++                'camera_name':        camera_name,
 +                'camera_info_url':    camera_config,
-+                'image_encoding':     LaunchConfiguration("image_encoding"),
++                'image_encoding':     image_encoding,
 +                'appsink_width':      1280,
 +                'appsink_height':     720,
-+                'appsink_framerate':  LaunchConfiguration("frame_rate"),
++                'appsink_framerate':  framerate,
 +                'sync_sink':          False,
 +                'preroll':            False,
 +                'use_gst_timestamps': False,
@@ -195,88 +206,98 @@ index 0000000..ab0e567
 +
 +    return [node]
 +
++
 +def generate_launch_description():
-+    ld = LaunchDescription()
 +
-+    # video_id: arg that can be set from the command line or a default will be used
-+    video_id = DeclareLaunchArgument(
-+        name="video_id",
-+        default_value=TextSubstitution(text="2"),
-+        description="""to find your device name, use ls /dev/video*
-+                       and look for the name begin with video"""
++    video_id_arg = DeclareLaunchArgument(
++        'video_id',
++        default_value='2',
++        description='ID of the video device to use.'
 +    )
 +
-+    # frame_rate: arg that can be set from the command line or a default will be used
-+    frame_rate = DeclareLaunchArgument(
-+        name="frame_rate",
-+        default_value=TextSubstitution(text="30"),
-+        description='Frame rate'
++    framerate_arg = DeclareLaunchArgument(
++        'framerate',
++        default_value='30',
++        description='Frame rate of the camera'
 +    )
 +
-+    # Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
-+    image_encoding = DeclareLaunchArgument(
-+        name="image_encoding",
-+        default_value=TextSubstitution(text="yuv420"),
-+        description='Image encoding'
++    image_encoding_arg = DeclareLaunchArgument(
++        'image_encoding',
++        default_value='yuv420',
++        description='Encoding of the camera image'
 +    )
 +
-+    # Camera namespace
-+    camera_name = DeclareLaunchArgument(
-+        name="camera_name",
-+        default_value=TextSubstitution(text="camera"),
-+        description='Camera namespace'
++    node_name_arg = DeclareLaunchArgument(
++        'node_name',
++        default_value='gscam_publisher',
++        description='Name of the gscam2 node'
 +    )
 +
-+    ld.add_action(video_id)
-+    ld.add_action(frame_rate)
-+    ld.add_action(image_encoding)
-+    ld.add_action(camera_name)
++    camera_name_arg = DeclareLaunchArgument(
++        'camera_name',
++        default_value='camera',
++        description='Name of the camera namespace'
++    )
++
++    # Create the launch description and add the arguments
++    ld  = LaunchDescription()
++    ld.add_action(video_id_arg)
++    ld.add_action(framerate_arg)
++    ld.add_action(image_encoding_arg)
++    ld.add_action(node_name_arg)
++    ld.add_action(camera_name_arg)
 +    ld.add_action(OpaqueFunction(function=finalize_node))
 +
 +    return ld
-+
+\ No newline at end of file
 diff --git a/launch/v4l_ov5640_launch.py b/launch/v4l_ov5640_launch.py
 new file mode 100644
-index 0000000..07b61f6
+index 0000000..d8470af
 --- /dev/null
 +++ b/launch/v4l_ov5640_launch.py
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,110 @@
 +"""
-+Launch a Node with parameters and remappings.
++Launch gscam2 node with parameters and remappings.
 +"""
 +import os
 +from ament_index_python.packages import get_package_share_directory
 +from launch import LaunchDescription
++from launch.actions import DeclareLaunchArgument
++from launch.substitutions import LaunchConfiguration
++from launch.actions import OpaqueFunction
 +from launch_ros.actions import Node
 +
-+# Camera device
-+device = '/dev/video2'
++def finalize_node(context, *args, **kwargs):
 +
-+# Framerate
-+framerate = 30
++    # Device
++    device = "/dev/video" + LaunchConfiguration('video_id').perform(context)
 +
-+# Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
-+image_encoding = 'yuv420'
++    # Framerate
++    framerate = LaunchConfiguration('framerate')
 +
-+# GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
-+# 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
-+gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++    # Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++    image_encoding = LaunchConfiguration('image_encoding')
 +
-+# Camera namespace
-+camera_name = 'camera'
++    # Name of the gscam2 node
++    node_name = LaunchConfiguration('node_name')
 +
-+# Camera calibration file
-+config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
-+camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
-+print(camera_config)
++    # GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
++    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
 +
-+def generate_launch_description():
++    # Camera namespace
++    camera_name = LaunchConfiguration('camera_name').perform(context)
++
++    # Camera calibration file
++    config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++    camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++    print(camera_config)
 +
 +    node = Node(
 +        package    = 'gscam2',
 +        executable = 'gscam_main',
 +        output     = 'screen',
-+        name       = 'gscam_publisher',
++        name       = node_name,
 +        namespace  = camera_name,
 +        parameters = [
 +            {
@@ -300,49 +321,100 @@ index 0000000..07b61f6
 +        ],
 +    )
 +
-+    return LaunchDescription([node])
++    return [node]
++
++
++def generate_launch_description():
++
++    video_id_arg = DeclareLaunchArgument(
++        'video_id',
++        default_value='2',
++        description='ID of the video device to use.'
++    )
++
++    framerate_arg = DeclareLaunchArgument(
++        'framerate',
++        default_value='30',
++        description='Frame rate of the camera'
++    )
++
++    image_encoding_arg = DeclareLaunchArgument(
++        'image_encoding',
++        default_value='yuv420',
++        description='Encoding of the camera image'
++    )
++
++    node_name_arg = DeclareLaunchArgument(
++        'node_name',
++        default_value='gscam_publisher',
++        description='Name of the gscam2 node'
++    )
++
++    camera_name_arg = DeclareLaunchArgument(
++        'camera_name',
++        default_value='camera',
++        description='Name of the camera namespace'
++    )
++
++    # Create the launch description and add the arguments
++    ld  = LaunchDescription()
++    ld.add_action(video_id_arg)
++    ld.add_action(framerate_arg)
++    ld.add_action(image_encoding_arg)
++    ld.add_action(node_name_arg)
++    ld.add_action(camera_name_arg)
++    ld.add_action(OpaqueFunction(function=finalize_node))
++
++    return ld
+\ No newline at end of file
 diff --git a/launch/v4l_yuv_launch.py b/launch/v4l_yuv_launch.py
 new file mode 100644
-index 0000000..469de8b
+index 0000000..552b8b7
 --- /dev/null
 +++ b/launch/v4l_yuv_launch.py
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,110 @@
 +"""
-+Launch a Node with parameters and remappings.
++Launch gscam2 node with parameters and remappings.
 +"""
 +import os
 +from ament_index_python.packages import get_package_share_directory
 +from launch import LaunchDescription
++from launch.actions import DeclareLaunchArgument
++from launch.substitutions import LaunchConfiguration
++from launch.actions import OpaqueFunction
 +from launch_ros.actions import Node
 +
-+# Camera device
-+device = '/dev/video2'
++def finalize_node(context, *args, **kwargs):
 +
-+# Framerate
-+framerate = 10
++    # Device
++    device = "/dev/video" + LaunchConfiguration('video_id').perform(context)
 +
-+# Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
-+image_encoding = 'yuv420'
++    # Framerate
++    framerate = LaunchConfiguration('framerate')
 +
-+# GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
-+# 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
-+gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++    # Image encoding: "yuv420" - publishes in "NV12" (default), "rgb8"
++    image_encoding = LaunchConfiguration('image_encoding')
 +
-+# Camera namespace
-+camera_name = 'camera'
++    # Name of the gscam2 node
++    node_name = LaunchConfiguration('node_name')
 +
-+# Camera calibration file
-+config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
-+camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
-+print(camera_config)
++    # GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
++    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
 +
-+def generate_launch_description():
++    # Camera namespace
++    camera_name = LaunchConfiguration('camera_name').perform(context)
++
++    # Camera calibration file
++    config_dir = os.path.join(get_package_share_directory('gscam2'), 'config')
++    camera_config = 'file://' + os.path.join(config_dir, 'C920_HD_camera_info.yaml')
++    print(camera_config)
 +
 +    node = Node(
 +        package    = 'gscam2',
 +        executable = 'gscam_main',
 +        output     = 'screen',
-+        name       = 'gscam_publisher',
++        name       = node_name,
 +        namespace  = camera_name,
 +        parameters = [
 +            {
@@ -366,7 +438,52 @@ index 0000000..469de8b
 +        ],
 +    )
 +
-+    return LaunchDescription([node])
++    return [node]
++
++
++def generate_launch_description():
++
++    video_id_arg = DeclareLaunchArgument(
++        'video_id',
++        default_value='2',
++        description='ID of the video device to use.'
++    )
++
++    framerate_arg = DeclareLaunchArgument(
++        'framerate',
++        default_value='10',
++        description='Frame rate of the camera'
++    )
++
++    image_encoding_arg = DeclareLaunchArgument(
++        'image_encoding',
++        default_value='yuv420',
++        description='Encoding of the camera image'
++    )
++
++    node_name_arg = DeclareLaunchArgument(
++        'node_name',
++        default_value='gscam_publisher',
++        description='Name of the gscam2 node'
++    )
++
++    camera_name_arg = DeclareLaunchArgument(
++        'camera_name',
++        default_value='camera',
++        description='Name of the camera namespace'
++    )
++
++    # Create the launch description and add the arguments
++    ld  = LaunchDescription()
++    ld.add_action(video_id_arg)
++    ld.add_action(framerate_arg)
++    ld.add_action(image_encoding_arg)
++    ld.add_action(node_name_arg)
++    ld.add_action(camera_name_arg)
++    ld.add_action(OpaqueFunction(function=finalize_node))
++
++    return ld
+\ No newline at end of file
 diff --git a/src/gscam_node.cpp b/src/gscam_node.cpp
 index 3fef91f..45f69ff 100644
 --- a/src/gscam_node.cpp

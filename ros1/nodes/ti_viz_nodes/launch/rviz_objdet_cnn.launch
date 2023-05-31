@@ -20,10 +20,7 @@
         <param name="vision_cnn_image_topic"   value="vision_cnn/out_image"/>
     </node>
 
-    <!-- image_view -->
-    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
-        <param name="autosize"         value="true"/>
-        <remap from="image" to="/vision_cnn/out_image"/>
-    </node>
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="rviz_semseg" args="-d $(find ti_viz_nodes)/rviz/objdet_cnn.rviz" />
 
 </launch>

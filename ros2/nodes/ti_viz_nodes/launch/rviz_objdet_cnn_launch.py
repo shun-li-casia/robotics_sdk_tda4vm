@@ -8,6 +8,9 @@ from launch_ros.actions import Node
 def generate_launch_description():
     ld = LaunchDescription()
 
+    viz_dir    = get_package_share_directory('ti_viz_nodes')
+    rviz_dir   = os.path.join(viz_dir, 'rviz')
+
     # color conversion for input image_raw for visualization
     params = [
         {"width":            1280},
@@ -49,19 +52,18 @@ def generate_launch_description():
                 output = "screen",
                 parameters = params)
 
-    # image_view node
-    image_view_node = Node(package = "image_view",
-                      executable = "image_view",
-                      name = "image_view",
+    # rviz node
+    rviz2_node = Node(package = "rviz2",
+                      executable = "rviz2",
+                      name = "rviz2",
                       output = "screen",
-                      parameters = [{"autosize": True}],
-                      remappings=[("image", "vision_cnn/out_image")]
+                      arguments=["-d", os.path.join(rviz_dir, 'objdet_cnn.rviz')]
                 )
 
     # Create the launch description with launch and node information
     ld.add_action(yuv2rbg_node1)
     ld.add_action(yuv2rbg_node2)
     ld.add_action(viz_objdet_node)
-    ld.add_action(image_view_node)
+    ld.add_action(rviz2_node)
 
     return ld

@@ -5,15 +5,18 @@ AprilTag ROS Node
 <figcaption> Figure 1. RViz display of AprilTag detection outputs on PC </figcaption>
 <br />
 
-AprilTag is a robust visual fiducial system, which is used in various applications such as Robotics, localization, SLAM, etc. For more information on AprilTag, is is recommended to visit [https://april.eecs.umich.edu/software/apriltag](https://april.eecs.umich.edu/software/apriltag) and [http://wiki.ros.org/apriltag_ros](http://wiki.ros.org/apriltag_ros). 
+AprilTag is a robust visual fiducial system used in various applications such as Robotics, localization, and SLAM. For more information on AprilTag, it is recommended to visit [https://april.eecs.umich.edu/software/apriltag](https://april.eecs.umich.edu/software/apriltag) and [http://wiki.ros.org/apriltag_ros](http://wiki.ros.org/apriltag_ros).
 
-This document describes how to install and run AprilTag ROS node in the ROS1 Docker container. It consists of two steps, 1) Install AprilTag library from source, 2) Run AprilTag ROS node with monochrome camera.
+This document describes how to install and run the AprilTag ROS node in the ROS 1 Docker container. It consists of two steps:
+
+1. Install the AprilTag library from source.
+2. Run the AprilTag ROS node with a monochrome camera.
 
 ## Install AprilTag Library
 
-1. Launch the Docker image. For setting up the ROS1 environment on J7, please follow [Docker Setup for ROS 1](../docker/setting_docker_ros1.md).
+1. Launch the Docker image. For setting up the ROS 1 environment on J7, please follow [Docker Setup for ROS 1](../docker/setting_docker_ros1.md).
     ```
-    root@tda4vm-sk:~/j7ros_home# ./docker_run_ros1.sh
+    root@am6x-sk:~/j7ros_home# ./docker_run_ros1.sh
     ```
 
     Before launching `docker_run_ros1.sh`, remove '--rm' flag in `docker run` command in it since we need to commit the changes after installing AprilTag library.
@@ -34,27 +37,27 @@ This document describes how to install and run AprilTag ROS node in the ROS1 Doc
 4. Exit docker and update an image from the container's changes.
     ```
     # Check container_id
-    root@tda4vm-sk:~/j7ros_home# docker ps --all
+    root@am6x-sk:~/j7ros_home# docker ps --all
 
     # Update Docker image
-    root@tda4vm-sk:~/j7ros_home# docker commit container_id j7-ros-noetic:8.4
+    root@am6x-sk:~/j7ros_home# docker commit container_id j7-ros-noetic:8.6
     ```
 
 ## Run April ROS Node
 
-1. Launch the Docker image. 
+1. Launch the Docker image.
     ```
-    root@tda4vm-sk:~/j7ros_home# ./docker_run_ros1.sh
+    root@am6x-sk:~/j7ros_home# ./docker_run_ros1.sh
     ```
 
-2. Clone and build AprilTag ROS package.
+2. Clone and build the AprilTag ROS package.
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ mkdir src
     root@j7-docker:~/j7ros_home/ros_ws$ git clone git clone https://github.com/AprilRobotics/apriltag_ros.git src/apriltag_ros
     root@j7-docker:~/j7ros_home/ros_ws$ catkin_make --source src/apriltag_ros
     ```
 
-3. Launch AprilTag ROS node.
+3. Launch the AprilTag ROS node.
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch apriltag_ros continuous_detection.launch
@@ -66,14 +69,13 @@ This document describes how to install and run AprilTag ROS node in the ROS1 Doc
 
     Connect a USB camera to the SK board. Logitech C920 camera is used for test. Since AprilTag ROS node does not support YUV422 format, we update the following line of `mono_capture.launch` under `/opt/robotics_sdk/ros1/drivers/mono_capture/launch`:
     ```
-    <arg name="encoding"               default="bgr8"/> 
+    <arg name="encoding"               default="bgr8"/>
     ```
 
-    Then launch the camera as follows: 
+    Then launch the camera as follows:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch mono_capture mono_capture.launch
     ```
 
     As shown in Figure 1, we can visualize the AprilTag detection outputs along with their poses with respect to the camera using RViz on PC.
-

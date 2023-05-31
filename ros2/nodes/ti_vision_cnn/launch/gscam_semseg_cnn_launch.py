@@ -19,7 +19,11 @@ def get_launch_file(pkg, file_name):
     return os.path.join(pkg_dir, 'launch', file_name)
 
 def generate_launch_description():
-    ld = LaunchDescription()
+    video_id_arg = DeclareLaunchArgument(
+        'video_id',
+        default_value='2',
+        description='ID of the video device to use.'
+    )
 
     exportPerfStats_arg = DeclareLaunchArgument(
         "exportPerfStats", default_value=TextSubstitution(text="0")
@@ -55,9 +59,14 @@ def generate_launch_description():
 
     # Include gscam2 launch file
     cam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(get_launch_file('gscam2', 'v4l_mjpg_launch.py'))
+        PythonLaunchDescriptionSource(get_launch_file('gscam2', 'v4l_mjpg_launch.py')),
+        launch_arguments={
+            "video_id": LaunchConfiguration('video_id'),
+        }.items()
     )
 
+    ld = LaunchDescription()
+    ld.add_action(video_id_arg)
     ld.add_action(exportPerfStats_arg)
     ld.add_action(exportPerfStats_str_arg)
     ld.add_action(cnn_node)

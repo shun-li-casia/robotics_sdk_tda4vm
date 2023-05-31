@@ -1,5 +1,5 @@
-Stereo Vision Application
-=========================
+Stereo Vision
+=============
 
 ![](docs/sde_disparity_rviz.png)
 <figcaption>Stereo demo: disparity and confidence maps</figcaption>
@@ -9,30 +9,33 @@ Stereo Vision Application
 <figcaption>Stereo demo: point cloud</figcaption>
 <br />
 
-This demonstrates the stereo application that uses TDA4 LDC (Lens Distortion Correction) and DMPAC SDE (Stereo Depth Engine) hardware accelerators (HWAs). This application outputs not only raw disparity map, but also point-cloud with 3D position, (X,Y,Z) and color information (R,G,B).
+This demonstrates the stereo application that utilizes the TDA4 LDC (Lens Distortion Correction) and DMPAC SDE (Stereo Depth Engine) hardware accelerators (HWAs). The application not only outputs the raw disparity map but also generates a point cloud with 3D position (X, Y, Z) and color information (R, G, B).
 
-Input image format to this application is YUV422:UYVY. The LDC coverts input stereo images to YUV420 (NV12) images, also rectifies the input images using the two rectification tables for left and right cameras, respectively. Note that the rectification tables should be provided in the format that LDC can recognize.
+The input image format for this application is YUV422:UYVY. The LDC converts the input stereo images to YUV420 (NV12) format and rectifies the images using two rectification tables, one for the left camera and one for the right camera. It's important to provide the rectification tables in a format that the LDC can recognize.
 
-The SDE produces disparity map from the rectified stereo images. Two different disparity estimation modes are supported in this application. One is a "single-layer SDE mode", which outputs the raw disparity map from SDE without post processing. The other is a "multi-layer SDE refinement mode", which combines the disparity maps produced by SDE at different layers with post processing. Up to 3 layers are supported and these are configurable. The overall application data flow is shown in Figure 1.
+The SDE produces a disparity map from the rectified stereo images. The application supports two disparity estimation modes: the "single-layer SDE mode" and the "multi-layer SDE refinement mode". In the single-layer SDE mode, it outputs the raw disparity map from the SDE without any post-processing. In the multi-layer SDE refinement mode, it combines the disparity maps produced by the SDE at different layers with post processing. Up to 3 layers are supported and these are configurable. The overall application data flow is shown in Figure 1.
 
-Finally, when configured, the output disparity map and the rectified right image can be mapped to 3D point cloud by the triangulation process. Each point in the point cloud has 3D position (X, Y, Z) and color information (R, G, B).
+Additionally, when configured, the output disparity map and the rectified right image can be mapped to generate a 3D point cloud through a triangulation process. Each point in the point cloud represents a 3D position (X, Y, Z) and includes color information (R, G, B).
 
 ![](docs/stereo_demo_block_diagram.svg)
 <figcaption>Figure 1. Stereo demo: block diagram</figcaption>
 <br />
 
-## How to Run the Application in ROS 1
+## Run the Application in ROS 1
 
 ### Run the Stereo Demo
-**[TDA4]** For setting up the ROS1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+
+**[TDA4]** For setting up the ROS 1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_sde` node with playing back a ROSBAG file, run the following command inside the Docker container on TDA4 target:
 ```
 roslaunch ti_sde bag_sde.launch
 ```
+
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch`:
 ```
-roslaunch ti_sde zed_sde.launch zed_sn:=SNxxxxx
+roslaunch ti_sde zed_sde.launch video_id:=x zed_sn:=SNxxxxx
 ```
-**[Visualization on Ubuntu PC]** For setting up the ROS1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
+
+**[Visualization on Ubuntu PC]** For setting up the ROS 1 environment on remote PC, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md).
 
 To display the disparity map using RViz on PC, run:
 ```
@@ -40,33 +43,36 @@ roslaunch ti_viz_nodes rviz_sde.launch
 ```
 
 ### Run the Stereo Demo with Point-Cloud Enabled
-**[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following inside the Docker container on TDA4 target:
+**[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following command inside the Docker container on TDA4 target:
 ```
 roslaunch ti_sde bag_sde_pcl.launch
 ```
+
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde.launch`:
 ```
-roslaunch ti_sde zed_sde_pcl.launch zed_sn:=SNxxxxx
+roslaunch ti_sde zed_sde_pcl.launch video_id:=x zed_sn:=SNxxxxx
 ```
-**[Visualization on Ubuntu PC]**  To display the point-cloud data using RViz on PC, run:
+
+**[Visualization on Ubuntu PC]** To display the point-cloud data using RViz on PC, run:
 ```
 roslaunch ti_viz_nodes rviz_sde_pcl.launch
 ```
 
-## How to Run the Application in ROS 2
+## Run the Application in ROS 2
 
 ### Run the Stereo Demo
-**[TDA4]** For setting up the ROS2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
+
+**[TDA4]** For setting up the ROS 2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 To process the image stream from a ZED stereo camera, replace the launch file with `zed_sde_launch.py`:
 ```
-ros2 launch ti_sde zed_sde_launch.py zed_sn:=SNxxxxx
+ros2 launch ti_sde zed_sde_launch.py video_id:=x zed_sn:=SNxxxxx
 ```
 <!-- To launch `ti_sde` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
 ```
 ros2 launch ti_sde bag_sde_launch.py
 ``` -->
 
-**[Visualization on Ubuntu PC]** For setting up the ROS2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
+**[Visualization on Ubuntu PC]** For setting up the ROS 2 environment on remote PC, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md).
 
 To display the disparity map using RViz on PC, run:
 ```
@@ -74,16 +80,17 @@ ros2 launch ti_viz_nodes rviz_sde_launch.py
 ```
 
 ### Run the Stereo Demo with Point-Cloud Enabled
-**[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG fil on a ZED stereo camera, run the following inside the Docker container on TDA4 target:
+
+**[TDA4]** To launch the `ti_sde` node with point-cloud enabled on a ZED stereo camera input, run the following command inside the Docker container on TDA4 target:
 ```
-ros2 launch ti_sde zed_sde_pcl_launch.py zed_sn:=SNxxxxx
+ros2 launch ti_sde zed_sde_pcl_launch.py video_id:=x zed_sn:=SNxxxxx
 ```
 <!-- run the following inside the Docker container on TDA4 target:
 ```
 ros2 launch ti_sde bag_sde_pcl_launch.py
 ``` -->
 
-**[Visualization on Ubuntu PC]**  To display the point-cloud data using RViz on PC, run:
+**[Visualization on Ubuntu PC]** To display the point-cloud data using RViz on PC, run:
 ```
 ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py
 ```
@@ -132,7 +139,7 @@ point_high_z             | Max Z position of a point to be rendered             
 ## Processing Blocks
 
 ### LDC (Lense Distortion Correction)
-As shown in Figure 1, we use the LDC HWA to rectify left and right images. In order to use LDC, the rectification tables should be provided in the format that LDC supports. We provide a Python tool for generate LDC rectification tables for ZED stereo camera. For details, please see [drivers/zed_capture/README.md](../../drivers/zed_capture/README.md). For information, below is the two-step process for generating the rectification table:
+As shown in Figure 1, we use the LDC HWA to rectify the left and right images. In order to use LDC, the rectification tables should be provided in the format that LDC supports. We provide a Python tool for generate LDC rectification tables for ZED stereo camera. For details, please see [drivers/zed_capture/README.md](../../drivers/zed_capture/README.md). For information, below is the two-step process for generating the rectification table:
 
 1. Generation of raw rectification table
 
@@ -217,6 +224,9 @@ Y = -(y - dcy) x b / d
 The 3D point out of the region specified by `point_low_{x/y/z}` and `point_high_{x/y/z}` are discarded. Note that the color conversion block runs on DSP and the triangulation block runs on either DSP and A72.
 
 ## Known Issues
-1. Output disparity map may have artifacts that are common to block-based stereo algorithms, e.g., noise in the sky, texture-less area, repeated patterns, etc.
-2. While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values, 0 and 7. Therefore, it would not appear as fine as the SDE's confidence map.
+
+1. The output disparity map may contain artifacts that are common to block-based stereo algorithms. e.g., noise in the sky, texture-less area, repeated patterns, etc.
+
+2. While the confidence map from SDE has 8 values between 0 (least confident) to 7 (most confident), the confidence map from the multi-layer SDE refinement has only 2 values: 0 and 7. Therefore, the confidence map from the refinement may not appear as fine as the SDE's confidence map.
+
 3. SDE HWA supports input resolution up to 2048x1024 with 192 disparity search ranges. However, in this release, SDE only supports up to 1280x720 with 128 disparity search range.

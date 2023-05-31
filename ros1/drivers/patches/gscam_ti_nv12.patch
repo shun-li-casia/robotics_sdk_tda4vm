@@ -61,23 +61,23 @@ index 98166b7..70531c3 100644
 +endif()
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..9df6cbe
+index 0000000..1e4ef70
 --- /dev/null
 +++ b/README_TI.md
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,94 @@
 +GStreamer Camera Node for ROS 1
 +===============================
-+This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Some changes are made to customize the original ROS node for the uses with Robotics SDK for TDA4:
++This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Following changes are made to customize for the use cases in the Robotics SDK:
 +
-+* Added GStreamer pipelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode.
++* Added GStreamer pipelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode for the output.
 +* Added an example `camera_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use TI TDA4 LDC hardware accelerator).
-+* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode), and OV5640 (in YUYV mode).
-+* Added a launch file for IMX390 FPD-Link cameras.
++* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode) and OV5640 (in YUYV mode) CSI camera with GStreamer pipelines using the plugins optimized on TI devices.
++* Added launch files for IMX390 FPD-Link cameras with GStreamer pipelines using the plugins optimized on TI devices.
 +* Dependency: following modules are already built and installed in the the Robotics SDK ROS Docker images.
 +    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
 +    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
 +
-+**Note**: The customization are made only for Robotics SDK for TDA4, and some of examples from the original GIT repository may not work with these changes.
++**Note**: The customization are made only for the Robotics SDK. It was not verified that all examples from the original GIT repository still work with these changes.
 +## Usage
 +
 +### Running gscam on TDA4
@@ -116,7 +116,7 @@ index 0000000..9df6cbe
 +
 +## Usage: IMX390 Camera
 +
-+### Running gscam on TDA4
++### Running gscam for raw image capture
 +
 +Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/getting_started.html).
 +
@@ -126,6 +126,7 @@ index 0000000..9df6cbe
 +```
 +roslaunch gscam v4l_imx390_raw.launch
 +```
++### Running gscam with rectification and resizing
 +
 +We also provide a launch file that includes rectification and resizing in the GStreamer pipeline.
 +
@@ -277,7 +278,7 @@ index 0000000..4d13bc1
 +    $ bash /opt/robotics_sdk/tools/mono_camera/imx390_ldc.sh -->
 +
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
-+    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh on the target host Linux.
++    by running /opt/edge_ai_apps/scripts/setup_cameras.sh on the target host Linux.
 +    Accordingly please update the parameters or pass as arguments -->
 +    <arg name="device" default="/dev/video18"/>
 +    <arg name="subdev" default="/dev/v4l-subdev7"/>
@@ -330,13 +331,13 @@ index 0000000..4d13bc1
 +</launch>
 diff --git a/launch/v4l_imx390_raw.launch b/launch/v4l_imx390_raw.launch
 new file mode 100644
-index 0000000..973b4d0
+index 0000000..da25647
 --- /dev/null
 +++ b/launch/v4l_imx390_raw.launch
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,44 @@
 +<launch>
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
-+    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh.
++    by running /opt/edge_ai_apps/scripts/setup_cameras.sh.
 +    Accordingly please update the parameters pass as arguments -->
 +    <arg name="device" default="/dev/video18"/>
 +    <arg name="subdev" default="/dev/v4l-subdev7"/>
@@ -353,10 +354,8 @@ index 0000000..973b4d0
 +    <arg name="dcc_isp_file" default="/opt/imaging/imx390/dcc_viss.bin"/>
 +    <!-- DCC 2A binary file -->
 +    <arg name="dcc_2a_file" default="/opt/imaging/imx390/dcc_2a.bin"/>
-+    <!-- LDC binary file -->
-+    <arg name="ldc_dcc_file" default="/opt/imaging/imx390/dcc_ldc.bin"/>
 +    <!-- camera_info URL: replace with camera_info from camera calibration -->
-+    <arg name="camera_info_url" default="package://gscam/config/IMX390_HD_camera_info.yaml"/>
++    <arg name="camera_info_url" default="/opt/robotics_sdk/tools/mono_camera/imx390_35244_equidistant_camera_info.yaml"/>
 +
 +    <!-- GStreamer pipeline specified in gscam_config was tested with IMX390 camera,
 +        'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are assumed to be already installed in TDA4 ROS container.
@@ -416,12 +415,12 @@ index 0000000..fc4a477
 +</launch>
 diff --git a/launch/v4l_ov5640.launch b/launch/v4l_ov5640.launch
 new file mode 100644
-index 0000000..4dfde20
+index 0000000..50bb320
 --- /dev/null
 +++ b/launch/v4l_ov5640.launch
 @@ -0,0 +1,29 @@
 +<launch>
-+    <!-- Please make sure run "bash /opt/edgeai-gst-apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
++    <!-- Please make sure run "bash /opt/edge_ai_apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->
@@ -433,7 +432,7 @@ index 0000000..4dfde20
 +    <!-- camera name: also used as namespace for the output topic name -->
 +    <arg name="camera_name"    default="camera"/>
 +
-+    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
++    <!-- GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
 +        'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container -->
 +    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
 +        <param name="gscam_config"

@@ -1,92 +1,86 @@
 ZED Stereo Camera ROS Node
 ==========================
-This is a stereo camera ROS node for ZED camera, based on OpenCV VideoCapture API. The ROS node publishes left and right raw images and their camera_info.
+This is a stereo camera ROS node for the ZED camera, based on the OpenCV VideoCapture API. The ROS node publishes left and right raw images and their camera_info.
 
 ## Usage
 
-1. Obtain the factory camera calibration data file for your ZED camera with a script provided. Find the serial number of the ZED camera. The serial number can be found on the ZED camera box.
+1. Obtain the factory camera calibration data file for your ZED camera with a script provided.
+
     ```
     cd $SDK_DIR/tools/stereo_camera
     ./download_calib_file.sh <serial_number>
     ```
-    where `<serial_number>` is the serial number of the ZED camera.
+    Replace `<serial_number>` with the serial number of the ZED camera (found on the original box).
+    Place the downloaded calibration data file (`SNxxxx.conf`) under the `$SDK_DIR/ros1/drivers/zed_capture/config` folder.
 
-    Then place the downloaded calibration data file (`SNxxxx.conf`) under `$SDK_DIR/ros1/drivers/zed_capture/config` folder.
-
-2. Generate `camera_info` YAML files, and undistortion & rectification look-up-table (LUT) files which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator. It is recommended to perform the following steps in the Robotics SDK ROS 1 container on the Ubuntu PC, and then "scp" the output artifacts to the TDA4 target host filesystem, under `/opt/robotics_sdk/ros1/drivers/zed_capture/config`.
+2. Generate `camera_info` YAML files and undistortion/rectification look-up-table (LUT) files, which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator. It is recommended to perform the following steps in the Robotics SDK ROS 1 container on the Ubuntu PC, and then "scp" the output artifacts to the TDA4 target host filesystem, under `/opt/robotics_sdk/ros1/drivers/zed_capture/config`.
 
     Run the following script:
     ```
     cd $SDK_DIR/tools/stereo_camera
     python3 generate_rect_map.py -i SNxxxx.conf -m <camera_mode> -p <output_folder_path>
     ```
-    where
-    * `SNxxxx.conf` is the factory calibration data file obtained from Step 1, and
-    * `<camera_mode>` is camera mode. Valid `<camera_mode>`: 2K, FHD, FHD2, HD, HD2, VGA (see ``Launch File Parameters`` section for description). If the `-m` argument is not provided, by default the tool will iterate for the following three camera modes: HD, HD2, FHD and FHD2.
+    - Replace `SNxxxx.conf` with the factory calibration data file obtained from Step 1.
+    - `<camera_mode>` is the camera mode. Valid camera mode are: 2K, FHD, FHD2, HD, HD2, VGA (see ``Launch File Parameters`` section for description). If the `-m` argument is not provided, the tool will iterate by default for the following three camera modes: HD, HD2, FHD, and FHD2.
 
     This script parses the calibration data and generates the following files under `<output_folder_path>`:
 
-    * `<SN_string>_<camera_mode>_camera_info_{left,right}.yaml`: `camera_info` for left and right raw image,
-    * `<SN_string>_<camera_mode>_remap_LUT_{left,right}.bin`: undistortion and rectification remap LUT for left and right raw images.
+    - `<SN_string>_<camera_mode>_camera_info_{left,right}.yaml`: `camera_info` for left and right raw image,
+    - `<SN_string>_<camera_mode>_remap_LUT_{left,right}.bin`: undistortion/rectification remap LUT for left and right raw images.
 
-3. Update `launch/zed_capture.launch` (`launch/zed_capture_launch.py` in ROS2. Remember to run `colcon build` after any modification) to modify `zed_sn_str` parameter. Also update relevant parameters in `nodes/*/params.yaml` files for each of demo applications.
-
-4. Build the ZED camera ROS node
+3. Build the ZED camera ROS node
     ```
     cd $ROS_WS
-    # ROS1
+    # ROS 1
     catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     source devel/setup.bash
-    # ROS2
+    # ROS 2
     colcon build --base-paths /opt/robotics_sdk/ros2 --cmake-force-configure
     source install/setup.bash
     ```
 
-5. Launch the ZED camera node
+4. Launch the ZED camera node: Update `zed_sn_str` in `launch/zed_capture.launch` (`launch/zed_capture_launch.py` in ROS 2. Remember to run `colcon build` after any modification in ROS 2), or pass as a lauch argument as follows:
     ```
-    # ROS1
+    # ROS 1
     roslaunch zed_capture zed_capture.launch zed_sn_str:=SNxxxxx
-    # ROS2
+    # ROS 2
     ros2 launch zed_capture zed_capture_launch.py zed_sn_str:=SNxxxxx
     ```
+## Stereo Camera Calibration
 
-*** Note ***
-
-For the cases where ZED cameras need to be recalibrated, we provides the OpenCV based calibration tool. For more information, refer to [Stereo Camera Calibration](../../../tools/stereo_camera/calibration/README.md).
+For cases where the ZED cameras needs to be recalibrated for some reason, we provides a OpenCV based calibration tool. For more information, refer to [Stereo Camera Calibration](../../../tools/stereo_camera/calibration/README.md).
 
 ## Launch File Parameters
 
- Parameter     | Description                                                               | Value
----------------|---------------------------------------------------------------------------|-------------------------
- zed_sn_str    | ZED camera serial number string                                           | string
- video_id      | camera device number. Specify X if the device shows up as `/dev/videoX` on the target with TI Edge AI | string
- camera_mode   | ZED camera mode                                                           | '2K' (2208x1242)
- _             | _                                                                         | 'FHD' (1920x1080)
- _             | _                                                                         | 'FHD2' (1920x1024)
- _             | _                                                                         | 'HD' (1280x720)
- _             | _                                                                         | 'HD2' (1280x720)
- _             | _                                                                         | 'VGA' (672x376)
- frame_rate    | frame rate at which raw images are published                              | int
- encoding      | image encoding                                                            | 'yuv422' (default) or 'bgr8'
+| Parameter     | Description                                                               | Value                |
+|---------------|---------------------------------------------------------------------------|----------------------|
+| zed_sn_str    | ZED camera serial number string, which should start with 'SN' followed by the serial number | string       |
+| video_id      | Camera device number. Use `device_id = X` if the device shows up as `/dev/videoX` on the target | string   |
+| camera_mode   | ZED camera mode                                                           | '2K' (2208x1242)     |
+| _             | _                                                                         | 'FHD' (1920x1080)    |
+| _             | _                                                                         | 'FHD2' (1920x1024)   |
+| _             | _                                                                         | 'HD' (1280x720)      |
+| _             | _                                                                         | 'HD2' (1280x720)     |
+| _             | _                                                                         | 'VGA' (672x376)      |
+| frame_rate    | Frame rate at which raw images are published                              | int                  |
+| encoding      | Image encoding                                                            | 'yuv422' (default) or 'bgr8'   |
 
-'FHD2' is a newly added mode that provides 1920x1024 resolution that is supported by the stereo depth engine (SDE) HWA. The images are obtained by cropping top and bottom evenly the original 1080p images captured from the 'FHD' mode.
+'FHD2' is a newly added mode that provides a resolution of 1920x1024 resolution that is supported by the stereo depth engine (SDE) hardware accelerator. The images are obtained by cropping top and bottom evenly the original 1080p images captured from the 'FHD' mode.
 
-'HD2' is a newly added mode that provides 720p resolution for experiments that need a longer focal length than the native 'HD'. The images are obtained by center-cropping the original 1080p images captured from the 'FHD' mode.
+'HD2' is a newly added mode that provides a resolution of 720p for experiments that need a longer focal length than the native 'HD'. The images are obtained by center-cropping the original 1080p images captured from the 'FHD' mode.
 
-When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the ZED camera is converted to YUV422::UYVY format considering the compatibility with LDC hardware accelerator.
+When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the ZED camera is converted to YUV422::UYVY format, considering the compatibility with LDC hardware accelerator.
 
 ## Data Collection Steps
 
-1. Connect the ZED camera to UBS 3 port (a USB type-A to type-C adaptor is required on TDA4 EVM). Check if the camera is recognized with `ls /dev/video*`. In a Ubuntu PC with a built-in webcam, the stereo camera can be recognized as `/dev/video2`.
+1. Connect the ZED camera to UBS 3 port (it is recommended to use a USB type-A to type-C adaptor on TDA4VM). Check if the camera is recognized with the command `ls /dev/video*`. If necessary, update `launch/zed_capture.launch` to change video device, camera mode, frame rate, and etc.
 
-2. If necessary, update `launch/zed_capture.launch` to change video device, camera mode, frame rate, and etc.
-
-3. On the first terminal, launch the ZED capture node with following, and keep it running:
+2. On the first terminal, launch the ZED capture node with following and keep it running:
     ```
     $ roslaunch zed_capture zed_capture.launch zed_sn_str:=SNxxxxx
     ```
 
-4. On the second terminal, to capture into ROS bag files, run one of two examples below
+3. On the second terminal, to capture into ROS bag files, run one of two examples below
 
     ```
     # Collect 15 seconds of data and stop itself
@@ -95,12 +89,11 @@ When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the ZED c
     $ roslaunch zed_capture recordbag_split.launch
     ```
 
-5. (Optional to check the ROS topics) On 3rd terminal,
+4. (Optional: to check the ROS topics) On 3rd terminal, run the following commands:
     ```
-    $ rostopic list
     $ rqt_image_view /camera/left/image_raw
     ```
 
 By default, ROS bag files are stored under `${HOME}/.ros` folder.
 
-**Note**: It is not recommended combining the `zed_capture` node and ROSBAG capture into a single launch file, since it takes some several seconds for the ZED camera to settle down its ISP tuning after the ZED camera node is started.
+**Note**: It is not recommended to combine the `zed_capture` node and ROSBAG capture into a single launch file, as it takes several seconds for the ZED camera to settle down its ISP tuning after the ZED camera node is started.

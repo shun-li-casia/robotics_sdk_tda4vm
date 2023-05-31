@@ -13,6 +13,7 @@ from launch.substitutions import LaunchConfiguration
 # undistortion/rectification look-up table files for LDC hardware accelerator
 
 def finalize_node(context, *args, **kwargs):
+    device_name = "/dev/video" + LaunchConfiguration('video_id').perform(context)
     zed_sn_str  = LaunchConfiguration("zed_sn_str").perform(context)
     camera_mode = LaunchConfiguration("camera_mode").perform(context)
     camera_info_base = "/opt/robotics_sdk/ros1/drivers/zed_capture/config"
@@ -32,7 +33,7 @@ def finalize_node(context, *args, **kwargs):
             "frame_id_right":          "right_frame",
             "camera_mode":             LaunchConfiguration("camera_mode"),
             "frame_rate":              LaunchConfiguration("frame_rate"),
-            "device_name":             LaunchConfiguration("device_name"),
+            "device_name":             device_name,
             "encoding":                LaunchConfiguration("encoding"),
             "image_topic_left":        image_topic_left,
             "image_topic_right":       image_topic_right,
@@ -59,24 +60,21 @@ def finalize_node(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    ld = LaunchDescription()
+    # video_id
+    video_id = DeclareLaunchArgument(
+        name="video_id",
+        default_value="2",
+        description="Video device ID",
+    )
 
-    # zed_sn_str: arg that can be set from the command line or a default will be used
+    # ZED camera serial number string
     zed_sn_str = DeclareLaunchArgument(
         name="zed_sn_str",
         default_value=TextSubstitution(text="SN18059"),
         description='string for ZED camera serial number'
     )
 
-    # device_name: arg that can be set from the command line or a default will be used
-    device_name = DeclareLaunchArgument(
-        name="device_name",
-        default_value=TextSubstitution(text="/dev/video2"),
-        description='''to find your device name, use ls /dev/video*
-                       and look for the name begin with video'''
-    )
-
-    # camera_mode: arg that can be set from the command line or a default will be used
+    # camera_mode
     camera_mode = DeclareLaunchArgument(
         name="camera_mode",
         default_value=TextSubstitution(text="HD"),
@@ -85,36 +83,37 @@ def generate_launch_description():
                       'HD2' - 1280x720: center-cropped from 1080p"""
     )
 
-    # frame_rate: arg that can be set from the command line or a default will be used
+    # frame_rate
     frame_rate = DeclareLaunchArgument(
         name="frame_rate",
         default_value=TextSubstitution(text="15.0"),
         description='Frame rate'
     )
 
-    # encoding: arg that can be set from the command line or a default will be used
+    # encoding
     encoding = DeclareLaunchArgument(
         name="encoding",
         default_value=TextSubstitution(text="yuv422"),
         description='''encoding: "yuv422" (default, output in YUV422:UYVY format), "bgr8"'''
     )
 
-    # topic_ns_left: arg that can be set from the command line or a default will be used
+    # topic_ns_left
     topic_ns_left = DeclareLaunchArgument(
         name="topic_ns_left",
         default_value=TextSubstitution(text="camera/left"),
         description='''topic_ns_left: topic namespace (left)'''
     )
 
-    # topic_ns_right: arg that can be set from the command line or a default will be used
+    # topic_ns_right
     topic_ns_right = DeclareLaunchArgument(
         name="topic_ns_right",
         default_value=TextSubstitution(text="camera/right"),
         description='''topic_ns_right: topic namespace (right)'''
     )
 
+    ld = LaunchDescription()
+    ld.add_action(video_id)
     ld.add_action(zed_sn_str)
-    ld.add_action(device_name)
     ld.add_action(camera_mode)
     ld.add_action(frame_rate)
     ld.add_action(encoding)
@@ -123,4 +122,3 @@ def generate_launch_description():
     ld.add_action(OpaqueFunction(function=finalize_node))
 
     return ld
-

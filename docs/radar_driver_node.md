@@ -90,7 +90,7 @@ When the standalone sensors are connected to the TDA4, the device appears as `/d
 
 1. On the TDA4 host linux, create a file named `99-usb-serial.rules` in the directory `/etc/udev/rules.d/` with super user:
     ```
-    root@tda4vm-sk:~$ sudo vi /etc/udev/rules.d/99-usb-serial.rules
+    root@am6x-sk:~$ sudo vi /etc/udev/rules.d/99-usb-serial.rules
     ```
 
 2. Press 'i', then type or paste the following:
@@ -102,7 +102,7 @@ When the standalone sensors are connected to the TDA4, the device appears as `/d
 
 4. Plug in the first sensor to the TDA4 and type the following in the command line:
     ```
-    root@tda4vm-sk:~$ ls -1 /dev/ | grep mmWave
+    root@am6x-sk:~$ ls -1 /dev/ | grep mmWave
     ```
 
 5. Two symbolic links should appear. Example: "mmWave_00CE0FCA_00", typically the command port, and "mmWave_00E0FCA_01", typically the data port.
@@ -128,16 +128,15 @@ For details regarding time synchronization of frames from multiple mmWave device
 1. Build the mmWave radar ROS node
     ```
     cd $ROS_WS
-    # ROS1
+    # ROS 1
     catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     source devel/setup.bash
     ```
 
 2. Launch the mmWave radar ROS node
     ```
-    # ROS1
+    # ROS 1
     roslaunch ti_mmwave_rospkg 6843_3d_TDA4VM.launch # for single sensor
-
     roslaunch ti_mmwave_rospkg 6843_quad_3d_TDA4VM.launch # for multiple sensors
     ```
 

@@ -8,9 +8,11 @@ from launch.substitutions import TextSubstitution
 from launch.substitutions import LaunchConfiguration
 
 def finalize_node(context, *args, **kwargs):
-    image_format    = int(LaunchConfiguration("image_format").perform(context))
+    image_format = int(LaunchConfiguration("image_format").perform(context))
+    zed_sn = LaunchConfiguration("zed_sn").perform(context)
+    lut_folder = "/opt/robotics_sdk/ros1/drivers/zed_capture/config"
+    lut_file_path = os.path.join(lut_folder, zed_sn+"_HD_LUT_right.bin")
     enable_ldc_node = int(LaunchConfiguration("enable_ldc_node").perform(context))
-    lut_file_path   = LaunchConfiguration("lut_file_path").perform(context)
     dl_model_path   = LaunchConfiguration("dl_model_path").perform(context)
     exportPerfStats = int(LaunchConfiguration("exportPerfStats").perform(context))
     print(f"exportPerfStats = {exportPerfStats}")
@@ -43,7 +45,13 @@ def finalize_node(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    ld = LaunchDescription()
+
+    # ZED camera serial number string
+    zed_sn = DeclareLaunchArgument(
+        name="zed_sn",
+        default_value=TextSubstitution(text="SN5867575"),
+        description='string for ZED camera serial number'
+    )
 
     # Input image format: 0 - VX_DF_IMAGE_U8, 1 - VX_DF_IMAGE_NV12, 2 - VX_DF_IMAGE_UYVY
     image_format = DeclareLaunchArgument(
@@ -57,13 +65,6 @@ def generate_launch_description():
         name="enable_ldc_node",
         default_value=TextSubstitution(text='1'),
         description='enable ldc node flag'
-    )
-
-    # LDC LUT definition file path
-    lut_file_path = DeclareLaunchArgument(
-        name="lut_file_path",
-        default_value=TextSubstitution(text="/opt/robotics_sdk/ros1/drivers/zed_capture/config/SN5867575_HD_LUT_right.bin"),
-        description='LDC LUT definition file path'
     )
 
     # DL model path
@@ -81,9 +82,10 @@ def generate_launch_description():
         description='flag for exporting the performance data'
     )
 
+    ld = LaunchDescription()
+    ld.add_action(zed_sn)
     ld.add_action(image_format)
     ld.add_action(enable_ldc_node)
-    ld.add_action(lut_file_path)
     ld.add_action(dl_model_path)
     ld.add_action(exportPerfStats)
     ld.add_action(OpaqueFunction(function=finalize_node))

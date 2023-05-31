@@ -5,18 +5,20 @@ RealSense Camera ROS Node
 <figcaption> Figure 1. RViz display of RealSense camera outputs on PC </figcaption>
 <br />
 
-Intel RealSense camera, D435i, is widely used in many Robotics applications that need depth information. This document describes how to install and run Intel RealSense camera (D435i) ROS node in the ROS1 Docker container on J7. It consists of two steps, 1) Install RealSense SDK from source, 2) Clone and RealSense camera ROS node.
+Intel RealSense camera D435i is widely used in many robotics applications that require depth information. This document describes how to install and run the Intel RealSense camera (D435i) ROS node in the ROS 1 Docker container on J7. It consists of two steps:
+1. Install RealSense SDK from source.
+2. Clone and install the RealSense camera ROS node.
 
 ## Install RealSense SDK from Source
 
-1. Launch the Docker image. For setting up the ROS1 environment on J7, please follow [Docker Setup for ROS 1](../docker/setting_docker_ros1.md).
+1. Launch the Docker image. For setting up the ROS 1 environment on J7, please follow [Docker Setup for ROS 1](../docker/setting_docker_ros1.md).
     ```
-    root@tda4vm-sk:~/j7ros_home# ./docker_run_ros1.sh
+    root@am6x-sk:~/j7ros_home# ./docker_run_ros1.sh
     ```
 
     Before launching `docker_run_ros1.sh`, remove '--rm' flag in `docker run` command in it since we need to commit the changes after installing RealSense SDK.
 
-2. Clone RealSense SDK.
+2. Clone the RealSense SDK.
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ export REALSENSE_SOURCE_DIR=$HOME/j7ros_home/librealsense
     root@j7-docker:~/j7ros_home/ros_ws$ sudo apt-get update
@@ -28,7 +30,7 @@ Intel RealSense camera, D435i, is widely used in many Robotics applications that
 
     ```
 
-3. Build and Install RealSense SDK.
+3. Build and the Install RealSense SDK.
     ```
     # Build SDK
     root@j7-docker:~/j7ros_home/librealsense/build$ export REALSENSE_INSTALL_PREFIX=/opt/realsense
@@ -47,35 +49,32 @@ Intel RealSense camera, D435i, is widely used in many Robotics applications that
     root@j7-docker:~/j7ros_home/librealsense/build$ sudo apt install ros-noetic-ddynamic-reconfigure
     ```
 
-4. Exit docker and update an image from the container's changes.
+4. Exit Docker and update an image from the container's changes.
     ```
     # Check container_id
-    root@tda4vm-sk:~/j7ros_home# docker ps --all
+    root@am6x-sk:~/j7ros_home# docker ps --all
 
-    # Update Docker image 
-    root@tda4vm-sk:~/j7ros_home# docker commit container_id j7-ros-noetic:8.4
+    # Update Docker image
+    root@am6x-sk:~/j7ros_home# docker commit container_id j7-ros-noetic:8.6
     ```
 
 ## Run RealSense ROS Node
 
-1. Launch the Docker image. 
+1. Launch the Docker image.
     ```
-    root@tda4vm-sk:~/j7ros_home# ./docker_run_ros1.sh
+    root@am6x-sk:~/j7ros_home# ./docker_run_ros1.sh
     ```
 
-2. Clone Intel RealSense ROS package.
+2. Clone the Intel RealSense ROS package.
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ mkdir src
     root@j7-docker:~/j7ros_home/ros_ws$ git clone https://github.com/IntelRealSense/realsense-ros.git src/realsense-ros
     root@j7-docker:~/j7ros_home/ros_ws$ catkin_make --source src/realsense-ros
     ```
 
-3. Launch RealSense camera.
-
+3. Launch the RealSense camera.
     Connect a RealSense camera to the SK-board. Then launch the RealSense camera as follows:
-
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch realsense2_camera rs_camera.launch
     ```
-
     We can visualize the RealSense camera outputs using RViz on PC as shown in Figure 1.

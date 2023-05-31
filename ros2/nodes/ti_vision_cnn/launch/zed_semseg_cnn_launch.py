@@ -16,7 +16,11 @@ def get_launch_file(pkg, file_name):
     return os.path.join(pkg_dir, 'launch', file_name)
 
 def generate_launch_description():
-    ld = LaunchDescription()
+    # video_id: when camera recognized as /dev/videoX, set video_id = X
+    video_id_arg = DeclareLaunchArgument(
+        'video_id',
+        default_value='2'
+    )
 
     # ZED camera serial number
     zed_sn_arg = DeclareLaunchArgument(
@@ -36,6 +40,7 @@ def generate_launch_description():
     cnn_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(get_launch_file('ti_vision_cnn', 'semseg_cnn_launch.py')),
         launch_arguments={
+            "zed_sn": LaunchConfiguration('zed_sn'),
             'lut_file_path': LaunchConfiguration('lut_file_path')
         }.items()
     )
@@ -44,11 +49,14 @@ def generate_launch_description():
     zed_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(get_launch_file('zed_capture', 'zed_capture_remap_launch.py')),
         launch_arguments={
+            "video_id": LaunchConfiguration('video_id'),
             "zed_sn_str": LaunchConfiguration('zed_sn'),
             'topic_ns_right': 'camera',
         }.items()
     )
 
+    ld = LaunchDescription()
+    ld.add_action(video_id_arg)
     ld.add_action(zed_sn_arg)
     ld.add_action(exportPerfStats_arg)
     ld.add_action(lut_file_path_arg)

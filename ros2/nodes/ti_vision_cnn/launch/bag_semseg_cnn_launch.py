@@ -10,8 +10,6 @@ from launch.substitutions import LaunchConfiguration
 dl_model_path = "/opt/model_zoo/ONR-SS-8818-deeplabv3lite-mobv2-qat-robokit-768x432"
 
 def generate_launch_description():
-    ld = LaunchDescription()
-
     exportPerfStats_arg = DeclareLaunchArgument(
         "exportPerfStats", default_value=TextSubstitution(text="0")
     )
@@ -42,6 +40,7 @@ def generate_launch_description():
         )
     )
 
+    ld = LaunchDescription()
     ld.add_action(exportPerfStats_arg)
     ld.add_action(dl_model_path_arg)
     ld.add_action(cnn_launch)

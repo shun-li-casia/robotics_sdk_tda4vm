@@ -12,6 +12,12 @@ def get_launch_file(pkg, file_name):
     return os.path.join(pkg_dir, 'launch', file_name)
 
 def generate_launch_description():
+    # video_id: when camera recognized as /dev/videoX, set video_id = X
+    video_id_arg = DeclareLaunchArgument(
+        'video_id',
+        default_value='2'
+    )
+
     # ZED camera serial number
     zed_sn_arg = DeclareLaunchArgument(
         "zed_sn", default_value=TextSubstitution(text="SN18059")
@@ -37,11 +43,13 @@ def generate_launch_description():
     zed_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(get_launch_file('zed_capture', 'zed_capture_launch.py')),
         launch_arguments={
+            "device_id": LaunchConfiguration('video_id'),
             "zed_sn_str": LaunchConfiguration('zed_sn'),
         }.items()
     )
 
     return LaunchDescription([
+        video_id_arg,
         zed_sn_arg,
         exportPerfStats_arg,
         sde_launch,

@@ -70,12 +70,14 @@ fi
 
 if [[ "$ARCH" == "aarch64" ]]; then
     source ${SDK_DIR}/docker/scripts/detect_soc.sh
-    cp -p ${SDK_DIR}/docker/install_osrt.sh ${DST_DIR}
+    # Installation of OSRT libs is now part of edgeai-gst-app/scripts/install_dl_inferer.sh
     cp -p /opt/edgeai-gst-apps/scripts/install_dl_inferer.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_modules.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_kernels.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_gst_plugins.sh ${DST_DIR}
-    cp -p /opt/edgeai-gst-apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
+    # Below is only for 8.6
+    # cp -p /opt/edgeai-gst-apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
+    cp -p /opt/robotics_sdk/scripts/install_ti_gpio_libs.sh ${DST_DIR}
 fi
 
 # Copy library files to the temporary folder

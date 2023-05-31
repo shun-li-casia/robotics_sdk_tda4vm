@@ -74,6 +74,12 @@ ROSBAG_FILE       = ros-bag_2020_1109.tar.gz
 DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
 VISLOC_DATA_FILE  = visual-localization-data_2022_0908.tar.gz
 VISLOC_MODEL_FILE = visual-localization-model_8.6.tar.gz
+ifeq ($(SOC), j721s2)
+VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
+endif
+ifeq ($(SOC), j784s4)
+VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
+endif
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
 

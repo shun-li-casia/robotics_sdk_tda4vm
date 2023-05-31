@@ -1,13 +1,9 @@
-USB Mono Camera ROS Node
-========================
-This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCapture API. The ROS node publishes raw image and its camera_info.
+Mono Camera Tools and Capture Node
+==================================
 
-**NOTE**: This ROS node currently is tested only with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode.
-'MJPG' (Motion-JPEG) mode is not yet enabled and tested. To use the camera in 'MJPG' mode, it is recommended to use 'gscam'/'gscam2' ROS package instead.
+## Mono Camera Tools
 
-## Usage
-
-1. Camera Calibration: A Python tool for camera calibration is provided: `$SDK_DIR/tools/mono_camera/camera_calibration.py`. This calibration tool takes a set of checkerboard images captured with the target USB camera, and generates `camera_info.yaml`. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool, and for examples, please see `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
+1. **Camera Calibration**: A Python tool for camera calibration is provided: `$SDK_DIR/tools/mono_camera/camera_calibration.py`. This tool calibrates the camera using a set of checkerboard images captured with the target USB camera and generates a `camera_info.yaml` file. Example calibration images are provided. While setting up the Docker environment, the calibration images are downloaded under `$HOME/j7ros_home/data/calib_images`. Below is the usage of the camera calibration tool. 
     ```
     usage: camera_calibration.py [-h] [-p PATH] [-e EXT] [-r PTS_ROWS] [-c PTS_COLUMNS] [-s SQUARE_SIZE] [-v VISUALIZE] [-f SCALING_FACTOR] [-o OUT_FNAME] [-n CAMERA_NAME]
 
@@ -30,8 +26,9 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
     -n CAMERA_NAME, --camera_name CAMERA_NAME
                             Camera name
     ```
+    For examples of how to use the tool, please refer to `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
 
-2. Rectification Map Generation: A Python tool for generating rectification map is provided: `$SDK_DIR/tools/mono_camera/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file, and generates a binary file for undistortion & rectification look-up-table (LUT) which is required in offloading the undistortion/rectification on J7 VPAC/LDC hardware accelerator. Below is the usage of the tool, and for examples, please see `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
+2. **Rectification Map Generatio**n: A Python tool is provided for generating rectification map: `$SDK_DIR/tools/mono_camera/generate_rect_map_mono.py`. This tool takes the `camera_info` YAML file as input and generates a binary file for undistortion/rectification look-up-table (LUT). The generated LUT is required for offloading the undistortion/rectification processes to J7 VPAC/LDC hardware accelerator. Below is the usage of the tool.
 
     ```
     usage: generate_rect_map_mono.py [-h] [--input INPUT] [--name NAME]
@@ -42,37 +39,44 @@ This is a camera ROS node for USB mono cameras (Webcam), based on OpenCV VideoCa
                             YAML file name for camera_info. The file should be stored under ../config folder
     --name NAME, -n NAME  Camera name
     ```
+    For examples of how to use the tool, please see `$SDK_DIR/tools/mono_camera/calib_C920.sh`.
+## USB Mono Camera ROS Node
 
-3. Build the USB mono camera ROS node
+This is a ROS node for USB mono cameras (Webcam) based on the OpenCV VideoCapture API. The node publishes raw images and camera information.
+
+**NOTE**: This ROS node has only been tested with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. 'MJPG' (Motion-JPEG) mode is currently not enabled or tested. If you want to use the camera in 'MJPG' mode, it is recommended to use the **gscam** / **gscam2** ROS package instead.
+
+### Usage
+1. Build the USB mono camera ROS node
     ```
     cd $ROS_WS
-    # ROS1
+    # ROS 1
     catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     source devel/setup.bash
-    # ROS2
+    # ROS 2
     colcon build --base-paths /opt/robotics_sdk/ros2 --cmake-force-configure
     source install/setup.bash
     ```
 
-4. Launch the mono camera node
+2. Launch the mono camera node
     ```
-    # ROS1
+    # ROS 1
     roslaunch mono_capture mono_capture.launch
-    # ROS2
+    # ROS 2
     ros2 launch mono_capture mono_capture_launch.py
     ```
 
-## Launch File Parameters
+### Launch File Parameters
 
- Parameter    | Description                                                               | Value
---------------|---------------------------------------------------------------------------|-------------------------
- model_str    | Camera model string                                                       | string
- video_id     | camera device number. Specify X if the device shows up as `/dev/videoX` on the target with TI Edge AI | string
- camera_mode  | Camera mode                                                               | 'FHD' (1920x1080)
- _            | _                                                                         | 'HD' (1280x720)
- _            | _                                                                         | 'VGA' (640x480)
- frame_rate   | Frame rate at which raw images are published                              | int
- encoding     | image encoding                                                            | 'yuv422' (default) or 'bgr8'
- topic_ns     | topic namespace                                                           | 'camera' (default)
+| Parameter   | Description                                                                | Value                  |
+|-------------|----------------------------------------------------------------------------|------------------------|
+| model_str   | Camera model string                                                        | string                 |
+| video_id    | Camera device number. Set `device_id = X` if the device shows up as `/dev/videoX` on the target with TI Edge AI | string |
+| camera_mode | Camera mode                                                                | 'FHD' (1920x1080)      |
+|             |                                                                            | 'HD' (1280x720)        |
+|             |                                                                            | 'VGA' (640x480)        |
+| frame_rate  | Frame rate at which raw images are published                               | int                    |
+| encoding    | Image encoding                                                             | 'yuv422' (default) or 'bgr8' |
+| topic_ns    | Topic namespace                                                            | 'camera' (default)     |
 
-**NOTE**: When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the webcam is converted to YUV422::UYVY format considering the compatibility with LDC hardware accelerator.
+**NOTE**: When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the webcam is converted to YUV422::UYVY format to ensure compatibility with the LDC hardware accelerator.

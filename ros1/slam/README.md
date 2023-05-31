@@ -15,35 +15,35 @@ Figure 1 shows the output map by Hector SLAM on the 2D Lidar data from TurtleBot
 
 1. Download 2D Lidar data.
     ```
-    root@tda4vm-sk:~/j7ros_home$ make lidar2d_download
+    root@am6x-sk:~/j7ros_home$ make lidar2d_download
     ```
     2D Lidar data is saved in $HOME/j7ros_home/data/lidar2d.
 
 2. Clone the Hector SLAM git repository. Run the followings on the J7 host Linux:
     ```
-    root@tda4vm-sk:~/j7ros_home$ export SLAM_ROOT=/opt/robotics_sdk/ros1/slam
-    root@tda4vm-sk:~/j7ros_home$ $SLAM_ROOT/j7_setup_hector_slam.sh
+    root@am6x-sk:~/j7ros_home$ export SLAM_ROOT=/opt/robotics_sdk/ros1/slam
+    root@am6x-sk:~/j7ros_home$ $SLAM_ROOT/j7_setup_hector_slam.sh
     ```
     It clones the Hector SLAM git repository and applies the patch to run it on the 2D Lidar data provided.
 
-3. Launch the Docker image. For setting up the ROS1 environment on J7 host, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
+3. Launch the Docker image. For setting up the ROS 1 environment on J7 host, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
     ```
-    root@tda4vm-sk:~/j7ros_home$ ./docker_run_ros1.sh
+    root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh
     ```
 
 4. Compile the Hector SLAM inside the Docker container:
     ```
-    root@tda4vm-sk:~/j7ros_home/ros_ws$ catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
+    root@am6x-sk:~/j7ros_home/ros_ws$ catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     ```
 
 5. Run the hector SLAM
     ```
-    root@tda4vm-sk:~/j7ros_home/ros_ws$ roslaunch hector_slam_launch tutorial_j7.launch
+    root@am6x-sk:~/j7ros_home/ros_ws$ roslaunch hector_slam_launch tutorial_j7.launch
     ```
 
 ### Visualize map and pose on Ubuntu PC
 
-For setting up the ROS1 environment on the remote PC, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
+For setting up the ROS 1 environment on the remote PC, please follow [Docker Setup for ROS 1](../../docker/setting_docker_ros1.md).
 
 1. As done on the J7 host Linux, clone the Hector SLAM git repository:
     ```
