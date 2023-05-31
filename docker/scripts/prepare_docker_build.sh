@@ -75,9 +75,7 @@ if [[ "$ARCH" == "aarch64" ]]; then
     cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_modules.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_tiovx_kernels.sh ${DST_DIR}
     cp -p /opt/edgeai-gst-apps/scripts/install_gst_plugins.sh ${DST_DIR}
-    # Below is only for 8.6
-    # cp -p /opt/edgeai-gst-apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
-    cp -p /opt/robotics_sdk/scripts/install_ti_gpio_libs.sh ${DST_DIR}
+    cp -p /opt/edgeai-gst-apps/scripts/install_ti_gpio_libs.sh ${DST_DIR}
 fi
 
 # Copy library files to the temporary folder

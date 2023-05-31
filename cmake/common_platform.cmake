@@ -119,12 +119,12 @@ elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
         message(FATAL_ERROR "SOC ${TARGET_SOC_LOWER} is not supported.")
     endif()
 
-    message(STATUS "SOC=${TARGET_SOC_LOWER}")
+    # message(STATUS "SOC=${TARGET_SOC_LOWER}")
 else()
     message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
 endif()
 
-set(TENSORFLOW_RT_LIBS 
+set(TENSORFLOW_RT_LIBS
     tensorflow-lite
     flatbuffers
     fft2d_fftsg2d
