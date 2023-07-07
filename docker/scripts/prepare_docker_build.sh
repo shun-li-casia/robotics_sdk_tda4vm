@@ -64,8 +64,16 @@ cp -p ${SDK_DIR}/docker/setup_proxy.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/ros_setup.sh ${DST_DIR}
 cp -p ${SDK_DIR}/docker/entrypoint_*.sh ${DST_DIR}
 
-if [ -d "/opt/proxy" ]; then
-    cp -rp /opt/proxy/* ${DST_DIR}/proxy
+if [[ "$ARCH" == "aarch64" ]]; then
+    if [ -d "/opt/proxy" ]; then
+        cp -rp /opt/proxy/* ${DST_DIR}/proxy
+    fi
+fi
+
+if [[ "$ARCH" == "x86_64" ]]; then
+    if [ -d "$HOME/proxy" ]; then
+        cp -rp $HOME/proxy/* ${DST_DIR}/proxy
+    fi
 fi
 
 if [[ "$ARCH" == "aarch64" ]]; then

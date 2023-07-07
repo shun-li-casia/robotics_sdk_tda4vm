@@ -1,7 +1,7 @@
 
 # Docker Setup for ROS 1
 
-## Set Up Docker Environment on the TDA4
+## Set Up Docker Environment on the Target
 
 In the ROS 1 Docker container environment, ROS Noetic, necessary libraries and tools are installed.
 
@@ -21,19 +21,27 @@ In the ROS 1 Docker container environment, ROS Noetic, necessary libraries and t
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh
     ```
-    It is important to use `docker_run_ros1.sh` script to start a Docker container since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the TDA4 device.
+    It is important to use `docker_run_ros1.sh` script to start a Docker container since the script includes all the necessary settings to leverage all the cores and hardware accelerators of the TI Processor.
 
 4. To build the ROS applications, inside the Docker container:
+    ````{only} tag_j7x
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ catkin_make --source /opt/robotics_sdk/ros1 --force-cmake
     # TDA4VM: In case catkin_make fails due to limited memory, "-j1" option can be added as follows
     root@j7-docker:~/j7ros_home/ros_ws$ catkin_make -j1 --source /opt/robotics_sdk/ros1 --force-cmake
     root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
     ```
+    ````
+    ````{only} tag_am62a
+    ```
+    root@j7-docker:~/j7ros_home/ros_ws$ catkin_make -j1 --source /opt/robotics_sdk/ros1 --force-cmake
+    root@j7-docker:~/j7ros_home/ros_ws$ source devel/setup.bash
+    ```
+    ````
 
 ## Set Up Docker Environment on the Remote PC for Visualization
 
-You can choose any folder, but `init_setip.sh` script sets up `${HOME}/j7ros_home` as the working directory.
+You can choose any folder, but `init_setup.sh` script sets up `${HOME}/j7ros_home` as the working directory.
 
 1. To generate the scripts for building and running a Docker image for ROS 1 Noetic:
     ```
@@ -53,10 +61,10 @@ You can choose any folder, but `init_setip.sh` script sets up `${HOME}/j7ros_hom
 
 3. ROS network setting: We need to set up two environment variables that will be passed to the Docker container and used to configure ROS network settings. Please update the following two lines in `setup_env_pc.sh`:
     ```
-    export J7_IP_ADDR=<J7_IP_address>
+    export J7_IP_ADDR=<target_IP_address>
     export PC_IP_ADDR=<PC_IP_address>
     ```
-    `<J7_IP_address>` can be found by running `make ip_show` on a TDA4 terminal.
+    `<target_IP_address>` can be found by running `make ip_show` on a target terminal.
 
     Then, source the updated script before executing `docker_run_ros1.sh` (in the next step):
     ```
@@ -76,13 +84,14 @@ You can choose any folder, but `init_setip.sh` script sets up `${HOME}/j7ros_hom
 
 ## Run Demo Applications
 
-The table below summarizes the launch commands that you can use in the Docker container for each demo, on the TDA4, and on the remote visualization PC. For more details, see the following subsections.
+The table below summarizes the launch commands that you can use in the Docker container for each demo, on the target SK board, and on the remote visualization PC. For more details, see the following subsections.
 
 Launch arguments can be passed to the following launch commands.
 - To specify a camera recognized as `/dev/videoX`, use the argument `video_id:=X`.
 - To specify the serial number of the ZED camera (found in the original box), use the argument `zed_sn`, which should start with 'SN' followed by the serial number.
 
-| Demo (Input Source) | Launch command on TDA4          | Launch command on Remote Visualization PC  |
+```{only} tag_j7x
+| Demo (Input Source) | Launch command on Target        | Launch command on Remote Visualization PC  |
 |---------------------|---------------------------------|--------------------------------------------|
 | Stereo Vision (ROSBAG)     | roslaunch ti_sde bag_sde.launch  | roslaunch ti_viz_nodes rviz_sde.launch |
 | Stereo Vision (ZED camera) | roslaunch ti_sde zed_sde.launch video_id:=x zed_sn:=SNxxxxx | same as above |
@@ -99,16 +108,26 @@ Launch arguments can be passed to the following launch commands.
 | Object Detection with 3D Spatial Information (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch |
 | Object Detection with 3D Spatial Information (ZED camera) | roslaunch ti_objdet_range zed_objdet_range.launch video_id:=x zed_sn:=SNxxxxx | same as above |
 | Visual Localization (ROSBAG)       | roslaunch ti_vl bag_visloc.launch    | roslaunch ti_viz_nodes rviz_visloc.launch |
+```
+```{only} tag_am62a
+| Demo (Input Source) | Launch command on Target        | Launch command on Remote Visualization PC  |
+|---------------------|---------------------------------|--------------------------------------------|
+| Semantic Segmentation CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch |
+| Semantic Segmentation CNN (Mono camera) | roslaunch ti_vision_cnn gscam_semseg_cnn.launch video_id:=x | same as above |
+| Object Detection CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch |
+| Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x | same as above |
+```
 
-In the following, **[TDA4]** and **[PC]** indicate the steps that should be launched, either on the TDA4 target or on the PC.
+In the following, **[SK]** and **[PC]** indicate the steps that should be launched, either on the target SK board or on the PC.
 
-### Run Stereo Vision Application
+````{only} tag_j7x
+**Run Stereo Vision Application**
 
-1. **[TDA4]** To launch `ti_sde` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker container:
+1. **[SK]** To launch `ti_sde` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker container:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_sde bag_sde.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde.launch
     ```
@@ -118,14 +137,16 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_sde.launch
     ```
+````
 
-### Run Stereo Vision Application with Point-Cloud Enabled
+````{only} tag_j7x
+**Run Stereo Vision Application with Point-Cloud Enabled**
 
-1. **[TDA4]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+1. **[SK]** To launch `ti_sde` node with point-cloud enabled on a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_sde bag_sde_pcl.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_sde bag_sde_pcl.launch
     ```
@@ -135,13 +156,15 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_sde_pcl.launch
     ```
-### Run Semantic Segmentation CNN Application
+````
 
-1. **[TDA4]** To launch semantic segmentation demo with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+**Run Semantic Segmentation CNN Application**
+
+1. **[SK]** To launch semantic segmentation demo with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_vision_cnn bag_semseg_cnn.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_semseg_cnn.launch
     ```
@@ -152,13 +175,13 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_semseg_cnn.launch
     ```
 
-### Run Object Detection CNN Application
+**Run Object Detection CNN Application**
 
-1. **[TDA4]** To launch object detection demo with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+1. **[SK]** To launch object detection demo with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_vision_cnn bag_objdet_cnn.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vision_cnn bag_objdet_cnn.launch
     ```
@@ -169,13 +192,14 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_objdet_cnn.launch
     ```
 
-### Run 3D Obstacle Detection Application
+````{only} tag_j7x
+**Run 3D Obstacle Detection Application**
 
-1. **[TDA4]** To launch `ti_estop` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+1. **[SK]** To launch `ti_estop` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_estop bag_estop.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_estop bag_estop.launch
     ```
@@ -185,14 +209,16 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_estop.launch
     ```
+````
 
-### Run Object Detection with 3D Spatial Information
+````{only} tag_j7x
+**Run Object Detection with 3D Spatial Information**
 
-1. **[TDA4]** To launch `ti_objdet_range` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+1. **[SK]** To launch `ti_objdet_range` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_objdet_range bag_objdet_range.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_objdet_range bag_objdet_range.launch
     ```
@@ -202,14 +228,16 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_objdet_range.launch
     ```
+````
 
-### Run Visual Localization Application
+````{only} tag_j7x
+**Run Visual Localization Application**
 
-1. **[J7]** To launch `ti_vl` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
+1. **[SK]** To launch `ti_vl` node with playing back a ROSBAG file, run the following `roslaunch` command **inside** the Docker:
     ```
     root@j7-docker:~/j7ros_home/ros_ws$ roslaunch ti_vl bag_visloc.launch
     ```
-    Alternatively, you can run the following directly on the TDA4 host Linux:
+    Alternatively, you can run the following directly on the target host Linux:
     ```
     root@am6x-sk:~/j7ros_home$ ./docker_run_ros1.sh roslaunch ti_vl bag_visloc.launch
     ```
@@ -217,7 +245,8 @@ In the following, **[TDA4]** and **[PC]** indicate the steps that should be laun
     ```
     root@pc-docker:~/j7ros_home/ros_ws$ roslaunch ti_viz_nodes rviz_visloc.launch
     ```
+````
 
-### Build and Run Hector SLAM Application
+**Build and Run Hector SLAM Application**
 
-Many open-source SLAM algorithms can run on TDA4. Among them, it is demonstrated how to setup and run Hector SLAM on 2D Lidar data. For details, please refer to [Hector SLAM Application](../ros1/slam/README.md).
+Many open-source SLAM algorithms can run on the target SK board. Among them, it is demonstrated how to setup and run Hector SLAM on 2D Lidar data. For details, please refer to [Hector SLAM Application](../ros1/slam/README.md).

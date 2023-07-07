@@ -72,7 +72,10 @@
 #include <TI/tivx.h>
 #include <TI/j7_tidl.h>
 
+#if !defined(SOC_AM62A) || !defined(SOC_AM62)
 #include <perception/perception.h>
+#endif // !defined(SOC_AM62A) || !defined(SOC_AM62)
+
 #include <edgeai_dl_inferer/ti_dl_inferer.h>
 #include <edgeai_dl_inferer/ti_pre_process_config.h>
 #include <edgeai_dl_inferer/ti_post_process_config.h>

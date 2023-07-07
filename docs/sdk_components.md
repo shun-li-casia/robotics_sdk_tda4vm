@@ -7,9 +7,15 @@ The Robotics SDK gets all the Linux kernel, filesystem, device-drivers and more 
 
 For more information visit:
 
+
+```{only} tag_j7x
 - [Processor SDK Linux for TDA4VM](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
 - [Processor SDK Linux for AM68A](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-AM68A)
 - [Processor SDK Linux for AM69A](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-AM69A)
+```
+```{only} tag_am62a
+- [Processor SDK Linux for AM62A](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-AM62A)
+```
 
 The Robotics SDK has dependency on the following software components of the Processor SDK Linux.
 

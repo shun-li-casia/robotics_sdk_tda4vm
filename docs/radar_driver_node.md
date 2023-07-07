@@ -54,7 +54,7 @@ If you are using a brand new TI mmWave EVM, it may come pre-flashed with an olde
     ./mmwave_sdk_<ver>-Linux-x86-Install.bin
     ```
 
-8. Follow the [EVM Operational Modes Setup Guide](https://dev.ti.com/tirex/explore/node?node=AMLjV2I4hAEEwpYRfP2okA__VLyFKFf__LATEST) to confirgure the device for `flashing` mode. Once configured for flashing mode, power cycle the device by toggling the NRST switch or unplugging then reconnecting the micro usb cable.
+8. Follow the [EVM Operational Modes Setup Guide](https://dev.ti.com/tirex/explore/node?node=AMLjV2I4hAEEwpYRfP2okA__VLyFKFf__LATEST) to configure the device for `flashing` mode. Once configured for flashing mode, power cycle the device by toggling the NRST switch or unplugging then reconnecting the micro usb cable.
 
 9. Follow the [Using Uniflash with mmWave Guide](https://dev.ti.com/tirex/explore/node?node=AGuT13c2cuwxqZKfpyurBQ__VLyFKFf__LATEST) to flash the device with the apropriate binary.
 
@@ -69,7 +69,7 @@ If you are using a brand new TI mmWave EVM, it may come pre-flashed with an olde
 
     The .bin file can be found at `<MMWAVE_SDK_INSTALL_DIR>/packages/ti/demo/xwr68xx/mmw/xwr68xx_mmw_demo.bin`
 
-10. Follow the [EVM Operational Modes Setup Guide](https://dev.ti.com/tirex/explore/node?node=AMLjV2I4hAEEwpYRfP2okA__VLyFKFf__LATEST) to confirgure the device for `functional` mode. Once configured for functional mode, power cycle the device by toggling the NRST switch or unplugging then reconnecting the micro usb cable.
+10. Follow the [EVM Operational Modes Setup Guide](https://dev.ti.com/tirex/explore/node?node=AMLjV2I4hAEEwpYRfP2okA__VLyFKFf__LATEST) to configure the device for `functional` mode. Once configured for functional mode, power cycle the device by toggling the NRST switch or unplugging then reconnecting the micro usb cable.
 
 ### Select Chirp Configuration
 
@@ -84,7 +84,7 @@ If you wish to use a custom chirp configuration, the [mmWave Sensing Estimator](
 
 This section is necessary for those using multiple sensors. Users with a single sensor can skip this step.
 
-When the standalone sensors are connected to the TDA4, the device appears as `/dev/ttyUSBx` (Command Port) and `/dev/ttyUSBy` (Data Port). These names are then used in the launch files to comunicate with the sensor. When using multiple sensors and hardcoding these ttyUSB names, the devices must then be connected to the TDA4 in a specific order. Furthermore, other devices may also appear as `/dev/ttyUSBx`. Therefore, creating a symbolic link will be extremely useful. Below are the steps to setting up symbolic links.
+When the standalone sensors are connected to the TDA4, the device appears as `/dev/ttyUSBx` (Command Port) and `/dev/ttyUSBy` (Data Port). These names are then used in the launch files to communicate with the sensor. When using multiple sensors and hardcoding these ttyUSB names, the devices must then be connected to the TDA4 in a specific order. Furthermore, other devices may also appear as `/dev/ttyUSBx`. Therefore, creating a symbolic link will be extremely useful. Below are the steps to setting up symbolic links.
 
 **NOTE**: The following steps are for standalone EVMs and will not work with the ICBOOST carrier board.
 
@@ -115,13 +115,13 @@ When the standalone sensors are connected to the TDA4, the device appears as `/d
 
 This section is necessary for those using multiple sensors. Users with a single sensor can skip this step.
 
-The launch files for the radar driver also create a static transofrm. If the position or angle of the sensors on the robot is different, the arguments in the static transorm must be changed. Find more information on static transorms here: [http://wiki.ros.org/tf#static_transform_publisher](http://wiki.ros.org/tf#static_transform_publisher)
+The launch files for the radar driver also create a static transform. If the position or angle of the sensors on the robot is different, the arguments in the static transform must be changed. Find more information on static transforms here: [http://wiki.ros.org/tf#static_transform_publisher](http://wiki.ros.org/tf#static_transform_publisher)
 
 For example, one can use the center of the robot as a baseline. In the file, `/launch/6843_quad_3d_TDA4VM.launch`, update `tf_args` (X Y Z Yaw Pitch Roll) for each sensor to describe the position of the sensor relative to the center of the robot.
 
-### Synchronization
+<!-- ### Synchronization
 
-For details regarding time synchronization of frames from multiple mmWave devices click [here](multi_sensor_time_synchronization.md).
+For details regarding time synchronization of frames from multiple mmWave devices click [here](multi_sensor_time_synchronization.md). -->
 
 ## Usage
 

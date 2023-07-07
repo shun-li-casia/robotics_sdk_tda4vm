@@ -445,19 +445,11 @@ void VisionCnnNode::readParams()
 
 vx_status VisionCnnNode::init()
 {
-    PTK_CRT             ptkConfig;
     vx_status           vxStatus;
 
     vxStatus = VX_SUCCESS;
 
-    /* Initialize PTK library. */
-    ptkConfig.exit   = exit;
-    ptkConfig.printf = printf;
-    ptkConfig.time   = NULL;
-
     //tivx_set_debug_zone(VX_ZONE_INFO);
-
-    PTK_init(&ptkConfig);
 
     m_cntxt = new VISION_CNN_Context();
 

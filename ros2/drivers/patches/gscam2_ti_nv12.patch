@@ -135,7 +135,7 @@ index 0000000..3ce26c2
 +       0. ]
 diff --git a/launch/v4l_mjpg_launch.py b/launch/v4l_mjpg_launch.py
 new file mode 100644
-index 0000000..e7a5de4
+index 0000000..0b17b7a
 --- /dev/null
 +++ b/launch/v4l_mjpg_launch.py
 @@ -0,0 +1,110 @@
@@ -165,8 +165,8 @@ index 0000000..e7a5de4
 +    node_name = LaunchConfiguration('node_name')
 +
 +    # GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
-+    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
-+    gscam_config = 'v4l2src device=' + device + ' io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxcolorconvert'
++    # 'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++    gscam_config = 'v4l2src device=' + device + ' io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxdlcolorconvert'
 +
 +    # Camera namespace
 +    camera_name = LaunchConfiguration('camera_name').perform(context)
@@ -252,7 +252,7 @@ index 0000000..e7a5de4
 \ No newline at end of file
 diff --git a/launch/v4l_ov5640_launch.py b/launch/v4l_ov5640_launch.py
 new file mode 100644
-index 0000000..d8470af
+index 0000000..ee377f7
 --- /dev/null
 +++ b/launch/v4l_ov5640_launch.py
 @@ -0,0 +1,110 @@
@@ -282,8 +282,8 @@ index 0000000..d8470af
 +    node_name = LaunchConfiguration('node_name')
 +
 +    # GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
-+    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
-+    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++    # 'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxdlcolorconvert'
 +
 +    # Camera namespace
 +    camera_name = LaunchConfiguration('camera_name').perform(context)
@@ -369,7 +369,7 @@ index 0000000..d8470af
 \ No newline at end of file
 diff --git a/launch/v4l_yuv_launch.py b/launch/v4l_yuv_launch.py
 new file mode 100644
-index 0000000..552b8b7
+index 0000000..4f47ef6
 --- /dev/null
 +++ b/launch/v4l_yuv_launch.py
 @@ -0,0 +1,110 @@
@@ -399,8 +399,8 @@ index 0000000..552b8b7
 +    node_name = LaunchConfiguration('node_name')
 +
 +    # GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
-+    # 'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
-+    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxcolorconvert'
++    # 'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container
++    gscam_config = 'v4l2src device=' + device + ' io-mode=0 do-timestamp=true ! tiovxdlcolorconvert'
 +
 +    # Camera namespace
 +    camera_name = LaunchConfiguration('camera_name').perform(context)

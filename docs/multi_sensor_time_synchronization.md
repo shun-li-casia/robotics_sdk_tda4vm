@@ -11,7 +11,7 @@ The software based approach is very simple and enables coarse synchronization (1
 
 ## Hardware Based Method
 
-**Note**: The hardware sync method applies only when the host machine is TI's [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM). It is also assumed that the setup of the Robotics SDK and Docker container is complete. If this has not been completed, follow the instructions [here](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/08_06_00/docs/source/docker/README.html).
+**Note**: The hardware sync method applies only when the host machine is TI's [SK-TDA4VM](https://www.ti.com/tool/SK-TDA4VM). It is also assumed that the setup of the Robotics SDK and Docker container is complete. If this has not been completed, follow the instructions {{'[here](https://software-dl.ti.com/jacinto7/esd/robotics-sdk/{}/docs/source/docker/README.html)'.format(SDK_VER)}}.
 
 This approach utilizes the GPIO PWM functionality on the SK-TDA4VM to generate a triggering signal. The mmWave devices can be configured for HW Trigger mode which means that each frame is triggered at the rising edge of a pulse signal fed into the SYNC_IN pin. The mmWave devices can also be configured with a trigger delay, which allows for the triggering of frames for multiple radars to be offset from one another. This can be beneficial in reducing the probability of seeing "ghost targets" caused by parallel interference.
 

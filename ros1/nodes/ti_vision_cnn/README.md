@@ -14,7 +14,7 @@ This `ti_vision_cnn` node is a versatile deep-learning (DL) inference ROS node t
 
 Referring to Figure 1, below are the descriptions of the processing blocks implemented in this application:
 
-1. The first step to process input images with lens distortion is performed by the TDA4 LDC (Lens Distortion Correction) hardware accelerator (HWA), which handles the undistortion or rectification. Pseudo codes to create LDC tables for rectification are provided [here](../ti_sde/README.md). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes the image format. Input image to the application is in YUV422 (UYVY) format, which is converted to YUV420 (NV12) by the LDC.
+1. The first step to process input images with lens distortion is performed by the TDA4 LDC (Lens Distortion Correction) hardware accelerator (HWA), which handles the undistortion or rectification. Tools for generating LDC look-up-tables are provided with the SDK (`tools/stereo_camera/generate_rect_map.py` and `tools/mono_camera/generate_rect_map_mono.py`). Note that the LDC HWA not only removes lens distortion or rectifies, but also changes the image format. Input image to the application is in YUV422 (UYVY) format, which is converted to YUV420 (NV12) by the LDC.
 
 2. Input images are resized to match to the input tensor size of the semantic segmentation model. The MSC (Multi-Scaler) HWA resizes the images to a desired size.
 

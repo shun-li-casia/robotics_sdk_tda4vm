@@ -8,14 +8,13 @@ ROS_VER          ?= 1
 GPUS             ?= n
 
 # Robotics SDK version
-RSDK_VER          = 8.6
-TIVA_LIB_VER     ?= ${RSDK_VER}.0
+SDK_VER           = 8.6.2
+SDK_VER_MAJOR     = 8.6
+TIVA_LIB_VER     ?= ${SDK_VER_MAJOR}.0
 RPMSG_LIB_VER    ?= 0.5.2
 
 # Set the operating variables based on the ROS version specified
 ROS_DISTRO        = foxy
-DOCKER_TAG_PC     = pc-ros2-$(ROS_DISTRO):$(RSDK_VER)
-DOCKER_TAG_TGT    = j7-ros2-$(ROS_DISTRO):$(RSDK_VER)
 WORK_DIR          = j7ros_home
 REPO_NAME         = robotics_sdk
 WS_NAME           = ros_ws
@@ -24,28 +23,22 @@ EXCLUDE           = ros1
 
 ifeq ($(ROS_VER), 1)
 	ROS_DISTRO      = noetic
-	DOCKER_TAG_TGT  = j7-ros-$(ROS_DISTRO):$(RSDK_VER)
-	DOCKER_TAG_PC   = pc-ros-$(ROS_DISTRO):$(RSDK_VER)
 	ROS_TAG         = ros1
 	EXCLUDE         = ros2
 endif
 
 # set PLATFORM based on "uname -m"
 PLATFORM          = j7
+ARCH              = arm64v8
 ifeq ($(shell uname -m), x86_64)
 	PLATFORM      = pc
+	ARCH          = x86_64
 endif
-
-# ROS1 specific
-ARCH_TGT          = arm64v8
-ARCH_PC           = x86_64
-DOCKER_FILE_TGT   = Dockerfile.$(ARCH_TGT).$(ROS_DISTRO)
-DOCKER_FILE_PC    = Dockerfile.$(ARCH_PC).$(ROS_DISTRO)
 
 WORK_PATH_HOST    = $(HOME)/$(WORK_DIR)
 REPO_PATH         = /opt/$(REPO_NAME)
 ifeq ($(PLATFORM), pc)
-REPO_PATH         = $(WORK_PATH_HOST)/ros_ws/src/$(REPO_NAME)
+	REPO_PATH     = $(WORK_PATH_HOST)/ros_ws/src/$(REPO_NAME)
 endif
 ROS_SRC_DIR       = $(REPO_PATH)
 DATA_DIR          = $(WORK_PATH_HOST)/data
@@ -53,16 +46,10 @@ DOCKER_DIR        = $(ROS_SRC_DIR)/docker
 SCRIPTS_DIR       = $(ROS_SRC_DIR)/docker/scripts
 DLRT_DIR          = /opt/dl_runtime
 
-ifeq ($(DOCKER_REPO_INTERNAL),)
-USE_PROXY = 0
+ifeq ($(ROS_DOCKER_INTERNAL),)
+	USE_PROXY = 0
 else
-USE_PROXY = 1
-endif
-
-REPO_LOC          = arm64v8
-ifeq ($(PLATFORM), pc)
-# make it empty
-REPO_LOC          = ""
+	USE_PROXY = 1
 endif
 
 # Environment variable list to pass to the Docker container
@@ -75,10 +62,10 @@ DLRT_LIBS_FILE    = dlrt-libs-aarch64-ubuntu18.04_8.0.tar.gz
 VISLOC_DATA_FILE  = visual-localization-data_2022_0908.tar.gz
 VISLOC_MODEL_FILE = visual-localization-model_8.6.tar.gz
 ifeq ($(SOC), j721s2)
-VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
+	VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
 endif
 ifeq ($(SOC), j784s4)
-VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
+	VISLOC_MODEL_FILE = visual-localization-model-j721s2_8.6.tar.gz
 endif
 LIDAR2D_FILE      = lidar2d_2021_0521.tar.gz
 CALIB_IMGS_FILE   = calib-images-example_2021_0422.tar.gz
@@ -107,10 +94,6 @@ ip_show:
 
 info:
 	$(info PLATFORM         = $(PLATFORM))
-	$(info DOCKER_FILE_TGT  = $(DOCKER_FILE_TGT))
-	$(info DOCKER_FILE_PC   = $(DOCKER_FILE_PC))
-	$(info DOCKER_TAG_TGT   = $(DOCKER_TAG_TGT))
-	$(info DOCKER_TAG_PC    = $(DOCKER_TAG_PC))
 	$(info WORK_DIR         = $(WORK_DIR))
 	$(info REPO_NAME        = $(REPO_NAME))
 	$(info WORK_PATH_HOST   = $(WORK_PATH_HOST))
@@ -124,35 +107,52 @@ info:
 # generate "docker build" script
 docker_build:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
-	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
+	@echo "set -e"                                            >> $(TGT_NAME)
+	@echo "SECONDS=0"                                         >> $(TGT_NAME)
+	@echo "ROS_DISTRO=$(ROS_DISTRO)"                          >> $(TGT_NAME)
+	@echo "SDK_VER=$(SDK_VER)"                                >> $(TGT_NAME)
+	@echo "DOCKER_TAG=$(PLATFORM)-ros-\$$ROS_DISTRO-common:\$$SDK_VER" >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
+	@echo "DOCKER_TAG2=$(PLATFORM)-ros-\$$ROS_DISTRO-\$$SOC:\$$SDK_VER" >> $(TGT_NAME)
+endif
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
 	@echo "USE_PROXY=$(USE_PROXY)"                            >> $(TGT_NAME)
 	@echo "# modify the server and proxy URLs as requied"     >> $(TGT_NAME)
 	@echo "if [ \"\$${USE_PROXY}\" -ne \"0\" ]; then"         >> $(TGT_NAME)
-	@echo "    REPO_LOCATION=$(DOCKER_REPO_INTERNAL)"         >> $(TGT_NAME)
+	@echo "    REPO_LOCATION=$(ROS_DOCKER_INTERNAL)"          >> $(TGT_NAME)
 	@echo "    HTTP_PROXY=${HTTP_PROXY}"                      >> $(TGT_NAME)
 	@echo "else"                                              >> $(TGT_NAME)
-	@echo "    REPO_LOCATION=$(REPO_LOC)"                     >> $(TGT_NAME)
+	@echo "    REPO_LOCATION="                                >> $(TGT_NAME)
 	@echo "fi"                                                >> $(TGT_NAME)
 	@echo "echo \"USE_PROXY = \$$USE_PROXY\""                 >> $(TGT_NAME)
 	@echo "echo \"REPO_LOCATION = \$$REPO_LOCATION\""         >> $(TGT_NAME)
 	@echo "DST_DIR=$(WORK_PATH_HOST)/docker_src"              >> $(TGT_NAME)
 	@echo "TIVA_LIB_VER=$(TIVA_LIB_VER)"                      >> $(TGT_NAME)
 	@echo "RPMSG_LIB_VER=$(RPMSG_LIB_VER)"                    >> $(TGT_NAME)
-	@echo "SOC_NAME=$(SOC)"                                   >> $(TGT_NAME)
 	@echo "bash \$$DOCKER_DIR/scripts/prepare_docker_build.sh \$$DST_DIR \$$TIVA_LIB_VER \$$RPMSG_LIB_VER" >> $(TGT_NAME)
 	@echo "cd $(WORK_PATH_HOST)"                              >> $(TGT_NAME)
 	@echo "docker build \\"                                   >> $(TGT_NAME)
-	@echo "    -t \$$DOCKER_TAG \\"                           >> $(TGT_NAME)
+	@echo "    -t \$$DOCKER_TAG \\"                          >> $(TGT_NAME)
 	@echo "    --build-arg USE_PROXY=\$$USE_PROXY \\"         >> $(TGT_NAME)
 	@echo "    --build-arg REPO_LOCATION=\$$REPO_LOCATION \\" >> $(TGT_NAME)
 	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
+	@echo "    -f \$$DOCKER_DIR/Dockerfile.$(ARCH).\$$ROS_DISTRO ./docker_src"  >> $(TGT_NAME)
+	@echo "echo \"Docker build -t \$$DOCKER_TAG completed!\"" >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
+	@echo "docker build \\"                                   >> $(TGT_NAME)
+	@echo "    -t \$$DOCKER_TAG2 \\"                          >> $(TGT_NAME)
+	@echo "    --build-arg USE_PROXY=\$$USE_PROXY \\"         >> $(TGT_NAME)
+	@echo "    --build-arg HTTP_PROXY=\$$HTTP_PROXY \\"       >> $(TGT_NAME)
 	@echo "    --build-arg TIVA_LIB_VER=\$$TIVA_LIB_VER \\"   >> $(TGT_NAME)
 	@echo "    --build-arg RPMSG_LIB_VER=\$$RPMSG_LIB_VER \\" >> $(TGT_NAME)
 	@echo "    --build-arg SOC_NAME=\$$SOC \\"                >> $(TGT_NAME)
+	@echo "    --build-arg ROS_DISTRO=\$$ROS_DISTRO \\"       >> $(TGT_NAME)
+	@echo "    --build-arg SDK_VER=\$$SDK_VER \\"             >> $(TGT_NAME)
+	@echo "    -f \$$DOCKER_DIR/Dockerfile.$(ARCH).ti_libs ./docker_src"  >> $(TGT_NAME)
+	@echo "echo \"Docker build -t \$$DOCKER_TAG2 completed!\"" >> $(TGT_NAME)
 endif
-	@echo "    -f \$$DOCKER_DIR/$(DOCKER_FILE) ./docker_src"  >> $(TGT_NAME)
+	@echo "duration=\$$SECONDS"                               >> $(TGT_NAME)
+	@echo "echo \"\$$((\$$duration / 60)) minutes and \$$((\$$duration % 60)) seconds elapsed.\"" >> $(TGT_NAME)
 	@echo "rm -r \$$DST_DIR"	                              >> $(TGT_NAME)
 	@chmod +x $(TGT_NAME)
 	@echo "$(TGT_NAME) is generated"
@@ -160,7 +160,14 @@ endif
 # generate "docker run" script
 docker_run:
 	@echo "#!/bin/bash"                                       >  $(TGT_NAME)
-	@echo "DOCKER_TAG=$(DOCKER_TAG)"                          >> $(TGT_NAME)
+	@echo "ROS_DISTRO=$(ROS_DISTRO)"                          >> $(TGT_NAME)
+	@echo "SDK_VER=$(SDK_VER)"                                >> $(TGT_NAME)
+ifeq ($(PLATFORM), j7)
+	@echo "DOCKER_TAG=$(PLATFORM)-ros-\$$ROS_DISTRO-\$$SOC:\$$SDK_VER" >> $(TGT_NAME)
+endif
+ifeq ($(PLATFORM), pc)
+	@echo "DOCKER_TAG=$(PLATFORM)-ros-\$$ROS_DISTRO-common:\$$SDK_VER" >> $(TGT_NAME)
+endif
 	@echo "USE_PROXY=$(USE_PROXY)"                            >> $(TGT_NAME)
 ifeq ($(PLATFORM), j7)
 	@echo "DOCKER_DIR=$(DOCKER_DIR)"                          >> $(TGT_NAME)
@@ -219,7 +226,7 @@ endif
 endif
 	@echo "      \$$DOCKER_TAG \$$CMD"                        >> $(TGT_NAME)
 ifeq ($(PLATFORM), pc)
-	@echo "xhost -local:\$$USER"                               >> $(TGT_NAME)
+	@echo "xhost -local:\$$USER"                              >> $(TGT_NAME)
 endif
 	@chmod +x $(TGT_NAME)
 	@echo "$(TGT_NAME) is generated"
@@ -228,22 +235,16 @@ scripts: scripts_$(PLATFORM)
 scripts_$(PLATFORM): docker_build_$(PLATFORM) docker_run_$(PLATFORM)
 
 docker_build_j7:
-	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh \
-	                      DOCKER_FILE=$(DOCKER_FILE_TGT) \
-	                      DOCKER_TAG=$(DOCKER_TAG_TGT)
+	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh
 
 docker_run_j7:
-	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh \
-	                    DOCKER_TAG=$(DOCKER_TAG_TGT) \
+	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh
 
 docker_build_pc:
-	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh \
-	                      DOCKER_FILE=$(DOCKER_FILE_PC) \
-	                      DOCKER_TAG=$(DOCKER_TAG_PC)
+	@$(MAKE) docker_build TGT_NAME=docker_build_$(ROS_TAG).sh
 
 docker_run_pc:
-	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh \
-	                    DOCKER_TAG=$(DOCKER_TAG_PC) \
+	@$(MAKE) docker_run TGT_NAME=docker_run_$(ROS_TAG).sh
 
 ## data files
 data_download: rosbag_download vl_data_download vl_model_download\

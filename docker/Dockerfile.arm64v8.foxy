@@ -30,7 +30,7 @@
 
 ARG USE_PROXY
 ARG HTTP_PROXY
-ARG REPO_LOCATION=arm64v8
+ARG REPO_LOCATION
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TIVA_LIB_VER
 ARG RPMSG_LIB_VER
@@ -39,7 +39,7 @@ ARG SOC_NAME
 #=========================================================================
 # The environment variable REPO_LOCATION is set from outside as needed,
 # based on network
-FROM ${REPO_LOCATION}/ubuntu:20.04 AS base-0
+FROM ${REPO_LOCATION}arm64v8/ros:foxy-ros-base-focal AS base-0
 
 #=========================================================================
 FROM base-0 AS base-1
@@ -50,7 +50,7 @@ ENV http_proxy=${HTTP_PROXY}
 ENV https_proxy=${HTTP_PROXY}
 
 #=========================================================================
-FROM base-${USE_PROXY} AS ubuntu-stage1
+FROM base-${USE_PROXY} AS ros-gst
 ARG DEBIAN_FRONTEND
 
 # setup proxy settings
@@ -59,7 +59,7 @@ ADD proxy /root/proxy
 RUN /root/setup_proxy.sh
 
 # install gstreamer dependencies
-RUN apt update && apt install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgstreamer1.0-0 \
     libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev \
@@ -84,66 +84,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 #=========================================================================
-FROM ubuntu-stage1 AS ubuntu-ros2
-ARG DEBIAN_FRONTEND
-# install ROS Foxy
-
-# setup timezone
-RUN echo 'Etc/UTC' > /etc/timezone && \
-    ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
-    apt-get update && \
-    apt-get install -q -y --no-install-recommends tzdata && \
-    rm -rf /var/lib/apt/lists/*
-
-# install packages
-RUN apt-get update && apt-get install -q -y --no-install-recommends \
-    dirmngr \
-    gnupg2 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# setup sources.list
-RUN echo "deb http://packages.ros.org/ros2/ubuntu focal main" > /etc/apt/sources.list.d/ros2-latest.list
-
-# setup keys
-# RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-# workaround in case apt-key above does not work, e.g., behind a proxy
-RUN curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | apt-key add -
-
-# setup environment variables
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-ENV ROS_DISTRO=foxy
-
-# install bootstrap tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    python3-colcon-common-extensions \
-    python3-colcon-mixin \
-    python3-rosdep \
-    python3-vcstool \
-    && rm -rf /var/lib/apt/lists/*
-
-# bootstrap rosdep
-RUN rosdep init && \
-    rosdep update --rosdistro ${ROS_DISTRO}
-
-# setup colcon mixin and metadata
-RUN colcon mixin add default \
-      https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
-    colcon mixin update && \
-    colcon metadata add default \
-      https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml && \
-    colcon metadata update
-
-# install ros-core packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-foxy-ros-base=0.9.2-1* \
-    && rm -rf /var/lib/apt/lists/*
-
-#=========================================================================
-FROM ubuntu-ros2
+FROM ros-gst as j7ros-common
 ARG DEBIAN_FRONTEND
 ARG TIVA_LIB_VER
 ARG RPMSG_LIB_VER
@@ -151,20 +92,20 @@ ARG SOC_NAME
 
 # install dependency for tivision_apps.so
 # TODO: check if these are still required in 20.04
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libdevil-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # intsall utils and miscellaneous packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
+    curl \
+    git \
     vim \
     tmux \
     gdb \
     iputils-ping \
     usbutils \
-    ncurses-dev \
-    libyaml-cpp-dev \
     rsync \
     strace \
     sysstat \
@@ -177,6 +118,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     v4l-utils && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ncurses-dev \
+    libopencv-core-dev \
+    libopencv-imgproc-dev \
+    libopencv-imgcodecs-dev \
+    libyaml-cpp-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros2/ubuntu focal main" > /etc/apt/sources.list.d/ros2-latest.list
+
+# setup keys
+# RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+# workaround in case apt-key above does not work, e.g., behind a proxy
+RUN curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | apt-key add -
+
 # install additional ROS packages beyond ros-foxy-ros-base
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-foxy-rmw-cyclonedds-cpp \
@@ -188,70 +145,3 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 -m pip install rosbags && \
     rm -rf /var/lib/apt/lists/*
 
-# install vision_apps lib and DL runtime libs
-COPY lib/*  /usr/lib/
-COPY lib_gstreamer-1.0/* /usr/lib/aarch64-linux-gnu/gstreamer-1.0/
-COPY include/processor_sdk /usr/include/processor_sdk
-RUN ln -s /usr/lib/libtivision_apps.so.$TIVA_LIB_VER /usr/lib/libtivision_apps.so && \
-    ln -s /usr/lib/libvx_tidl_rt.so.1.0 /usr/lib/libvx_tidl_rt.so && \
-    ln -s /usr/lib/libti_rpmsg_char.so.$RPMSG_LIB_VER /usr/lib/libti_rpmsg_char.so.0 && \
-    ln -s /usr/lib/libti_rpmsg_char.so.0 /usr/lib/libti_rpmsg_char.so
-
-# install dl-inferer
-ADD install_dl_inferer.sh /usr/bin/
-RUN /usr/bin/install_dl_inferer.sh && \
-    rm -rf /opt/edgeai-dl-inferer && \
-    rm -rf /usr/include/dlpack
-
-# install edgeai-tiovx-kernels
-ENV SOC=$SOC_NAME
-ADD install_tiovx_kernels.sh /usr/bin/
-RUN /usr/bin/install_tiovx_kernels.sh && \
-    rm -rf /opt/edgeai-tiovx-kernels
-
-# install edgeai-tiovx-modules
-ENV SOC=$SOC_NAME
-ADD install_tiovx_modules.sh /usr/bin/
-RUN /usr/bin/install_tiovx_modules.sh && \
-    rm -rf /opt/edgeai-tiovx-modules
-
-# install edgeai-gst-plugins
-ADD install_gst_plugins.sh /usr/bin/
-RUN /usr/bin/install_gst_plugins.sh && \
-    rm -rf /opt/edgeai-gst-plugins
-
-# install python modules for DL RT
-RUN apt update && apt-get install -y \
-    python3-gi && \
-    pip3 install PyYAML
-
-# install ti-gpio-cpp
-ADD install_ti_gpio_libs.sh /usr/bin/
-RUN /usr/bin/install_ti_gpio_libs.sh
-
-# add scripts
-COPY entrypoint_arm64v8.sh /root/entrypoint.sh
-ADD  ros_setup.sh /root/
-
-# .profile and .bashrc
-WORKDIR /root
-RUN echo "if [ -n \"$BASH_VERSION\" ]; then"     >  .profile && \
-    echo "    # include .bashrc if it exists"    >> .profile && \
-    echo "    if [ -f \"$HOME/.bashrc\" ]; then" >> .profile && \
-    echo "        . \"$HOME/.bashrc\""           >> .profile && \
-    echo "    fi"                                >> .profile && \
-    echo "fi"                                    >> .profile && \
-    echo "#!/bin/bash"                           >  .bashrc  && \
-    echo "export PS1=\"${debian_chroot:+($debian_chroot)}\u@j7-docker:\w\$ \"" >> .bashrc
-
-# workdir for ROS apps
-ARG PROJECT_HOME=j7ros_home
-ENV WORK_DIR=/root/${PROJECT_HOME}
-ENV ROS_WS=${WORK_DIR}/ros_ws
-WORKDIR ${ROS_WS}
-
-# change the DDS implementation to Cyclone DDS
-ENV RMW_IMPLEMENTATION rmw_cyclonedds_cpp
-
-# setup entrypoint
-ENTRYPOINT ["/root/entrypoint.sh"]

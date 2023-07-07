@@ -381,11 +381,14 @@ index 0000000..da25647
 +</launch>
 diff --git a/launch/v4l_mjpg.launch b/launch/v4l_mjpg.launch
 new file mode 100644
-index 0000000..fc4a477
+index 0000000..5038f4a
 --- /dev/null
 +++ b/launch/v4l_mjpg.launch
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,29 @@
 +<launch>
++    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
++        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
++        are already installed in TDA4 ROS container -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->
@@ -397,11 +400,9 @@ index 0000000..fc4a477
 +    <!-- camera name -->
 +    <arg name="camera_name"    default="camera"/>
 +
-+    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
-+        'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container -->
 +    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
 +        <param name="gscam_config"
-+            value="v4l2src device=$(arg device) io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxcolorconvert"/>
++            value="v4l2src device=$(arg device) io-mode=2 do-timestamp=true ! image/jpeg ! jpegdec ! tiovxdlcolorconvert "/>
 +        <param name="camera_name"        value="$(arg camera_name)"/>
 +        <param name="camera_info_url"    value="package://gscam/config/C920_HD_camera_info.yaml"/>
 +        <param name="width"              value="1280"/>
@@ -415,12 +416,17 @@ index 0000000..fc4a477
 +</launch>
 diff --git a/launch/v4l_ov5640.launch b/launch/v4l_ov5640.launch
 new file mode 100644
-index 0000000..50bb320
+index 0000000..628b253
 --- /dev/null
 +++ b/launch/v4l_ov5640.launch
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,32 @@
 +<launch>
 +    <!-- Please make sure run "bash /opt/edge_ai_apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
++
++    <!-- GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
++        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
++        are already installed in TDA4 ROS container -->
++
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->
@@ -432,11 +438,9 @@ index 0000000..50bb320
 +    <!-- camera name: also used as namespace for the output topic name -->
 +    <arg name="camera_name"    default="camera"/>
 +
-+    <!-- GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
-+        'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container -->
 +    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
 +        <param name="gscam_config"
-+            value="v4l2src device=$(arg device) do-timestamp=true ! tiovxcolorconvert"/>
++            value="v4l2src device=$(arg device) do-timestamp=true ! tiovxdlcolorconvert"/>
 +        <param name="camera_name"     value="$(arg camera_name)"/>
 +        <param name="camera_info_url" value="package://gscam/config/C920_HD_camera_info.yaml"/>
 +        <param name="width"           value="1280"/>
@@ -450,11 +454,14 @@ index 0000000..50bb320
 +</launch>
 diff --git a/launch/v4l_yuv.launch b/launch/v4l_yuv.launch
 new file mode 100644
-index 0000000..9619e4f
+index 0000000..8c4b0fc
 --- /dev/null
 +++ b/launch/v4l_yuv.launch
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,29 @@
 +<launch>
++    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
++        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
++        are already installed in TDA4 ROS container -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->
@@ -466,11 +473,9 @@ index 0000000..9619e4f
 +    <!-- camera name: also used as namespace for the output topic name -->
 +    <arg name="camera_name"    default="camera"/>
 +
-+    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
-+        'tiovxcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are already installed in TDA4 ROS container -->
 +    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
 +        <param name="gscam_config"
-+            value="v4l2src device=$(arg device) io-mode=0 do-timestamp=true ! tiovxcolorconvert"/>
++            value="v4l2src device=$(arg device) io-mode=0 do-timestamp=true ! tiovxdlcolorconvert"/>
 +        <param name="camera_name"        value="$(arg camera_name)"/>
 +        <param name="camera_info_url"    value="package://gscam/config/C920_HD_camera_info.yaml"/>
 +        <param name="width"              value="1280"/>

@@ -3,9 +3,9 @@ Change Log
 
 ## Release 8.6.1 (2023-05-31)
 
-- The Robotics SDK now supports two additional platforms: SK-AM68A and SK-AM69A, as well as SK-TDA4VM.
-- Added support for RPi headers and GPIO libraries for SK-AM68A and SK-AM69 (as part of the Processor SDK Linux for Edge AI).
-- Updated the Robotics SDK documentation to cover AM68A and AM69A, as well as TDA4VM.
+- The Robotics SDK now supports two additional platforms: SK-AM68 and SK-AM69, as well as SK-TDA4VM.
+- Added support for RPi headers and GPIO libraries for SK-AM68 and SK-AM69 (as part of the Processor SDK Linux for Edge AI).
+- Reorganized and updated the Robotics SDK documentation to cover TDA4VM, AM68A, and AM69A.
 
 ## Release 8.6.0 (2023-03-03)
 
