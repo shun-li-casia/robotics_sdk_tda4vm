@@ -1,21 +1,31 @@
-import os
-from ament_index_python.packages import get_package_share_directory
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node
+from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
-    ld = LaunchDescription()
+
+    width_arg = DeclareLaunchArgument(
+        name='width',
+        default_value='1280',
+        description='Width of the image'
+    )
+
+    height_arg = DeclareLaunchArgument(
+        name='height',
+        default_value='720',
+        description='Height of the image'
+    )
 
     # color conversion for input image_raw for visualization
     params = [
         {
-            "width":            1280,
-            "height":           720,
-            "input_yuv_topic":  "camera/image_raw",
+            "width": LaunchConfiguration('width'),
+            "height": LaunchConfiguration('height'),
+            "input_yuv_topic": "camera/image_raw",
             "output_rgb_topic": "camera/image_raw_rgb",
-            "yuv_format":       "YUV420",
+            "yuv_format": "YUV420",
             "yuv420_luma_only": False,
         }
     ]
@@ -42,6 +52,9 @@ def generate_launch_description():
     )
 
     # Create the launch description with launch and node information
+    ld = LaunchDescription()
+    ld.add_action(width_arg)
+    ld.add_action(height_arg)
     ld.add_action(yuv2rbg_node)
     ld.add_action(image_view_node)
 

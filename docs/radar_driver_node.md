@@ -3,7 +3,9 @@ mmWave Radar ROS Node
 
 This is a radar ROS node for TI's mmWave devices. The ROS node sets up a ROS service as an interface to configure the mmWave Evaluation Module and publishes a ROS PointCloud2 message with the objects detected when the sensor is activated.
 
-**NOTE**: This ROS node, running on TDA4, currently is tested only with TI's [IWR6843ISK](https://www.ti.com/tool/IWR6843ISK).
+```{note}
+This ROS node, running on SK-TDA4VM, currently is tested only with TI's [IWR6843ISK](https://www.ti.com/tool/IWR6843ISK).
+```
 
 ## Setup
 
@@ -78,17 +80,21 @@ If you wish to use the default chirp configuration, no further action is require
 
 If you wish to use a custom chirp configuration, the [mmWave Sensing Estimator](https://dev.ti.com/gallery/view/mmwave/mmWaveSensingEstimator/ver/1.4.0/) can be used to estimate the chirp configuration based on scene parameters. For more information on how to select the right chirp parameters in a FMCW Radar device, please see [Programming Chirp Parameters in TI Radar Devices](https://www.ti.com/lit/an/swra553a/swra553a.pdf). To modify the parameters, edit `6843_3d.cfg` and save the file using a text editor or specify an alternate configuration file in the mmWaveQuickConfig node section of `6843_3d_TDA4VM.launch`.
 
-**NOTE**: This ROS node currently is tested only with the chirp configuration provided. Modifying the chirp configuration may have an adverse effect on the performance.
+```{note}
+This ROS node currently is tested only with the chirp configuration provided. Modifying the chirp configuration may have an adverse effect on the performance.
+```
 
 ### Setup Symbolic Links
 
 This section is necessary for those using multiple sensors. Users with a single sensor can skip this step.
 
-When the standalone sensors are connected to the TDA4, the device appears as `/dev/ttyUSBx` (Command Port) and `/dev/ttyUSBy` (Data Port). These names are then used in the launch files to communicate with the sensor. When using multiple sensors and hardcoding these ttyUSB names, the devices must then be connected to the TDA4 in a specific order. Furthermore, other devices may also appear as `/dev/ttyUSBx`. Therefore, creating a symbolic link will be extremely useful. Below are the steps to setting up symbolic links.
+When the standalone sensors are connected to the SK board, the device appears as `/dev/ttyUSBx` (Command Port) and `/dev/ttyUSBy` (Data Port). These names are then used in the launch files to communicate with the sensor. When using multiple sensors and hardcoding these ttyUSB names, the devices must then be connected to the SK board in a specific order. Furthermore, other devices may also appear as `/dev/ttyUSBx`. Therefore, creating a symbolic link will be extremely useful. Below are the steps to setting up symbolic links.
 
-**NOTE**: The following steps are for standalone EVMs and will not work with the ICBOOST carrier board.
+```{note}
+The following steps are for standalone EVMs and will not work with the ICBOOST carrier board.
+```
 
-1. On the TDA4 host linux, create a file named `99-usb-serial.rules` in the directory `/etc/udev/rules.d/` with super user:
+1. On the target host linux, create a file named `99-usb-serial.rules` in the directory `/etc/udev/rules.d/` with super user:
     ```
     root@am6x-sk:~$ sudo vi /etc/udev/rules.d/99-usb-serial.rules
     ```
@@ -100,7 +106,7 @@ When the standalone sensors are connected to the TDA4, the device appears as `/d
 
 3. Close and save the file by hitting 'Esc', typing ':', then 'wq', and finally pressing 'Enter'.
 
-4. Plug in the first sensor to the TDA4 and type the following in the command line:
+4. Plug in the first sensor to the SK board and type the following in the command line:
     ```
     root@am6x-sk:~$ ls -1 /dev/ | grep mmWave
     ```

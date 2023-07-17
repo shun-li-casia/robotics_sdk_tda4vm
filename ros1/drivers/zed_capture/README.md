@@ -13,7 +13,7 @@ This is a stereo camera ROS node for the ZED camera, based on the OpenCV VideoCa
     Replace `<serial_number>` with the serial number of the ZED camera (found on the original box).
     Place the downloaded calibration data file (`SNxxxx.conf`) under the `$SDK_DIR/ros1/drivers/zed_capture/config` folder.
 
-2. Generate `camera_info` YAML files and undistortion/rectification look-up-table (LUT) files, which are required in offloading the undistortion/rectification on TDA4 VPAC/LDC hardware accelerator. It is recommended to perform the following steps in the Robotics SDK ROS 1 container on the Ubuntu PC, and then "scp" the output artifacts to the TDA4 target host filesystem, under `/opt/robotics_sdk/ros1/drivers/zed_capture/config`.
+2. Generate `camera_info` YAML files and undistortion/rectification look-up-table (LUT) files, which are required in offloading the undistortion/rectification on the VPAC/LDC hardware accelerator. It is recommended to perform the following steps in the Robotics SDK ROS 1 container on the Ubuntu PC, and then "scp" the output artifacts to the target Linux filesystem, under `/opt/robotics_sdk/ros1/drivers/zed_capture/config`.
 
     Run the following script:
     ```
@@ -96,4 +96,6 @@ When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the ZED c
 
 By default, ROS bag files are stored under `${HOME}/.ros` folder.
 
-**Note**: It is not recommended to combine the `zed_capture` node and ROSBAG capture into a single launch file, as it takes several seconds for the ZED camera to settle down its ISP tuning after the ZED camera node is started.
+```{note}
+It is not recommended to combine the `zed_capture` node and ROSBAG capture into a single launch file, as it takes several seconds for the ZED camera to settle down its ISP tuning after the ZED camera node is started.
+```

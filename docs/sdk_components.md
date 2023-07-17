@@ -3,7 +3,7 @@ SDK Components
 
 ## Processor SDK Linux for Edge AI
 
-The Robotics SDK gets all the Linux kernel, filesystem, device-drivers and more from Processor SDK Linux. The Robotics SDK includes the deep-learning inference C++ framework and the GStreamer plugins optimized on TDA4 from the Processor SDK Linux for Edge AI.
+The Robotics SDK gets all the Linux kernel, filesystem, device-drivers and more from Processor SDK Linux. The Robotics SDK includes the deep-learning inference C++ framework and the GStreamer plugins optimized for TI Processors from the Processor SDK Linux for Edge AI.
 
 For more information visit:
 

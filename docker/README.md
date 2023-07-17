@@ -136,10 +136,12 @@ user@pc:~$ wget -O init_setup.sh https://git.ti.com/cgit/processor-sdk-vision/ja
 user@pc:~$ source ./init_setup.sh REL.08.06.01
 ```
 
-**NOTE**: In a proxy network, in case the `wget` command above does not work, you can try again with adding `--proxy off` argument:
+````{note}
+In a proxy network, in case the `wget` command above does not work, you can try again with adding `--proxy off` argument:
 ```
 user@pc:~$ wget --proxy off -O init_setup.sh https://git.ti.com/cgit/processor-sdk-vision/jacinto_ros_perception/plain/init_setup.sh
 ```
+````
 
 ### Set Up Docker Environment on the Target
 

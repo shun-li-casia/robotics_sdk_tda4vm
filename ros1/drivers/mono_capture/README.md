@@ -44,7 +44,9 @@ Mono Camera Tools and Capture Node
 
 This is a ROS node for USB mono cameras (Webcam) based on the OpenCV VideoCapture API. The node publishes raw images and camera information.
 
-**NOTE**: This ROS node has only been tested with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. 'MJPG' (Motion-JPEG) mode is currently not enabled or tested. If you want to use the camera in 'MJPG' mode, it is recommended to use the **gscam** / **gscam2** ROS package instead.
+```{note}
+This ROS node has only been tested with Logitech C920 and C270 webcams in 'YUYV' (YUYV 4:2:2) mode. 'MJPG' (Motion-JPEG) mode is currently not enabled or tested. If you want to use the camera in 'MJPG' mode, it is recommended to use the **gscam** / **gscam2** ROS package instead.
+```
 
 ### Usage
 1. Build the USB mono camera ROS node
@@ -79,4 +81,6 @@ This is a ROS node for USB mono cameras (Webcam) based on the OpenCV VideoCaptur
 | encoding    | Image encoding                                                             | 'yuv422' (default) or 'bgr8' |
 | topic_ns    | Topic namespace                                                            | 'camera' (default)     |
 
-**NOTE**: When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the webcam is converted to YUV422::UYVY format to ensure compatibility with the LDC hardware accelerator.
+```{note}
+When `encoding` is set to 'yuv422', the pixel format YUV422::YUYV from the webcam is converted to YUV422::UYVY format to ensure compatibility with the LDC hardware accelerator.
+```

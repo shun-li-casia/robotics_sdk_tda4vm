@@ -17,7 +17,9 @@ This approach utilizes the GPIO PWM functionality on the SK-TDA4VM to generate a
 
 This approach has clear advantages in terms of time synchronization. This is because the triggering of frames for all the connected sensors is controlled by a single source. Also, assuming an equal length for the path of the triggering pulse signal to each sensor, the sensors all receive the signal at the same instant.
 
-**Note**: HW based synchronization was tested with TI's IWR1843BOOST EVM due to the SYNC_IN pin being accessible without board modification. Modification may be required in order to access the SYNC_IN pin on other EVMs.
+```{note}
+HW based synchronization was tested with TI's IWR1843BOOST EVM due to the SYNC_IN pin being accessible without board modification. Modification may be required in order to access the SYNC_IN pin on other EVMs.
+```
 
 ## Using the mmWaveSync node
 
@@ -34,7 +36,7 @@ To use the SW based sync, launch the driver with `sw_sync_quad_sensor.launch`. B
 ```
 
 ### HW based synchronization
-The hardware based synchronization method requires the ti-gpio-cpp package. Run the following on the TDA4 host linux:
+The hardware based synchronization method requires the ti-gpio-cpp package. Run the following on the target host linux:
 ```
 git clone https://github.com/TexasInstruments/ti-gpio-cpp.git
 mkdir -p ti-gpio-cpp/build && cd ti-gpio-cpp/build
@@ -71,10 +73,12 @@ To use the HW based sync, launch the driver with `hw_sync_quad_sensor.launch`. B
 </node>
 ```
 
-**Note**: For HW based sync, user must define valid parameters for triggering pulse generation:
-* Pulse periodicity should be greater than the sum of the frame period and the trigger_delay
-* Pulse width must be greater than 25ns
-* HW PWM pins on SK-TDA4VM are {29, 31, 32, 33}
+```{note}
+For HW based sync, user must define valid parameters for triggering pulse generation:
+- Pulse periodicity should be greater than the sum of the frame period and the trigger_delay
+- Pulse width must be greater than 25ns
+- HW PWM pins on SK-TDA4VM are {29, 31, 32, 33}
+```
 
 ## mmWaveSync Parameters
 

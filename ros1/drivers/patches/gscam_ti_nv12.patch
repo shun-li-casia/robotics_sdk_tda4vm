@@ -61,26 +61,29 @@ index 98166b7..70531c3 100644
 +endif()
 diff --git a/README_TI.md b/README_TI.md
 new file mode 100644
-index 0000000..1e4ef70
+index 0000000..c1da33c
 --- /dev/null
 +++ b/README_TI.md
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,136 @@
 +GStreamer Camera Node for ROS 1
 +===============================
 +This GStreamer based camera ROS node is from [https://github.com/ros-drivers/gscam](https://github.com/ros-drivers/gscam). Following changes are made to customize for the use cases in the Robotics SDK:
 +
-+* Added GStreamer pipelines that use [the GStreamer plugins optimized for TDA4 devices](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode for the output.
-+* Added an example `camera_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use TI TDA4 LDC hardware accelerator).
++* Added GStreamer pipelines that use [the GStreamer plugins optimized for TI Processors](https://github.com/TexasInstruments/edgeai-gst-plugins), and added NV12 encoding mode for the output.
++* Added an example `camera_info.yaml` for Logitech webcam C920 and associated LDC look-up-table file (required to use the LDC hardware accelerator).
 +* Added launch files (under 'launch' folder) for Logitech webcam (in MJPG mode and YUYV mode) and OV5640 (in YUYV mode) CSI camera with GStreamer pipelines using the plugins optimized on TI devices.
 +* Added launch files for IMX390 FPD-Link cameras with GStreamer pipelines using the plugins optimized on TI devices.
 +* Dependency: following modules are already built and installed in the the Robotics SDK ROS Docker images.
 +    * [edgeai-tiovx-modules](https://github.com/TexasInstruments/edgeai-tiovx-modules)
 +    * [edgeai-gst-plugins](https://github.com/TexasInstruments/edgeai-gst-plugins)
 +
-+**Note**: The customization are made only for the Robotics SDK. It was not verified that all examples from the original GIT repository still work with these changes.
-+## Usage
++```{note}
++The customization are made only for the Robotics SDK. It was not verified that all examples from the original GIT repository still work with these changes.
++```
 +
-+### Running gscam on TDA4
++## Usage: USB Camera
++
++### Running gscam on the target
 +
 +1. Camera Calibration and Rectification Map Generation: See corresponding parts of [mono_capture/README.md](../mono_capture/README.md).
 +
@@ -103,24 +106,59 @@ index 0000000..1e4ef70
 +    roslaunch gscam v4l_ov5640.launch # for OV5640 CSI camera
 +    ```
 +
-+**Note**: The measured framerate for the output topic can be less than the framerate set in the launch file, depending on the light condition of the scenes. This is a normal behavior inherited from `v4l2src` and the ISP settings of, e.g., USB webcam.
++```{note}
++The measured framerate for the output topic can be less than the framerate set in the launch file, depending on the light condition of the scenes. This is a normal behavior inherited from `v4l2src` and the default ISP settings of the USB webcam.
++```
 +
-+### Visualization on Remote PC
++### Visualization on remote PC
 +
-+By default, the output topic `raw_image` is published in NV12 color format to make more efficient when the node is integrated with the vision vision CNN processing chain (including `ti_vision_cnn` ROS node) on TDA4. We provide a launch file for visualization on the remote Ubuntu (included in `ti_viz_nodes` ROS package).
++By default, the output topic `raw_image` is published in NV12 color format to make more efficient when the node is integrated with the vision vision CNN processing chain (including `ti_vision_cnn` ROS node) on the target. We provide a launch file for visualization on the remote Ubuntu (included in `ti_viz_nodes` ROS package).
 +
 +In the PC Docker container,
 +```
 +roslaunch ti_viz_nodes gscam_nv12.launch
 +```
 +
++## Usage: IMX219 Camera
++
++```{only} tag_j7x
++Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/latest/exports/docs/devices/TDA4VM/linux/getting_started.html#rpiv2-imx219-raw-sensor).
++```
++```{only} tag_am62a
++Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/AM62AX/latest/exports/docs/devices/AM62AX/linux/getting_started.html#rpiv2-imx219-raw-sensor).
++```
++
++You can check the device ID and subdev ID for the IMX219 CSI camera attached to the hardware setup by running `/opt/edgeai-gst-apps/scripts/setup_cameras.sh` on the target host Linux. Accordingly please update the launch files below, or it's also possible to pass as launch arguments.
++
++### Running gscam with resizing
++To publish the captured images from the IMX219 camera,
++```
++roslaunch gscam v4l_imx219.launch device_id:=X subdev_id:=Y
++```
++
++```{note}
++The GStreamer pipeline in `v4l_imx219.launch` includes the ISP plugin (tiovxisp) followed by the image scaler plugin (tiovxmultiscaler) to resize the images to the output resolution. The output images are published in NV12 format.
++```
++
++### Visualization on remote PC
++
++For visualization, run the following in the PC Docker container,
++```
++roslaunch ti_viz_nodes gscam_nv12.launch width:=1280 height:=720
++```
++
 +## Usage: IMX390 Camera
++
++```{only} tag_j7x
++Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/latest/exports/docs/devices/TDA4VM/linux/getting_started.html#imx390-raw-sensor).
++```
++```{only} tag_am62a
++Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/AM62AX/latest/exports/docs/devices/AM62AX/linux/getting_started.html#imx390-raw-sensor).
++```
 +
 +### Running gscam for raw image capture
 +
-+Please follow [the hardware setup section of Edge AI documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/getting_started.html).
-+
-+You can check the device ID and subdev ID for the IMX390 camera attached to the hardware setup by running `/opt/edgeai-gst-apps/scripts/setup_cameras.sh` on the TDA4 target host Linux. Accordingly please update the launch files below, or it's also possible to pass as launch arguments.
++You can check the device ID and subdev ID for the IMX390 camera attached to the hardware setup by running `/opt/edgeai-gst-apps/scripts/setup_cameras.sh` on the target host Linux. Accordingly please update the launch files below, or it's also possible to pass as launch arguments.
 +
 +To publish raw images in the native resolution (1936 x 1096),
 +```
@@ -130,14 +168,16 @@ index 0000000..1e4ef70
 +
 +We also provide a launch file that includes rectification and resizing in the GStreamer pipeline.
 +
-+**NOTE**: `v4l_imx390.launch` has `tiovxldc` in the GStreamer pipeline and
++````{note}
++`v4l_imx390.launch` has `tiovxldc` in the GStreamer pipeline and
 +`tiovxldc` requires `lut-file`. The LUT file is specific to the camera.
 +As an example, we provide camera calibration data for a fisheye IMX390 camera
 +is provided in the form of camera_info YAML file. To generate the LUT files,
-+please run the following in the Robotics SDK Docker container on the TDA4 target:
++please run the following in the Robotics SDK Docker container on the target:
 +```
 +$ bash /opt/robotics_sdk/tools/mono_camera/imx390_ldc.sh
 +```
++````
 +
 +```
 +# 1080p
@@ -146,9 +186,11 @@ index 0000000..1e4ef70
 +roslaunch gscam v4l_imx390.launch width:=1280 height:=720
 +```
 +
-+**Note**: The GStreamer pipeline in `v4l_imx390.launch` also includes the LDC plugin (tiovxldc). Raw resolution is 1936 x 1096. The LDC plugin performs rectification and then cropping to produce 1920 x 1080 images in NV12 format, followed by MSC plugin (tiovxmultiscaler) to resize the images to the output resolution.
++```{note}
++The GStreamer pipeline in `v4l_imx390.launch` also includes the LDC plugin (tiovxldc). Raw resolution is 1936 x 1096. The LDC plugin performs rectification and then cropping to produce 1920 x 1080 images in NV12 format, followed by MSC plugin (tiovxmultiscaler) to resize the images to the output resolution.
++```
 +
-+### Visualization on Remote PC
++### Visualization on remote PC
 +
 +For visualization, run the following in the PC Docker container,
 +```
@@ -167,6 +209,44 @@ index 0000000..3ce26c2
 @@ -0,0 +1,31 @@
 +%YAML:1.0
 +---
++image_width: 1280
++image_height: 720
++camera_name: camera
++camera_matrix: !!opencv-matrix
++   rows: 3
++   cols: 3
++   dt: d
++   data: [ 9.3797299601201667e+02, 0., 6.4110167315102080e+02, 0.,
++       9.3981016471195335e+02, 3.8512990806142415e+02, 0., 0., 1. ]
++distortion_model: plumb_bob
++distortion_coefficients: !!opencv-matrix
++   rows: 1
++   cols: 5
++   dt: d
++   data: [ 7.3934261699576093e-02, -4.1542678753901879e-01,
++       1.4128959036683215e-03, 9.4384360282255390e-04,
++       5.9913436641201279e-01 ]
++rectification_matrix: !!opencv-matrix
++   rows: 3
++   cols: 3
++   dt: d
++   data: [ 1., 0., 0., 0., 1., 0., 0., 0., 1. ]
++projection_matrix: !!opencv-matrix
++   rows: 3
++   cols: 4
++   dt: d
++   data: [ 9.3797299601201667e+02, 0., 6.4110167315102080e+02, 0., 0.,
++       9.3981016471195335e+02, 3.8512990806142415e+02, 0., 0., 0., 1.,
++       0. ]
+diff --git a/config/IMX219_HD_camera_info.yaml b/config/IMX219_HD_camera_info.yaml
+new file mode 100644
+index 0000000..b3ab210
+--- /dev/null
++++ b/config/IMX219_HD_camera_info.yaml
+@@ -0,0 +1,32 @@
++%YAML:1.0
++---
++# This is just a template. All the coefficients should be from calibration.
 +image_width: 1280
 +image_height: 720
 +camera_name: camera
@@ -262,9 +342,67 @@ index e4b4ee2..dc7e2ff 100644
      image_transport::ImageTransport image_transport_;
      camera_info_manager::CameraInfoManager camera_info_manager_;
      image_transport::CameraPublisher camera_pub_;
+diff --git a/launch/v4l_imx219.launch b/launch/v4l_imx219.launch
+new file mode 100644
+index 0000000..6ce8cb1
+--- /dev/null
++++ b/launch/v4l_imx219.launch
+@@ -0,0 +1,52 @@
++<launch>
++    <!-- You can check the device ID and subdev ID for the IMX219 camera (RPi v2
++    attached by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh on the target
++    host Linux. Accordingly please update the parameters or pass as launch arguments. -->
++    <arg name="device" default="/dev/video2"/>
++    <arg name="subdev" default="/dev/v4l-subdev2"/>
++    <!-- output resolution: width and height -->
++    <arg name="width" default="1280"/>
++    <arg name="height" default="720"/>
++    <!-- framerate (integer): 30 (default) FPS -->
++    <!-- If 30 FPS has issue, try a pipleline without videorate -->
++    <arg name="framerate" default="30"/>
++    <!-- node name -->
++    <arg name="node_name" default="gscam_node"/>
++    <!-- camera name: also used as namespace for the output topic name -->
++    <arg name="camera_name" default="camera"/>
++    <!-- DCC VISS binary file -->
++    <arg name="dcc_isp_file" default="/opt/imaging/imx219/dcc_viss.bin"/>
++    <!-- DCC 2A binary file -->
++    <arg name="dcc_2a_file" default="/opt/imaging/imx219/dcc_2a.bin"/>
++    <!-- edgeai-gst-plugins sensor name -->
++    <arg name="sensor_name" default="SENSOR_SONY_IMX219_RPI"/>
++    <!-- LDC binary file -->
++    <!-- camera_info URL: replace with camera_info from camera calibration -->
++    <!-- package://ros_package_name/config/camera_info.yaml -->
++    <!-- file:///full/path/to/local/file.yaml -->
++    <arg name="camera_info_url" default="package://gscam/config/IMX219_HD_camera_info.yaml"/>
++
++    <!-- GStreamer pipeline specified in gscam_config was tested with IMX219 camera,
++        'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are assumed to be already
++        installed in target ROS container.-->
++    <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
++        <param name="gscam_config"
++            value="v4l2src device=$(arg device) io-mode=5 do-timestamp=true !
++            video/x-bayer, width=1920, height=1080, format=rggb !
++            tiovxisp sink_0::device=$(arg subdev) dcc-isp-file=$(arg dcc_isp_file)
++            sink_0::dcc-2a-file=$(arg dcc_2a_file) format-msb=7 sensor-name=$(arg sensor_name) !
++            video/x-raw, format=NV12 !
++            tiovxmultiscaler ! video/x-raw, width=$(arg width), height=$(arg height) !
++            tiovxdlcolorconvert target=1 out-pool-size=4"/>
++        <param name="camera_name"     value="$(arg camera_name)"/>
++        <param name="camera_info_url" value="$(arg camera_info_url)"/>
++        <param name="width"           value="$(arg width)"/>
++        <param name="height"          value="$(arg height)"/>
++        <param name="framerate"       value="$(arg framerate)"/>
++        <param name="sync_sink"       value="false"/>
++        <param name="use_gst_timestamps" value="false"/>
++        <!-- image encoding: "yuv420" - publish in "NV12" -->
++        <param name="image_encoding"  value="yuv420"/>
++    </node>
++
++</launch>
 diff --git a/launch/v4l_imx390.launch b/launch/v4l_imx390.launch
 new file mode 100644
-index 0000000..4d13bc1
+index 0000000..d4eda93
 --- /dev/null
 +++ b/launch/v4l_imx390.launch
 @@ -0,0 +1,61 @@
@@ -274,12 +412,12 @@ index 0000000..4d13bc1
 +    tiovxldc requires lut-file. The LUT file is specific to the camera.
 +    As an example, we provide camera calibration data for a fisheye IMX390 camera
 +    is provided in the form of camera_info YAML file. To generate the LUT files,
-+    please run the following in the Robotics SDK Docker container on the TDA4 target:
++    please run the following in the Robotics SDK Docker container on the target target:
 +    $ bash /opt/robotics_sdk/tools/mono_camera/imx390_ldc.sh -->
 +
 +    <!-- You can check the device ID and subdev ID for the IMX390 camera attached
-+    by running /opt/edge_ai_apps/scripts/setup_cameras.sh on the target host Linux.
-+    Accordingly please update the parameters or pass as arguments -->
++    by running /opt/edgeai-gst-apps/scripts/setup_cameras.sh on the target host Linux.
++    Accordingly please update the parameters or pass as launch argument. -->
 +    <arg name="device" default="/dev/video18"/>
 +    <arg name="subdev" default="/dev/v4l-subdev7"/>
 +    <!-- output resolution: width and height -->
@@ -305,7 +443,7 @@ index 0000000..4d13bc1
 +    <!-- <arg name="camera_info_url" default="package://gscam/config/IMX390_HD_camera_info.yaml"/> -->
 +
 +    <!-- GStreamer pipeline specified in gscam_config was tested with IMX390 camera,
-+        'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are assumed to be already installed in TDA4 ROS container.
++        'edgeai-tiovx-modules' and 'edgeai-gst-plugins' are assumed to be already installed in target ROS container.
 +        Note: GStreamer pipeline also includes the LDC plugin. Raw resolution is 1936 x 1096,
 +        and the LDC plugin (tiovxldc) performs rectification and resizing to have output resolution in NV12.
 +        Note: /dev/v4l-subdev ID can change, depending on the device attached, and at reboot. -->
@@ -381,14 +519,14 @@ index 0000000..da25647
 +</launch>
 diff --git a/launch/v4l_mjpg.launch b/launch/v4l_mjpg.launch
 new file mode 100644
-index 0000000..5038f4a
+index 0000000..0ab2e9b
 --- /dev/null
 +++ b/launch/v4l_mjpg.launch
 @@ -0,0 +1,29 @@
 +<launch>
 +    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in MJPG mode,
 +        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
-+        are already installed in TDA4 ROS container -->
++        are already installed in target ROS container. -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->
@@ -416,16 +554,16 @@ index 0000000..5038f4a
 +</launch>
 diff --git a/launch/v4l_ov5640.launch b/launch/v4l_ov5640.launch
 new file mode 100644
-index 0000000..628b253
+index 0000000..f37b060
 --- /dev/null
 +++ b/launch/v4l_ov5640.launch
 @@ -0,0 +1,32 @@
 +<launch>
-+    <!-- Please make sure run "bash /opt/edge_ai_apps/init_script.sh" on TDA4 host Linux before launching this for OV5640 -->
++    <!-- Please make sure run "bash /opt/edgeai-gst-apps/init_script.sh" on target host Linux before launching this for OV5640 -->
 +
 +    <!-- GStreamer pipeline specified in gscam_config was tested with OV5640 CSI camera in YUYV mode,
 +        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
-+        are already installed in TDA4 ROS container -->
++        are already installed in target ROS container. -->
 +
 +
 +    <arg name="device"         default="/dev/video2"/>
@@ -454,14 +592,14 @@ index 0000000..628b253
 +</launch>
 diff --git a/launch/v4l_yuv.launch b/launch/v4l_yuv.launch
 new file mode 100644
-index 0000000..8c4b0fc
+index 0000000..a7ab999
 --- /dev/null
 +++ b/launch/v4l_yuv.launch
 @@ -0,0 +1,29 @@
 +<launch>
 +    <!-- GStreamer pipeline specified in gscam_config was tested with Logitech C920 webcam in YUYV mode,
 +        'tiovxdlcolorconvert' assumes 'edgeai-tiovx-modules' and 'edgeai-gst-plugins'
-+        are already installed in TDA4 ROS container -->
++        are already installed in target ROS container. -->
 +
 +    <arg name="device"         default="/dev/video2"/>
 +    <!-- framerate (integer) -->

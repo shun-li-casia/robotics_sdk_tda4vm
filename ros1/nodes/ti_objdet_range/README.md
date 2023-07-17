@@ -21,8 +21,8 @@ This demo takes stereo camera raw images either from ROSBAG file or live ZED cam
 <figcaption>Figure 1. 2D object detection with XYZ information from stereo disparity map: block diagram</figcaption>
 <br />
 
-This demo runs currently in ROS 1 only. Launch the following launch file in the TDA4 ROS 1 Docker container.
-**[TDA4]**
+This demo runs currently in ROS 1 only. Launch the following launch file in the ROS 1 Docker container on the target.
+**[SK]**
 With stereo camera images from ROSBAG file:
 ```
 roslaunch ti_objdet_range bag_objdet_range.launch

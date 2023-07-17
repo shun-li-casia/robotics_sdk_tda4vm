@@ -97,12 +97,16 @@ Launch arguments can be passed to the following launch commands.
 | Stereo Vision (ZED camera) | roslaunch ti_sde zed_sde.launch video_id:=x zed_sn:=SNxxxxx | same as above |
 | Stereo Vision with point-cloud (ROSBAG)     | roslaunch ti_sde bag_sde_pcl.launch video_id:=x zed_sn:=SNxxxxx | roslaunch ti_viz_nodes rviz_sde_pcl.launch |
 | Stereo Vision with point-cloud (ZED camera) | roslaunch ti_sde zed_sde_pcl.launch video_id:=x zed_sn:=SNxxxxx | same as above |
-| Semantic Segmentation CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch |
-| Semantic Segmentation CNN (ZED camera)  | roslaunch ti_vision_cnn zed_semseg_cnn.launch video_id:=x zed_sn:=SNxxxxx | same as above |
-| Semantic Segmentation CNN (Mono camera) | roslaunch ti_vision_cnn gscam_semseg_cnn.launch video_id:=x | same as above |
-| Object Detection CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch |
-| Object Detection CNN (ZED camera)  | roslaunch ti_vision_cnn zed_objdet_cnn.launch video_id:=x zed_sn:=SNxxxxx | same as above |
-| Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x | same as above |
+| Semantic Segmentation CNN (ROSBAG)        | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch |
+| Semantic Segmentation CNN (ZED camera)    | roslaunch ti_vision_cnn zed_semseg_cnn.launch video_id:=x zed_sn:=SNxxxxx | same as above |
+| Semantic Segmentation CNN (Mono camera)   | roslaunch ti_vision_cnn gscam_semseg_cnn.launch video_id:=x | same as above |
+| Semantic Segmentation CNN (IMX219 camera) | roslaunch ti_vision_cnn gscam_semseg_cnn_imx219.launch video_id:=x subdev_id:=y | same as above |
+| Semantic Segmentation CNN (IMX390 camera) | roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (ROSBAG)        | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch |
+| Object Detection CNN (ZED camera)    | roslaunch ti_vision_cnn zed_objdet_cnn.launch video_id:=x zed_sn:=SNxxxxx | same as above |
+| Object Detection CNN (Mono camera)   | roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x | same as above |
+| Object Detection CNN (IMX219 camera) | roslaunch ti_vision_cnn gscam_objdet_cnn_imx219.launch video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (IMX390 camera) | roslaunch ti_vision_cnn gscam_objdet_cnn_imx390.launch video_id:=x subdev_id:=y | same as above |
 | 3D Obstacle Detection (ROSBAG)     | roslaunch ti_estop bag_estop.launch  | roslaunch ti_viz_nodes rviz_estop.launch |
 | 3D Obstacle Detection (ZED camera) | roslaunch ti_estop zed_estop.launch video_id:=x zed_sn:=SNxxxxx | same as above |
 | Object Detection with 3D Spatial Information (ROSBAG)     | roslaunch ti_objdet_range bag_objdet_range.launch  | roslaunch ti_viz_nodes rviz_objdet_range.launch |
@@ -114,8 +118,12 @@ Launch arguments can be passed to the following launch commands.
 |---------------------|---------------------------------|--------------------------------------------|
 | Semantic Segmentation CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_semseg_cnn.launch   | roslaunch ti_viz_nodes rviz_semseg_cnn.launch |
 | Semantic Segmentation CNN (Mono camera) | roslaunch ti_vision_cnn gscam_semseg_cnn.launch video_id:=x | same as above |
-| Object Detection CNN (ROSBAG)      | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch |
-| Object Detection CNN (Mono camera) | roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x | same as above |
+| Semantic Segmentation CNN (IMX219 camera) | roslaunch ti_vision_cnn gscam_semseg_cnn_imx219.launch video_id:=x subdev_id:=y | same as above |
+| Semantic Segmentation CNN (IMX390 camera) | roslaunch ti_vision_cnn gscam_semseg_cnn_imx390.launch video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (ROSBAG)        | roslaunch ti_vision_cnn bag_objdet_cnn.launch   | roslaunch ti_viz_nodes rviz_objdet_cnn.launch |
+| Object Detection CNN (Mono camera)   | roslaunch ti_vision_cnn gscam_objdet_cnn.launch video_id:=x | same as above |
+| Object Detection CNN (IMX219 camera) | roslaunch ti_vision_cnn gscam_objdet_cnn_imx219.launch video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (IMX390 camera) | roslaunch ti_vision_cnn gscam_objdet_cnn_imx390.launch video_id:=x subdev_id:=y | same as above |
 ```
 
 In the following, **[SK]** and **[PC]** indicate the steps that should be launched, either on the target SK board or on the PC.

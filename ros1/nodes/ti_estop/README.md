@@ -21,7 +21,7 @@ This demonstrates the 3D obstacle detection application using the disparity map 
 
 ## Run the Application in ROS 1
 
-**[TDA4]** For setting up the ROS 1 environment on TDA4 host, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following command inside the Docker container on TDA4 target:
+**[SK]** For setting up the ROS 1 environment on target, please follow [Docker Setup for ROS 1](../../../docker/setting_docker_ros1.md). To launch `ti_estop` node with playing back a ROSBAG file, run the following command inside the Docker container on the target:
 ```
 roslaunch ti_estop bag_estop.launch
 ```
@@ -44,11 +44,11 @@ roslaunch ti_estop rviz_estop_ogmap.launch
 
 ## Run the Application in ROS 2
 
-**[TDA4]** For setting up the ROS 2 environment on TDA4 host, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera:
+**[SK]** For setting up the ROS 2 environment on the target, please follow [Docker Setup for ROS 2](../../../docker/setting_docker_ros2.md). To process the image stream from a ZED stereo camera:
 ```
 ros2 launch ti_estop zed_estop_launch.py video_id:=x zed_sn:=SNxxxxx
 ```
-<!-- To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on TDA4 target:
+<!-- To launch `ti_estop` node with playing back a ROSBAG file, run the following inside the Docker container on the target:
 ```
 ros2 launch ti_estop bag_estop_launch.py
 ``` -->

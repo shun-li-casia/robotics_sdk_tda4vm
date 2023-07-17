@@ -9,7 +9,7 @@ To ensure smooth running of the out-of-box demos, the following DDS selections a
 
 | Platform          | DDS Choice           | Note                                            |
 |-------------------|----------------------|-------------------------------------------------|
-| TDA4 target       | Eclipse Cyclone DDS  | Provides better performance, especially with "rosbag play" |
+| Target SK board   | Eclipse Cyclone DDS  | Provides better performance, especially with "rosbag play" |
 | Visualization PC  | eProsima Fast DDS    | Provides better `Ctrl+C` response                 |
 
 You can switch the DDS implementation in each launch session by setting the environment variable `RMW_IMPLEMENTATION`. For example,
@@ -115,22 +115,30 @@ Launch arguments can be passed to the following launch commands.
 |---------------------|---------------------------------|--------------------------------------------|
 | Stereo Vision (ZED camera) | ros2 launch ti_sde zed_sde_launch.py video_id:=x zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_sde_launch.py |
 | Stereo Vision with point-cloud (ZED camera) | ros2 launch ti_sde zed_sde_pcl_launch.py video_id:=x  zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_sde_pcl_launch.py |
-| Semantic Segmentation CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py video_id:=x  zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py |
-| Semantic Segmentation CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_launch.py video_id:=x | same as above |
-| Object Detection CNN (ZED camera)  | ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py video_id:=x zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py |
-| Object Detection CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_launch.py video_id:=x | same as above |
+| Semantic Segmentation CNN (ZED camera)    | ros2 launch ti_vision_cnn zed_semseg_cnn_launch.py video_id:=x  zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py |
+| Semantic Segmentation CNN (Mono camera)   | ros2 launch ti_vision_cnn gscam_semseg_cnn_launch.py video_id:=x | same as above |
+| Semantic Segmentation CNN (IMX219 camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_imx219_launch.py video_id:=x subdev_id:=y | same as above |
+| Semantic Segmentation CNN (IMX390 camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_imx390_launch.py video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (ZED camera)    | ros2 launch ti_vision_cnn zed_objdet_cnn_launch.py video_id:=x zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py |
+| Object Detection CNN (Mono camera)   | ros2 launch ti_vision_cnn gscam_objdet_cnn_launch.py video_id:=x | same as above |
+| Object Detection CNN (IMX219 camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_imx219_launch.py video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (IMX390 camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_imx390_launch.py video_id:=x subdev_id:=y | same as above |
 | 3D Obstacle Detection (ZED camera) | ros2 launch ti_estop zed_estop_launch.py video_id:=x zed_sn:=SNxxxxx | ros2 launch ti_viz_nodes rviz_estop_launch.py |
 ```
 ```{only} tag_am62a
 | Demo (Input Source) | Launch command on Target        | Launch command on Remote Visualization PC  |
 |---------------------|---------------------------------|--------------------------------------------|
 | Semantic Segmentation CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_launch.py video_id:=x | ros2 launch ti_viz_nodes rviz_semseg_cnn_launch.py |
+| Semantic Segmentation CNN (IMX219 camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_imx219_launch.py video_id:=x subdev_id:=y | same as above |
+| Semantic Segmentation CNN (IMX390 camera) | ros2 launch ti_vision_cnn gscam_semseg_cnn_imx390_launch.py video_id:=x subdev_id:=y | same as above |
 | Object Detection CNN (Mono camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_launch.py video_id:=x | ros2 launch ti_viz_nodes rviz_objdet_cnn_launch.py |
+| Object Detection CNN (IMX219 camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_imx219_launch.py video_id:=x subdev_id:=y | same as above |
+| Object Detection CNN (IMX390 camera) | ros2 launch ti_vision_cnn gscam_objdet_cnn_imx390_launch.py video_id:=x subdev_id:=y | same as above |
 ```
 
 **Running Demos with ROSBAG**
 
-It is recommended to launch demos in two terminals on the TDA4 target, and launch `ros2 bag play` in a separate terminal as shown in the following table.
+It is recommended to launch the demos in two terminals on the target SK board, specifically, launch `ros2 bag play` in a separate terminal as shown in the following table.
 
 ```{only} tag_j7x
 | Demo                           | ROSBAG launch command on Target (Terminal 1) | Demo launch command on Target (Terminal 2) | Launch command on Remote Visualization PC |
@@ -157,7 +165,7 @@ You can use TMUX inside the ROS Docker container to split the current terminal w
 - `Ctrl + b`, followed by `x`: Close the current pane.
 ```
 
-In the following, **[SK]** and **[PC]** indicate the steps that should be launched, either on the TDA4 target or on the PC.
+In the following, **[SK]** and **[PC]** indicate the steps that should be launched, either on the target SK board or on the PC.
 
 ````{only} tag_j7x
 **Run Stereo Vision Application**
