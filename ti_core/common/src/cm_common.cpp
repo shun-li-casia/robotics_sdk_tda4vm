@@ -472,9 +472,9 @@ vx_status CM_copyImage2Image(vx_image srcImage, vx_image dstImage)
 }
 
 
-vx_status CM_copyData2Image(const uint8_t * data_ptr_src, 
-                            vx_image        dstImage, 
-                            int16_t         hSrcOfst, 
+vx_status CM_copyData2Image(const uint8_t * data_ptr_src,
+                            vx_image        dstImage,
+                            int16_t         hSrcOfst,
                             int16_t         vSrcOfst)
 {
     vx_map_id                  map_id;
@@ -696,7 +696,7 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
 
         if ((img_format != VX_DF_IMAGE_NV12) &&
             (img_format != VX_DF_IMAGE_S16)  &&
-            (img_format != VX_DF_IMAGE_RGB)) 
+            (img_format != VX_DF_IMAGE_RGB))
         {
             LOG_ERROR("Image format is NOT supported.");
             vxStatus = VX_FAILURE;
@@ -749,7 +749,7 @@ vx_status CM_extractImageData(uint8_t         *outImageData,
             if (img_format == VX_DF_IMAGE_NV12)
             {
                 size = width * height;
-            } 
+            }
             else if (img_format == VX_DF_IMAGE_S16)
             {
                 size = 2 * width * height;
@@ -832,6 +832,7 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
     return vxStatus;
 }
 
+#if !defined(SOC_AM62A) && !defined(SOC_AM62)
 vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
                                    const vx_user_data_object pointCloud,
                                    uint32_t                  pointSize,
@@ -906,6 +907,7 @@ vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
 
     return vxStatus;
 }
+#endif // !defined(SOC_AM62A) || !defined(SOC_AM62)
 
 vx_int32 CM_fill1DTensor(vx_tensor in_tensor, const vx_char* in_file)
 {
@@ -1096,4 +1098,4 @@ vx_status CM_createDlBuffers(DLInferer            *inferer,
 }
 
 
-} // namespace ti_core_common 
+} // namespace ti_core_common

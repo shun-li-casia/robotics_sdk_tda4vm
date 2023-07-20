@@ -72,7 +72,7 @@
 #include <TI/tivx.h>
 #include <TI/j7_tidl.h>
 
-#if !defined(SOC_AM62A) || !defined(SOC_AM62)
+#if !defined(SOC_AM62A) && !defined(SOC_AM62)
 #include <perception/perception.h>
 #endif // !defined(SOC_AM62A) || !defined(SOC_AM62)
 
@@ -100,7 +100,7 @@ using namespace ti::post_process;
  *
  */
 
-namespace ti_core_common 
+namespace ti_core_common
 {
 
 /**
@@ -228,23 +228,23 @@ vx_status CM_copyImage2Image(vx_image srcImage, vx_image dstImage);
 
 /**
  * \brief Function for copying data from a data pointer to OpenVX image object
- * 
+ *
  * \param [in] data_ptr_src source image data
  *
  * \param [in] dstImage     image object that image data is copied to
  *
  * \param [in] hSrcOfst     horizontal offset from which the image data is copied
  *
- * \param [in] vSrcOfst     vertical offset from which the image data is copied 
- * 
- * \return VX_SUCCESS on success 
+ * \param [in] vSrcOfst     vertical offset from which the image data is copied
+ *
+ * \return VX_SUCCESS on success
  *
  * \ingroup group_ticore_common
- * 
+ *
  */
-vx_status CM_copyData2Image(const uint8_t * data_ptr_src, 
-                            vx_image        dstImage, 
-                            int16_t         hSrcOfst, 
+vx_status CM_copyData2Image(const uint8_t * data_ptr_src,
+                            vx_image        dstImage,
+                            int16_t         hSrcOfst,
                             int16_t         vSrcOfst);
 
 
@@ -329,15 +329,15 @@ vx_status CM_extractTensorData(uint8_t         *outTensorData,
 /**
  * \brief Function to read a input binary file and fill 1-D tensor object's data
  *
- * \param [in,out] in_tensor tensor that reads in a file 
+ * \param [in,out] in_tensor tensor that reads in a file
  *
  * \param [in]  in_file input file name
- * 
- * \return The number of bytes 
+ *
+ * \return The number of bytes
  *
  * \ingroup group_ticore_common
  */
-vx_int32  CM_fill1DTensor(vx_tensor        in_tensor, 
+vx_int32  CM_fill1DTensor(vx_tensor        in_tensor,
                           const vx_char  * in_file);
 
 
@@ -347,30 +347,31 @@ vx_int32  CM_fill1DTensor(vx_tensor        in_tensor,
  * \param [in,out] in_tensor tensor that reads in file files
  *
  * \param [in]  in_file1 input file name 1
- * 
+ *
  * \param [in]  in_file2 input file name 2
- * 
- * \return The number of bytes 
+ *
+ * \return The number of bytes
  *
  * \ingroup group_ticore_common
  */
-vx_int32  CM_fill1DTensorFrom2Bin(vx_tensor        in_tensor, 
-                                  const vx_char  * in_file1, 
+vx_int32  CM_fill1DTensorFrom2Bin(vx_tensor        in_tensor,
+                                  const vx_char  * in_file1,
                                   const vx_char  * in_file2);
+
 
 /**
  * \brief Function to extract point cloud (XYZRGB) data from an OpenVX user data object.
  *        When copyPointFlag = 1, copy points to outPcData. Otherwise, only get numPoints.
  *
- * \param [out]     outPcData Output point cloud data, which inclues X,Y,Z and R, G, B for each point. 
+ * \param [out]     outPcData Output point cloud data, which inclues X,Y,Z and R, G, B for each point.
  *                            The size of each point is 15 bytes.
  *
- * \param [in]      pointCloud OpenVX user object for PTK_PointCloud 
+ * \param [in]      pointCloud OpenVX user object for PTK_PointCloud
  *
- * \param [in]      pointSize  size of one point in byte 
- * 
- * \param [in,out]  numPoints  the number of points in pointCloud object. 
- * 
+ * \param [in]      pointSize  size of one point in byte
+ *
+ * \param [in,out]  numPoints  the number of points in pointCloud object.
+ *
  * \param [in]      copyPointFlag whether to copy points to outPcData
  *
  * \return VX_SUCCESS on success
@@ -378,22 +379,23 @@ vx_int32  CM_fill1DTensorFrom2Bin(vx_tensor        in_tensor,
  * \ingroup group_ticore_common
  */
 
+#if !defined(SOC_AM62A) && !defined(SOC_AM62)
 vx_status CM_extractPointCloudData(uint8_t                  *outPcData,
                                    const vx_user_data_object pointCloud,
                                    uint32_t                  pointSize,
                                    uint32_t                 *numPoints,
                                    uint8_t                   copyPointFlag);
-
+#endif // !defined(SOC_AM62A) || !defined(SOC_AM62)
 
 /**
  * \brief Function to create input and output buffers for DL inferer
- *  
- * \param [out]     inferer DL inferer object point 
  *
- * \param [in]      ifInfoList DL tensor info 
+ * \param [out]     inferer DL inferer object point
  *
- * \param [in,out]   vecVar  DL tensor pointer where buffers are allocated 
- * 
+ * \param [in]      ifInfoList DL tensor info
+ *
+ * \param [in,out]   vecVar  DL tensor pointer where buffers are allocated
+ *
  * \return VX_SUCCESS on success
  *
  * \ingroup group_ticore_common
@@ -404,15 +406,15 @@ vx_status CM_createDlBuffers(DLInferer            *inferer,
 
 
 /**
- * \brief Function to copy tensor data 
+ * \brief Function to copy tensor data
  *
- * \param [in] inData input buffer or tensor 
+ * \param [in] inData input buffer or tensor
  *
  * \param [out] outData output buffer or tensor
  *
  * \param [in] numElem the number of elements to copy
  *
- * \return 
+ * \return
  *
  * \ingroup group_ticore_common
  */
@@ -427,7 +429,7 @@ void CM_copyTensorData(inT  *inData, outT *outData, int32_t  numElem)
 }
 
 
-} // namespace ti_core_common 
+} // namespace ti_core_common
 
 #endif /* _CM_COMMON_CNTXT_H_ */
 

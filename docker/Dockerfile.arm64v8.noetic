@@ -109,7 +109,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     chrony \
     nfs-common \
     corkscrew \
-    v4l-utils && \
+    v4l-utils \
+    unzip && \
     rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
