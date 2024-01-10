@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 
         signal(SIGINT, sigHandler);
 
+        // create the SDE App Node
         sdeAppNode = new SDEAppNode(nh, privNh);
 
         ros::spin();

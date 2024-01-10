@@ -1,0 +1,3 @@
+[submodule "ros1/drivers/gscam2"]
+	path = ros1/drivers/gscam2
+	url = https://github.com/clydemcqueen/gscam2.git

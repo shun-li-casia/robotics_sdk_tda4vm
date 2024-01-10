@@ -329,6 +329,8 @@ void SDEAppNode::imgCb(const ImageConstPtr& left_image_ptr,
 {
     if (m_cntxt->state == SDEAPP_STATE_INIT)
     {
+      // once get the image then send them to process
+      // SDE_run, add the images objests into the graph
         SDEAPP_run(m_cntxt, 
                    left_image_ptr->data.data(),
                    right_image_ptr->data.data(),
