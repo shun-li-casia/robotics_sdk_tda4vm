@@ -1,0 +1,55 @@
+%YAML:1.0
+
+#common parameters
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam;
+imu: 0
+num_of_cam: 2
+
+imu_topic: "/fdi_imu"
+image0_topic: "/zed2i/zed_node/left/image_rect_color"
+image1_topic: "/zed2i/zed_node/right/image_rect_color"
+output_path: "/home/ls/vins_output/"
+
+cam0_calib: "cam0_pinhole.yaml"
+cam1_calib: "cam1_pinhole.yaml"
+image_width: 640
+image_height: 360
+
+
+# Extrinsic parameter between IMU and Camera.
+estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
+                        # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [0.012453666892938253, -0.015462596333768286,  0.999802887721144007,  0.144048320801575508,
+          0.999893417853642941, -0.007426757550880625, -0.012569654141641018, -0.040674676953499939,
+          0.007619653133822679,  0.999852864869076208,  0.015368457932429580,  0.023447574999888421,
+          0.000000000000000000,  0.000000000000000000,  0.000000000000000000,  1.000000000000000000]
+
+body_T_cam1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [0.014000221902170651, -0.015962163757355152,  0.999774576149480509,  0.144291415566620063,
+          0.999871818305968385, -0.007544212943436879, -0.014122032735430334,  0.079107538037391442,
+          0.007767930497015740,  0.999844134942665663,  0.015854497044878957,  0.024412476832968905,
+          0.000000000000000000,  0.000000000000000000,  0.000000000000000000,  1.000000000000000000]
+
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 150            # max feature number in feature tracking
+min_dist: 30            # min distance between two features
+freq: 25                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
+max_num_iterations: 8   # max solver itrations, to guarantee real time
+keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
