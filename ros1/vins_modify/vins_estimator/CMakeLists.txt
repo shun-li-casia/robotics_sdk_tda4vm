@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(vins)
 
+include(/opt/robotics_sdk/cmake/common_platform.cmake)
+
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_FLAGS "-std=c++14")
 #-DEIGEN_USE_MKL_ALL")
